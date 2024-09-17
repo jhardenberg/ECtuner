@@ -11,6 +11,8 @@ from scipy.optimize import minimize
 import math
 from tabulate import tabulate
 
+from logger import setup_logger
+
 def load_config(config_file='config-tuner.yaml'):
     with open(config_file, 'r') as file:
         config = yaml.safe_load(file)
@@ -92,13 +94,12 @@ def objective_function(changes):
 
     return total_difference
 
-
-def print_change(changes):
+def print_change(logger, changes):
     for fluxname in targets:
         for region in difference[fluxname]['ALL']:
             if not math.isnan(difference[fluxname]['ALL'][region]):  # Skip NaN values
                 flux_change = sum(sensitivity[param][fluxname]['ALL'][region][0] * changes[i] for i, param in enumerate(params))
-                print(fluxname, region, difference[fluxname]['ALL'][region] + flux_change)    
+                logger.info("%s %s %s", fluxname, region, difference[fluxname]['ALL'][region] + flux_change)    
 
 
 def parse_arguments(arguments):
@@ -145,6 +146,9 @@ if __name__ == '__main__':
     year1 = get_arg(args, 'year1', None)
     year2 = get_arg(args, 'year2', None)
     exp = get_arg(args, 'exp', None)
+    loglevel = get_arg(args, 'loglevel', 'INFO')
+
+    logger = setup_logger(level=loglevel)
 
     if not exp:
         print("Error:  experiment not specified")
@@ -209,15 +213,17 @@ if __name__ == '__main__':
     # Print the optimal parameter changes
     optimal_changes = {params[i]: result.x[i] for i in range(len(params))}
 
-    print("Total score before optimization:", objective_function(initial_guess))
-    print("\nTarget offset before optimization:")
-    print("-------------------------------")
-    print_change(initial_guess)
+    logger.info("Total score before optimization: %s", objective_function(initial_guess))
 
-    print("Total score after optimization:", objective_function(result.x))
-    print("\nTarget offset after optimization:")
-    print("-------------------------------")
-    print_change(result.x)
+    logger.info("Target offset before optimization:")
+    logger.info("-------------------------------")
+    print_change(logger, initial_guess)
+
+    logger.info("Total score after optimization: %s", objective_function(result.x))
+
+    logger.info("Target offset after optimization:")
+    logger.info("-------------------------------")
+    print_change(logger, result.x)
 
     print("\nParameters:")
     print("-----------")
