@@ -1,0 +1,58 @@
+files:
+  reference: gm_reference_EC23.yml  # Reference file based on obs (our target)
+  sensitivity: sensitivity_{year1}-{year2}.yaml  # sensitivity file template
+  base: global_mean_{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml  # template for ecmean output filenames
+  params: params_{exp}.yaml  # template for parameter files
+  ecmean: ./ecmean  # directory for ecmean output files
+  exps: ./exps  # directory for parameter files for each experiment
+
+  # base: ecmean/global_mean_s000_EC-Earth4_r1i1p1f1_1990_1997.yml
+
+args:
+  # Default years for sensitivities
+  year1: 1990
+  year2: 1997
+
+# pars: # Parameters to tune and their base values
+#   RPRCON: 0.0014
+#   ENTRORG: 0.00175
+#   DETRPEN: 0.000075
+#   ENTRDD: 0.0003
+#   RMFDEPS: 0.3
+#   RVICE: 0.13
+#   RLCRITSNOW: 0.00003
+#   RSNOWLIN2: 0.03
+#   RCLDIFF: 0.000003
+#   RCLDIFF_CONVI: 7.0
+
+inc: 0.2  # Maximum acceptable parameter change
+
+weights_region:  # Weights for different regions
+  Global: 1.0
+  North Midlat: 0.5
+  South Midlat: 0.5
+  Tropical: 0.5
+
+weights:  # Weights for different variables
+  net_toa: 2.0
+  rsnt: 0.
+  rlnt: 0.
+  swcf: 0.
+  lwcf: 0.
+  rsns: 0.
+  rlns: 0.
+  hfss: 0.
+  hfls: 0.
+  net_sfc: 0.
+  toamsfc: 0.
+
+  # rsnt: 0.5
+  # rlnt: 0.5
+  # swcf: 0.3
+  # lwcf: 0.3
+  # rsns: 0.1
+  # rlns: 0.1
+  # hfss: 0.1
+  # hfls: 0.1
+  # net_sfc: 0.3
+  # toamsfc: 0.1
