@@ -27,11 +27,16 @@ args:
 
 inc: 0.2  # Maximum acceptable parameter change
 
+weights_season:
+  ALL: 1.0
+  DJF: 0.0
+  JJA: 0.0
+
 weights_region:  # Weights for different regions
   Global: 1.0
-  North Midlat: 0.5
-  South Midlat: 0.5
-  Tropical: 0.5
+  North Midlat: 0.
+  South Midlat: 0.
+  Tropical: 0.
 
 weights:  # Weights for different variables
   net_toa: 2.0

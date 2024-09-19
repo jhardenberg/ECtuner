@@ -209,6 +209,14 @@ if __name__ == '__main__':
     #result = minimize(objective_function, initial_guess, constraints=constraints)
     #result = minimize(objective_function, initial_guess, constraints=constraints, method='COBYLA', options={'disp': False, 'ftol': 1e-10, 'maxiter': 100})
 
+    logger.info("Total score before optimization: %s", objective_function(initial_guess, params, sensitivity, difference, weights_flux, weights_season, weights_region))
+
+    logger.info("Target offset before optimization:")
+    logger.info("-------------------------------")
+    print_change(logger, initial_guess)
+    logger.info("")
+    logger.info("Optimizing parameters ...")
+
     result = minimize(objective_function, initial_guess, constraints=constraints, 
                       method='trust-constr', options={'disp': True, 'maxiter': maxiter},
                       args=(params, sensitivity, difference, weights_flux, weights_season, weights_region))
@@ -216,12 +224,7 @@ if __name__ == '__main__':
     # Print the optimal parameter changes
     optimal_changes = {params[i]: result.x[i] for i in range(len(params))}
 
-    logger.info("Total score before optimization: %s", objective_function(initial_guess, params, sensitivity, difference, weights_flux, weights_season, weights_region))
-
-    logger.info("Target offset before optimization:")
-    logger.info("-------------------------------")
-    print_change(logger, initial_guess)
-
+    logger.info("")
     logger.info("Total score after optimization: %s", objective_function(result.x, params, sensitivity, difference, weights_flux, weights_season, weights_region))
 
     logger.info("Target offset after optimization:")
@@ -232,9 +235,11 @@ if __name__ == '__main__':
     print("-----------")
     outtable = []
     for p in optimal_changes:
-        outtable.append([p, values[p]+optimal_changes[p], optimal_changes[p], optimal_changes[p]/values[p], diffmax[p]])
+        outtable.append([p, values[p]+optimal_changes[p], values[p],
+                         optimal_changes[p], optimal_changes[p]/values[p], diffmax[p]])
         print(p,':', values[p]+optimal_changes[p])
     print("")
-    head=['Parameter','New value','Change','Relative change','Max change']
+    head=['Parameter','New value','Old value', 'Change','Relative change','Max change']
     print(tabulate(outtable, headers=head, stralign='center', tablefmt='orgtbl'))
         
+ 
