@@ -38,7 +38,7 @@ More options:
 ```
 ./ectuner.py s000 1990 1997  -o tuned-s000.yml -i 0.2 -p 30 -m differential_evolution 
 ```
-writes output to a given file (already in SE compliant format, limits changes to 20% from default OIFS values, 
+writes output to a given file (already in SE compliant format), limits changes to 20% from default OIFS values, 
 applies a penalty with weight 30 to being far from the original values, changes the global optimization method.
 Actually the default optimization method, dual_annealing, seems to work best, so no need to change it.
 
