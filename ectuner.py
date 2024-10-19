@@ -71,7 +71,8 @@ def compute_difference(base, reference):
     return difference
 
 # Objective function to minimize: sum of squared differences + penalty for exceeding maximum parameter changes
-def objective_function(changes, params, sensitivity, difference, weights_flux, weights_season, weights_region):
+def objective_function(changes, params, values, reference_pars, penalty, sensitivity,
+                       difference, weights_flux, weights_season, weights_region):
     """
     Objective function to minimize: sum of squared differences + penalty for exceeding maximum parameter changes
     
@@ -82,6 +83,7 @@ def objective_function(changes, params, sensitivity, difference, weights_flux, w
         float: score to minimize
     """
     total_difference = 0
+    param_difference = 0
     for fluxname in sensitivity[params[0]].keys():
         for season in  sensitivity[params[0]][fluxname].keys():
             for region in sensitivity[params[0]][fluxname][season].keys():
@@ -90,7 +92,12 @@ def objective_function(changes, params, sensitivity, difference, weights_flux, w
                     flux_change = sum(sensitivity[param][fluxname][season][region][0] * changes[i] for i, param in enumerate(params))
                     # Difference between current and desired state minus the calculated flux change
                     total_difference += weights_flux[fluxname] * weights_region[region] * weights_season[season] * (difference[fluxname][season][region] + flux_change) ** 2
-    return total_difference
+
+    param_difference += sum([((reference_pars[param] - (values[param] + changes[i]) ) / reference_pars[param]) ** 2 for i, param in enumerate(params)])
+
+
+    # print(total_difference, param_difference)
+    return total_difference + param_difference * penalty
 
 def print_change(logger, changes):
     for fluxname in targets:
@@ -108,10 +115,16 @@ def parse_arguments(arguments):
 
     parser.add_argument('-c', '--config', type=str,
                         help='yaml configuration file')
+    parser.add_argument('-o', '--output', type=str,
+                        help='output yaml for Script Engine')
     parser.add_argument('-l', '--loglevel', type=str,
                         help='logging level')
-    parser.add_argument('-i', '--maxiter', type=int,
+    parser.add_argument('-m', '--maxiter', type=int,
                         help='the maximumum number of iterations')
+    parser.add_argument('-p', '--penalty', type=float,
+                        help='penalty for relative parameter changes')
+    parser.add_argument('-i', '--inc', type=float,
+                        help='fractional maximum parameter change')
     # positional
     parser.add_argument('exp', type=str, help='experiment to tune')
     parser.add_argument('year1', type=int, help='start year', nargs='?', default=None)
@@ -146,7 +159,10 @@ if __name__ == '__main__':
     year2 = get_arg(args, 'year2', None)
     exp = get_arg(args, 'exp', None)
     loglevel = get_arg(args, 'loglevel', 'INFO')
-    maxiter=get_arg(args, 'maxiter', 10000)
+    maxiter = get_arg(args, 'maxiter', 10000)
+    penalty = get_arg(args, 'penalty', None)
+    inc = get_arg(args, 'inc', None)
+    out = get_arg(args, 'output', None)
 
     logger = setup_logger(level=loglevel)
 
@@ -160,11 +176,23 @@ if __name__ == '__main__':
         year1 = config['args']['year1']
     if not year2:
         year2 = config['args']['year2']
+    if not penalty:
+        penalty = config['args']['penalty']
+    if not inc:
+        inc = config['args']['inc']
 
+    logger.debug("year1: %s", year1)
+    logger.debug("year2: %s", year2)
+    logger.debug("experiment: %s", exp)
+    logger.debug("loglevel: %s", loglevel)
+    logger.debug("maxiter: %s", maxiter)
+    logger.debug("penalty: %s", penalty)
+    logger.debug("inc: %s", inc)
+
+    reference_pars = config['reference_parameters']
     weights_flux=config['weights']
     weights_region=config['weights_region']
     weights_season=config['weights_season']
-    inc=config['inc']
     targets=list(weights_flux.keys())
 
     # params=list(config['pars'].keys())
@@ -192,6 +220,7 @@ if __name__ == '__main__':
         diffmax[params[i]] = vals[i] * inc
         values[params[i]] = vals[i]
 
+    print(diffmax)
     # List of parameters
 
     # params = list(sensitivity.keys())
@@ -209,29 +238,43 @@ if __name__ == '__main__':
     #result = minimize(objective_function, initial_guess, constraints=constraints)
     #result = minimize(objective_function, initial_guess, constraints=constraints, method='COBYLA', options={'disp': False, 'ftol': 1e-10, 'maxiter': 100})
 
-    logger.info("Total score before optimization: %s", objective_function(initial_guess, params, sensitivity, difference, weights_flux, weights_season, weights_region))
-
     logger.info("Target offset before optimization:")
     logger.info("-------------------------------")
     print_change(logger, initial_guess)
     logger.info("")
     logger.info("Optimizing parameters ...")
 
+    method = "TNC"  # powell, TNC
+    method = "TNC"  # or "COBYLA" or "SLSQP" or trust-constr
     result = minimize(objective_function, initial_guess, constraints=constraints, 
-                      method='trust-constr', options={'disp': True, 'maxiter': maxiter},
-                      args=(params, sensitivity, difference, weights_flux, weights_season, weights_region))
+                      method=method, options={'disp': True, 'maxiter': maxiter},
+                      args=(params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
 
     # Print the optimal parameter changes
     optimal_changes = {params[i]: result.x[i] for i in range(len(params))}
 
     logger.info("")
-    logger.info("Total score after optimization: %s", objective_function(result.x, params, sensitivity, difference, weights_flux, weights_season, weights_region))
 
     logger.info("Target offset after optimization:")
     logger.info("-------------------------------")
     print_change(logger, result.x)
 
-    print("\nParameters:")
+    logger.info("")
+    logger.info("Total score before optimization: %s", objective_function(initial_guess, params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
+    logger.info("Total score after optimization: %s", objective_function(result.x, params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
+
+    if out:
+        outdict = {'tuning': {}}
+        for pg in config['parameter_group']:
+            outdict['tuning'][pg] = {}
+            for p in config['parameter_group'][pg]:
+                outdict['tuning'][pg][p] = float(values[p]+optimal_changes[p])
+
+        with open(out, 'w') as file:
+            yaml.dump(outdict, file)
+            logger.info("Optimal parameter changes written to %s", out)
+
+    print("\n\nParameters:")
     print("-----------")
     outtable = []
     for p in optimal_changes:
@@ -241,5 +284,7 @@ if __name__ == '__main__':
     print("")
     head=['Parameter','New value','Old value', 'Change','Relative change','Max change']
     print(tabulate(outtable, headers=head, stralign='center', tablefmt='orgtbl'))
+
+
         
  
