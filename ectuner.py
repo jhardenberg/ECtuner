@@ -1,6 +1,31 @@
-# ECE Tuner 
-# A tool to perform tuning of EC-Earth model parameters
-# based on ECmean4 output
+"""
+ECtuner: A tuning tool for EC-Earth
+This atmospheric tuning tool uses ECmean output files to compute new suggested values for EC-Earth OIFS parameters.
+The tool uses a reference dataset and a sensitivity dataset to compute the optimal parameter changes.
+The tool is based on the scipy.optimize module and uses the dual_annealing optimization method by default.
+
+Usage:
+    python ectuner.py [options] <experiment> <year1> <year2>
+    
+Options:    
+    -c, --config <file>     yaml configuration file
+    -o, --output <file>     output yaml for Script Engine
+    -l, --loglevel <level>  logging level
+    -m, --method <method>   optimization method (shgo (not recommended), dual_annealing (default), differential_evolution)
+    -p, --penalty <value>   penalty for distance from reference parameters
+    -i, --inc <value>       fractional maximum parameter change wrt reference
+
+Arguments:
+    experiment              experiment to tune
+    year1                   start year
+    year2                   end year
+
+Example:
+    python ectuner.py -c config-tuner.yaml -l INFO -p 0.5 -i 0.1 -o tuned_parameters.yml -m dual_annealing s000 1990 1997
+
+Author:  Jost von Hardenberg    
+Date:    2024-10-15
+"""
 
 import sys
 import os
@@ -14,16 +39,26 @@ from tabulate import tabulate
 from logger import setup_logger
 
 def load_config(config_file='config-tuner.yaml'):
+    """
+    Load configuration file
+    """
     with open(config_file, 'r') as file:
         config = yaml.safe_load(file)
     return config
 
 def load_sensitivity(sens_file='sensitivity_1990-1997.yaml'):
+    """
+    Load sensitivity file (computed externally)
+    """
     with open(sens_file, 'r') as file:
         sensitivity = yaml.safe_load(file)
     return sensitivity
 
 def load_reference(ref_file='gm_reference_EC23.yml'):
+    """
+    Load reference file with reference fluxes/targets
+    """
+
     with open(ref_file, 'r') as file:
         ref = yaml.safe_load(file)
 
@@ -45,16 +80,28 @@ def load_reference(ref_file='gm_reference_EC23.yml'):
     return reference
 
 def load_base(base_file='ecmean/global_mean_s000_EC-Earth4_r1i1p1f1_1990_1997.yml'):
+    """
+    Load base file with fluxes of configuration to tune
+    """
+
     with open(base_file, 'r') as file:
         base = yaml.safe_load(file)
     return base
 
 def load_params(param_file):
+    """
+    Load parameter file with parameters of configuration to tune
+    """
+
     with open(param_file, 'r') as file:
         params = yaml.safe_load(file)
     return list(params.keys()), list(params.values())
 
 def compute_difference(base, reference):
+    """
+    Compute the difference between base and reference fluxes
+    """
+
     difference = {}
     for key, value in base.items():
         difference[key] = {}
@@ -101,6 +148,9 @@ def objective_function(changes, params, values, reference_pars, penalty, sensiti
     return total_difference + param_difference * penalty
 
 def print_change(logger, changes):
+    """
+    Print the change in fluxes after optimization
+    """
     for fluxname in targets:
         for region in difference[fluxname]['ALL']:
             if not math.isnan(difference[fluxname]['ALL'][region]):  # Skip NaN values
@@ -268,7 +318,7 @@ if __name__ == '__main__':
     logger.debug("Optimization result:")
     logger.debug("--------------------")
     logger.debug(result)
-    
+
     logger.info("")
 
     logger.info("Target offset after and before optimization:")
@@ -300,7 +350,7 @@ if __name__ == '__main__':
                          optimal_changes[p], optimal_changes[p]/values[p], minval[p], maxval[p], (values[p]+optimal_changes[p]-reference_pars[p])/reference_pars[p]])
         print(p,':', values[p]+optimal_changes[p])
     print("")
-    head=['Parameter','New value','Old value','Relative change','Min change', 'Max change', 'Rel. dist. from ref.']
+    head=['Parameter','New value','Old value', 'Change', 'Relative change','Min change', 'Max change', 'Rel. dist. from ref.']
     print(tabulate(outtable, headers=head, stralign='center', tablefmt='orgtbl'))
 
 
