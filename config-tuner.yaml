@@ -14,6 +14,7 @@ args:
   year2: 1997
   penalty: 10  # Penalty for deviation from reference parameter values
   inc: 0.2  # Maximum acceptable parameter change
+  method: 'dual_annealing' # Optimization method (dual_annealing (recommended), differential_evolution, shgo (not recommended))
 
 reference_parameters: # Default OIFS parameter values (used for penalty)
   RPRCON: 0.0014

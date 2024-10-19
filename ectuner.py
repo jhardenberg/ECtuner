@@ -96,6 +96,7 @@ def objective_function(changes, params, values, reference_pars, penalty, sensiti
     param_difference += sum([((reference_pars[param] - (values[param] + changes[i]) ) / reference_pars[param]) ** 2 for i, param in enumerate(params)])
 
 
+
     # print(total_difference, param_difference)
     return total_difference + param_difference * penalty
 
@@ -126,6 +127,8 @@ def parse_arguments(arguments):
                         help='output yaml for Script Engine')
     parser.add_argument('-l', '--loglevel', type=str,
                         help='logging level')
+    parser.add_argument('-m', '--method', type=str,
+                        help='optimization method (shgo (not recommended), dual_annealing (default), differential_evolution)')
     # parser.add_argument('-m', '--maxiter', type=int,
     #                     help='the maximumum number of iterations')
     parser.add_argument('-p', '--penalty', type=float,
@@ -170,6 +173,7 @@ if __name__ == '__main__':
     penalty = get_arg(args, 'penalty', None)
     inc = get_arg(args, 'inc', None)
     out = get_arg(args, 'output', None)
+    method = get_arg(args, 'method', None)
 
     logger = setup_logger(level=loglevel)
 
@@ -187,6 +191,8 @@ if __name__ == '__main__':
         penalty = config['args']['penalty']
     if not inc:
         inc = config['args']['inc']
+    if not method:
+        method = config['args']['method']
 
     logger.debug("year1: %s", year1)
     logger.debug("year2: %s", year2)
@@ -195,6 +201,8 @@ if __name__ == '__main__':
     # logger.debug("maxiter: %s", maxiter)
     logger.debug("penalty: %s", penalty)
     logger.debug("inc: %s", inc)
+    logger.debug("output: %s", out)
+    logger.debug("method: %s", method)
 
     reference_pars = config['reference_parameters']
     weights_flux=config['weights']
@@ -238,11 +246,22 @@ if __name__ == '__main__':
     for i in range(len(params)):
         logger.debug("%s: %s - %s", params[i], minval[params[i]], maxval[params[i]])
 
-    logger.info("Optimizing parameters ...")
+    logger.info(f"Optimizing parameters using {method} ...")
 
-    result = optimize.dual_annealing(objective_function, bounds,
+    # shgo or dual_annealing
+    if method == 'shgo':  # Not recommended
+        result = optimize.shgo(objective_function, bounds,
                     args=(params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
-
+    elif method == 'dual_annealing':  # Recommended!
+        result = optimize.dual_annealing(objective_function, bounds,
+                    args=(params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
+    elif method == 'differential_evolution':
+        result = optimize.differential_evolution(objective_function, bounds,
+                    args=(params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
+    else:
+        logger.error("Method not supported")
+        sys.exit(1)
+    
     # Print the optimal parameter changes
     optimal_changes = {params[i]: result.x[i] for i in range(len(params))}
 
@@ -267,7 +286,7 @@ if __name__ == '__main__':
 
         with open(out, 'w') as file:
             yaml.dump(outdict, file)
-            logger.info("Optimal parameter changes written to %s", out)
+            logger.info("Optimal new parameters written to %s", out)
 
     print("\nParameters:")
     print("-----------")
