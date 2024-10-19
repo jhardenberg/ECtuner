@@ -7,7 +7,7 @@ import os
 import yaml
 import argparse
 import numpy as np
-from scipy.optimize import minimize
+from scipy import optimize
 import math
 from tabulate import tabulate
 
@@ -104,7 +104,14 @@ def print_change(logger, changes):
         for region in difference[fluxname]['ALL']:
             if not math.isnan(difference[fluxname]['ALL'][region]):  # Skip NaN values
                 flux_change = sum(sensitivity[param][fluxname]['ALL'][region][0] * changes[i] for i, param in enumerate(params))
-                logger.info("%s %s %s", fluxname, region, difference[fluxname]['ALL'][region] + flux_change)    
+
+                # Paint green if the change is in the right direction, red otherwise
+                if abs(difference[fluxname]['ALL'][region] + flux_change) < abs(difference[fluxname]['ALL'][region]):
+                    fmt = "\033[92m%s %s %s %s\033[0m"
+                else:
+                    fmt = "\033[91m%s %s %s %s\033[0m"
+
+                logger.info(fmt, fluxname, region, difference[fluxname]['ALL'][region] + flux_change, difference[fluxname]['ALL'][region])
 
 def parse_arguments(arguments):
     """
@@ -119,12 +126,12 @@ def parse_arguments(arguments):
                         help='output yaml for Script Engine')
     parser.add_argument('-l', '--loglevel', type=str,
                         help='logging level')
-    parser.add_argument('-m', '--maxiter', type=int,
-                        help='the maximumum number of iterations')
+    # parser.add_argument('-m', '--maxiter', type=int,
+    #                     help='the maximumum number of iterations')
     parser.add_argument('-p', '--penalty', type=float,
-                        help='penalty for relative parameter changes')
+                        help='penalty for distance from reference parameters')
     parser.add_argument('-i', '--inc', type=float,
-                        help='fractional maximum parameter change')
+                        help='fractional maximum parameter change wrt reference')
     # positional
     parser.add_argument('exp', type=str, help='experiment to tune')
     parser.add_argument('year1', type=int, help='start year', nargs='?', default=None)
@@ -159,7 +166,7 @@ if __name__ == '__main__':
     year2 = get_arg(args, 'year2', None)
     exp = get_arg(args, 'exp', None)
     loglevel = get_arg(args, 'loglevel', 'INFO')
-    maxiter = get_arg(args, 'maxiter', 10000)
+    #maxiter = get_arg(args, 'maxiter', 10000)
     penalty = get_arg(args, 'penalty', None)
     inc = get_arg(args, 'inc', None)
     out = get_arg(args, 'output', None)
@@ -185,7 +192,7 @@ if __name__ == '__main__':
     logger.debug("year2: %s", year2)
     logger.debug("experiment: %s", exp)
     logger.debug("loglevel: %s", loglevel)
-    logger.debug("maxiter: %s", maxiter)
+    # logger.debug("maxiter: %s", maxiter)
     logger.debug("penalty: %s", penalty)
     logger.debug("inc: %s", inc)
 
@@ -195,73 +202,61 @@ if __name__ == '__main__':
     weights_season=config['weights_season']
     targets=list(weights_flux.keys())
 
-    # params=list(config['pars'].keys())
-    # vals=list(config['pars'].values())
-
+    # Load sensitivities
     sens_file = config['files']['sensitivity'].format(year1=year1, year2=year2)
+    sensitivity = load_sensitivity(sens_file)
+
+    # Load reference fluxes
     ref_file = config['files']['reference']
+    reference = load_reference(ref_file)
     
+    # Load fluxes of configuration to tune
     base_file = config['files']['base'].format(exp=exp, year1=year1, year2=year2)
     base_file = os.path.join(config['files']['ecmean'], base_file)
+    base = load_base(base_file)
 
+    # Load parameters of configuration to tune
     param_file = config['files']['params'].format(exp=exp)
     param_file = os.path.join(config['files']['exps'], param_file)
-
-    sensitivity = load_sensitivity(sens_file)    
-    reference = load_reference(ref_file)
-    base = load_base(base_file)
     params, vals = load_params(param_file)
 
     difference = compute_difference(base, reference)
 
-    diffmax = {}
+    minval = {}
+    maxval = {}
     values = {}
+
     for i in range(len(params)):
-        diffmax[params[i]] = vals[i] * inc
-        values[params[i]] = vals[i]
+        p = params[i]
+        minval[p] = reference_pars[p] * (1 - inc) - vals[i]  # Minimum value
+        maxval[p] = reference_pars[p] * (1 + inc) - vals[i]  # Maximum value
+        values[p] = vals[i]
 
-    print(diffmax)
-    # List of parameters
+    bounds = [(minval[params[i]], maxval[params[i]]) for i in range(len(params))]
+    logger.debug("Parameter bounds:")
+    logger.debug("-----------------")
+    for i in range(len(params)):
+        logger.debug("%s: %s - %s", params[i], minval[params[i]], maxval[params[i]])
 
-    # params = list(sensitivity.keys())
-   
-    # Constraints: parameter changes should be within the prescribed maximum differences
-    # constraints = []
-    # for i, param in enumerate(params):
-    #     constraints.append({'type': 'ineq', 'fun': lambda x, i=i: diffmax[params[i]] - np.abs(x[i])})
-    constraints = [{'type': 'ineq', 'fun': lambda x, i=i: diffmax[params[i]] - np.abs(x[i])} for i in range(len(params))]
-
-    # Initial guess: no change
-    initial_guess = np.zeros(len(params))
-
-    # Minimize the objective function with constraints
-    #result = minimize(objective_function, initial_guess, constraints=constraints)
-    #result = minimize(objective_function, initial_guess, constraints=constraints, method='COBYLA', options={'disp': False, 'ftol': 1e-10, 'maxiter': 100})
-
-    logger.info("Target offset before optimization:")
-    logger.info("-------------------------------")
-    print_change(logger, initial_guess)
-    logger.info("")
     logger.info("Optimizing parameters ...")
 
-    method = "TNC"  # powell, TNC
-    method = "TNC"  # or "COBYLA" or "SLSQP" or trust-constr
-    result = minimize(objective_function, initial_guess, constraints=constraints, 
-                      method=method, options={'disp': True, 'maxiter': maxiter},
-                      args=(params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
+    result = optimize.dual_annealing(objective_function, bounds,
+                    args=(params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
 
     # Print the optimal parameter changes
     optimal_changes = {params[i]: result.x[i] for i in range(len(params))}
 
     logger.info("")
 
-    logger.info("Target offset after optimization:")
-    logger.info("-------------------------------")
+    logger.info("Target offset after and before optimization:")
+    logger.info("-------------------------------------------")
     print_change(logger, result.x)
 
+    initial_guess = np.zeros(len(params))
     logger.info("")
     logger.info("Total score before optimization: %s", objective_function(initial_guess, params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
     logger.info("Total score after optimization: %s", objective_function(result.x, params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
+    logger.info("")
 
     if out:
         outdict = {'tuning': {}}
@@ -274,15 +269,15 @@ if __name__ == '__main__':
             yaml.dump(outdict, file)
             logger.info("Optimal parameter changes written to %s", out)
 
-    print("\n\nParameters:")
+    print("\nParameters:")
     print("-----------")
     outtable = []
     for p in optimal_changes:
         outtable.append([p, values[p]+optimal_changes[p], values[p],
-                         optimal_changes[p], optimal_changes[p]/values[p], diffmax[p]])
+                         optimal_changes[p], optimal_changes[p]/values[p], minval[p], maxval[p], (values[p]+optimal_changes[p]-reference_pars[p])/reference_pars[p]])
         print(p,':', values[p]+optimal_changes[p])
     print("")
-    head=['Parameter','New value','Old value', 'Change','Relative change','Max change']
+    head=['Parameter','New value','Old value','Relative change','Min change', 'Max change', 'Rel. dist. from ref.']
     print(tabulate(outtable, headers=head, stralign='center', tablefmt='orgtbl'))
 
 

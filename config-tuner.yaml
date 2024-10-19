@@ -1,7 +1,7 @@
 files:
   reference: gm_reference_EC23.yml  # Reference file based on obs (our target)
   sensitivity: sensitivity_{year1}-{year2}.yaml  # sensitivity file template
-  base: global_mean_{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml  # template for ecmean output filenames
+  base: global_mean_{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml  # template for ecmean output filenames, name of the file to tune
   params: params_{exp}.yaml  # template for parameter files
   ecmean: ./ecmean  # directory for ecmean output files
   exps: ./exps  # directory for parameter files for each experiment
@@ -12,7 +12,7 @@ args:
   # Default years for sensitivities
   year1: 1990
   year2: 1997
-  penalty: 0.0  # Penalty for deviation from reference parameter values
+  penalty: 10  # Penalty for deviation from reference parameter values
   inc: 0.2  # Maximum acceptable parameter change
 
 reference_parameters: # Default OIFS parameter values (used for penalty)
