@@ -12,22 +12,36 @@ args:
   # Default years for sensitivities
   year1: 1990
   year2: 1997
+  penalty: 0.0  # Penalty for deviation from reference parameter values
+  inc: 0.2  # Maximum acceptable parameter change
 
-# pars: # Parameters to tune and their base values
-#   RPRCON: 0.0014
-#   ENTRORG: 0.00175
-#   DETRPEN: 0.000075
-#   ENTRDD: 0.0003
-#   RMFDEPS: 0.3
-#   RVICE: 0.13
-#   RLCRITSNOW: 0.00003
-#   RSNOWLIN2: 0.03
-#   RCLDIFF: 0.000003
-#   RCLDIFF_CONVI: 7.0
+reference_parameters: # Default OIFS parameter values (used for penalty)
+  RPRCON: 0.0014
+  ENTRORG: 0.00175
+  DETRPEN: 0.000075
+  ENTRDD: 0.0003
+  RMFDEPS: 0.3
+  RVICE: 0.13
+  RLCRITSNOW: 0.00003
+  RSNOWLIN2: 0.03
+  RCLDIFF: 0.000003
+  RCLDIFF_CONVI: 7.0
 
-inc: 0.2  # Maximum acceptable parameter change
-
-weights_season:
+parameter_group: # Parameter grouping for SE output
+  namcumf: 
+    - RPRCON
+    - ENTRORG
+    - DETRPEN
+    - ENTRDD
+    - RMFDEPS
+  namcldp:
+    - RVICE
+    - RLCRITSNOW
+    - RSNOWLIN2
+    - RCLDIFF
+    - RCLDIFF_CONVI
+  
+weights_season:  # Weights for different seasons
   ALL: 1.0
   DJF: 0.
   JJA: 0.
@@ -38,7 +52,7 @@ weights_region:  # Weights for different regions
   South Midlat: 0.3
   Tropical: 0.2
 
-weights:  # Weights for different variables
+weights:  # Weights for different target variables
   net_toa: 5.0
   rsnt: 0.5
   rlnt: 0.5
