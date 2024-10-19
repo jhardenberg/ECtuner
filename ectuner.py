@@ -265,6 +265,10 @@ if __name__ == '__main__':
     # Print the optimal parameter changes
     optimal_changes = {params[i]: result.x[i] for i in range(len(params))}
 
+    logger.debug("Optimization result:")
+    logger.debug("--------------------")
+    logger.debug(result)
+    
     logger.info("")
 
     logger.info("Target offset after and before optimization:")
