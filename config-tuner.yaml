@@ -1,6 +1,6 @@
 files:
   reference: gm_reference_EC23.yml  # Reference file based on obs (our target)
-  sensitivity: sensitivity_{year1}-{year2}.yaml  # sensitivity file template
+  sensitivity: sensitivity_TL255_{year1}-{year2}.yaml  # sensitivity file template
   base: global_mean_{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml  # template for ecmean output filenames, name of the file to tune
   params: params_{exp}.yaml  # template for parameter files
   ecmean: ./ecmean  # directory for ecmean output files
