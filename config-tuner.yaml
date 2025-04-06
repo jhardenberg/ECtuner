@@ -1,6 +1,6 @@
 files:
   reference: gm_reference_EC23.yml  # Reference file based on obs (our target)
-  sensitivity: sensitivity_TL255_{year1}-{year2}.yaml  # sensitivity file template
+  sensitivity: sensitivity_a000_{year1}-{year2}.yaml  # sensitivity file template
   base: global_mean_{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml  # template for ecmean output filenames, name of the file to tune
   params: params_{exp}.yaml  # template for parameter files
   ecmean: ./ecmean  # directory for ecmean output files
@@ -19,14 +19,14 @@ args:
 reference_parameters: # Default OIFS parameter values (used for penalty)
   RPRCON: 0.0014
   ENTRORG: 0.00175
-  DETRPEN: 0.000075
+  DETRPEN: 7.5e-05
   ENTRDD: 0.0003
   RMFDEPS: 0.3
   RVICE: 0.13
-  RLCRITSNOW: 0.00003
+  RLCRITSNOW: 2.0e-05
   RSNOWLIN2: 0.03
-  RCLDIFF: 0.000003
-  RCLDIFF_CONVI: 7.0
+  RCLDIFF: 6.0e-06
+  RCLDIFF_CONVI: 10.0
 
 parameter_group: # Parameter grouping for SE output
   namcumf: 
@@ -48,13 +48,13 @@ weights_season:  # Weights for different seasons
   JJA: 0.
 
 weights_region:  # Weights for different regions
-  Global: 2.0
-  North Midlat: 0.2
+  Global: 1.0
+  North Midlat: 0.3
   South Midlat: 0.3
-  Tropical: 0.2
+  Tropical: 0.3
 
 weights:  # Weights for different target variables
-  net_toa: 5.0
+  net_toa: 3.0
   rsnt: 0.5
   rlnt: 0.5
   swcf: 0.2
