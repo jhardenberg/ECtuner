@@ -5,13 +5,15 @@ files:
   params: params_{exp}.yaml  # template for parameter files
   ecmean: ./ecmean  # directory for ecmean output files
   exps: ./exps  # directory for parameter files for each experiment
+  exp_temp: s??? # template name for sensitivity runs (can include ?, *)
 
-  # base: ecmean/global_mean_s000_EC-Earth4_r1i1p1f1_1990_1997.yml
+ecmean:
+  ecmean_config: config_ecmean.yml
 
 args:
   # Default years for sensitivities
   year1: 1990
-  year2: 1997
+  year2: 2000
   penalty: 10  # Penalty for deviation from reference parameter values
   inc: 0.2  # Maximum acceptable parameter change
   method: 'dual_annealing' # Optimization method (dual_annealing (recommended), differential_evolution, shgo (not recommended))
