@@ -9,7 +9,7 @@ If the corresponding ecmean files are not there, they are automatically produced
 Also check that the "exp_temp" placeholder for the experiments naming convention and the "params" placeholder for the tuning files naming convention are correct. >>>>
 
 Usage:
-    python sensitivity_autonaming.py [options] <exp_temp> <year1> <year2>
+    python sensitivity.py [options] <exp_temp> <year1> <year2>
     
 Options:    
     -c, --config <file>     yaml configuration file
@@ -104,7 +104,12 @@ def read_yaml_files(yaml_files: List[str]) -> Dict[str, Dict[str, float]]:
         try:
             with open(yaml_file, 'r') as f:
                 data = yaml.safe_load(f)
-                flattened = flatten_yaml_dict(data)
+                if isinstance(data, list):
+                    # new tuning file in se format
+                    flattened = flatten_yaml_dict(data[0])
+                else:
+                    flattened = flatten_yaml_dict(data)
+                    
                 tag = extract_tag_from_filename(yaml_file)
                 all_data[tag] = flattened
                 print(f"Loaded {len(flattened)} parameters from {yaml_file} (tag: {tag})")

@@ -97,7 +97,13 @@ def load_params(param_file):
     """
 
     with open(param_file, 'r') as file:
-        params = yaml.safe_load(file)
+        coso = yaml.safe_load(file)
+        if isinstance(coso, list):
+            # new tuning file in se format
+            params = coso[0]['base.context']['model_config']['oifs']
+        else:
+            # old tuning file
+            params = coso
 
     if 'tuning' in params:
         # the tuning file is in SE format
