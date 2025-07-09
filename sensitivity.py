@@ -9,12 +9,13 @@ If the corresponding ecmean files are not there, they are automatically produced
 Also check that the "exp_temp" placeholder for the experiments naming convention and the "params" placeholder for the tuning files naming convention are correct. >>>>
 
 Usage:
-    python sensitivity.py [options] <exp_temp> <year1> <year2>
+    python sensitivity.py [options] <ref_tag> <exp_temp> <year1> <year2>
     
 Options:    
     -c, --config <file>     yaml configuration file
 
-Arguments:
+Arguments (optional, can be specified in the config file as well):
+    ref_tag                 name of reference experiment, useful if not recognized automatically
     exp_temp              template for experiment name (e.g. "s???"). The code looks for matching tuning files in the specified "exps" folder.
     year1                   start year
     year2                   end year
