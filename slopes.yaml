@@ -1,0 +1,110 @@
+#c4c9
+# T_slope:
+#     net_toa: 
+#         ALL:
+#             Global:
+#             -0.759694
+#             North Midlat:
+#             South Midlat:
+#             Tropical:
+#         DJF:
+#             Global:
+#             North Midlat:
+#             South Midlat:
+#             Tropical:
+#         JJA:
+#             Global:
+#             North Midlat:
+#             South Midlat:
+#             Tropical:
+#     rsnt: 
+#         ALL:
+#             Global:
+#             0.851892
+#             North Midlat:
+#             South Midlat:
+#             Tropical:
+#         DJF:
+#             Global:
+#             North Midlat:
+#             South Midlat:
+#             Tropical:
+#         JJA:
+#             Global:
+#             North Midlat:
+#             South Midlat:
+#             Tropical:
+#     rlnt: 
+#         ALL:
+#             Global:
+#             -1.612037
+#             North Midlat:
+#             South Midlat:
+#             Tropical:
+#         DJF:
+#             Global:
+#             North Midlat:
+#             South Midlat:
+#             Tropical:
+#         JJA:
+#             Global:
+#             North Midlat:
+#             South Midlat:
+#             Tropical:
+
+
+#pic9
+T_slope:
+    net_toa: 
+        ALL:
+            Global:
+            -0.337586
+            North Midlat:
+            South Midlat:
+            Tropical:
+        DJF:
+            Global:
+            North Midlat:
+            South Midlat:
+            Tropical:
+        JJA:
+            Global:
+            North Midlat:
+            South Midlat:
+            Tropical:
+    rsnt: 
+        ALL:
+            Global:
+            1.189083
+            North Midlat:
+            South Midlat:
+            Tropical:
+        DJF:
+            Global:
+            North Midlat:
+            South Midlat:
+            Tropical:
+        JJA:
+            Global:
+            North Midlat:
+            South Midlat:
+            Tropical:
+    rlnt: 
+        ALL:
+            Global:
+            -1.526779
+            North Midlat:
+            South Midlat:
+            Tropical:
+        DJF:
+            Global:
+            North Midlat:
+            South Midlat:
+            Tropical:
+        JJA:
+            Global:
+            North Midlat:
+            South Midlat:
+            Tropical:
+    
+     

@@ -82,6 +82,44 @@ def load_reference(ref_file='gm_reference_EC23.yml'):
     
     return reference
 
+import copy
+
+def apply_temperature_correction(reference, slopes, delta_t, weights):
+    """
+    Modify reference fluxes by adding delta_t * slope only if slope exists.
+    Raise error only if weight > 0 and slope is missing for any (var, season, region).
+
+    reference: nested dict {var: {season: {region: flux}}}
+    slopes: nested dict {var: {season: {region: slope}}}
+    delta_t: float
+    weights: dict {var: weight}
+    """
+    corrected_reference = copy.deepcopy(reference)  # preserve original
+
+    for var in corrected_reference:
+        weight = weights.get(var, 0.0)
+
+        for season in corrected_reference[var]:
+            for region in corrected_reference[var][season]:
+                # Default slope = 0 if weight = 0
+                if weight == 0.0:
+                    slope = 0.0
+                else:
+                    # Try to get the slope from the nested structure
+                    try:
+                        slope = slopes[var][season][region]
+                        if slope is None:
+                            raise KeyError
+                    except KeyError:
+                        raise ValueError(
+                            f"Slope missing for variable '{var}', season '{season}', region '{region}', "
+                            f"but its weight is {weight} (> 0)."
+                        )
+
+                corrected_reference[var][season][region] += delta_t * slope
+
+    return corrected_reference
+
 def load_base(base_file='ecmean/global_mean_s000_EC-Earth4_r1i1p1f1_1990_1997.yml'):
     """
     Load base file with fluxes of configuration to tune
@@ -287,6 +325,24 @@ if __name__ == '__main__':
     ref_file = config['files']['reference']
     reference = load_reference(ref_file)
     
+    # Modify reference file if there is delta t in config file and the slope file
+    # Check if delta_t and sensitivity (slopes) file exist in config
+    delta_t = config.get('args', {}).get('deltaT') # modifica
+    slope_file = config['files'].get('slope_file')
+    if delta_t is not None and slope_file is not None:
+        print("Delta T and slope file are given, correction applied.")
+        slopes_yaml = load_sensitivity(slope_file)
+        # Adjust this depending on slope file structure
+        slopes = slopes_yaml.get('T_slope', {})
+        weights = config.get('weights', {})
+
+        # Apply correction
+        corrected_reference = apply_temperature_correction(reference, slopes, delta_t, weights)
+    else:
+        corrected_reference = reference
+        print("Delta T or slope file not specified in config, no correction applied.")
+
+    
     # Load fluxes of configuration to tune
     base_file = config['files']['base'].format(exp=exp, year1=year1, year2=year2)
     base_file = os.path.join(config['files']['ecmean'], base_file)
@@ -297,7 +353,7 @@ if __name__ == '__main__':
     param_file = os.path.join(config['files']['exps'], param_file)
     params, vals = load_params(param_file)
 
-    difference = compute_difference(base, reference)
+    difference = compute_difference(base, corrected_reference)
 
     minval = {}
     maxval = {}
