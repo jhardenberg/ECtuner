@@ -106,7 +106,7 @@ def read_yaml_files(yaml_files: List[str]) -> Dict[str, Dict[str, float]]:
                 data = yaml.safe_load(f)
                 if isinstance(data, list):
                     # new tuning file in se format
-                    flattened = flatten_yaml_dict(data[0])
+                    flattened = flatten_yaml_dict(data[0]['base.context']['model_config']['oifs'])
                 else:
                     flattened = flatten_yaml_dict(data)
                     
@@ -290,6 +290,7 @@ def parse_arguments(arguments):
                         help='yaml configuration file')
 
     # positional
+    parser.add_argument('ref_tag', type=str, help='name of reference experiment', nargs='?', default=None)
     parser.add_argument('exp_temp', type=str, help='template name of tuning experiments to use for sensitivity calc (usually something like "s???")', nargs='?', default=None)
     parser.add_argument('year1', type=int, help='start year', nargs='?', default=None)
     parser.add_argument('year2', type=int, help='end year', nargs='?', default=None)
@@ -425,6 +426,7 @@ if __name__ == '__main__':
     args = parse_arguments(sys.argv[1:])
 
     config_file = get_arg(args, 'config', 'config-tuner.yaml')
+    ref_tag = get_arg(args, 'ref_tag', None)
     exp_temp = get_arg(args, 'exp_temp', None)
     year1 = get_arg(args, 'year1', None)
     year2 = get_arg(args, 'year2', None)
@@ -462,14 +464,14 @@ if __name__ == '__main__':
 
     print(reference_dict)
 
-    ref_tag = None
-    for exp in tunsets:
-        if dicts_equal(tunsets[exp], reference_dict):
-            print(f'{exp} is the reference exp')
-            ref_tag = exp
+    if ref_tag is None:
+        for exp in tunsets:
+            if dicts_equal(tunsets[exp], reference_dict):
+                print(f'{exp} is the reference exp')
+                ref_tag = exp
     
     if ref_tag is None:
-        raise ValueError('No reference exp found! is it there?')
+        raise ValueError('No reference exp found! Automatic recognition may fail if the reference exp was run with different parameters than specified in the config file. Set it manually running: python sensitivity.py ref_tag -c config.yml')
 
     if tunsets:
         print("Comparing parameters with reference...")
