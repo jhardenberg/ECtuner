@@ -4,19 +4,33 @@
 
 This atmospheric tuning tool uses [ECmean](https://github.com/oloapinivad/ECmean4) output files to compute new suggested values for EC-Earth OIFS parameters.
 
-### Usage
+## Usage
 
 The main configuration file is `config-tuner.yaml`.
 You will need to specify a directory (e.g. `ecmean`) containing ECmean output yaml files, one file for each experiment.
 Another directory (e.g. `exps`) should contain yaml files listing the parameter values used for each experiments
 
-The notebook `sensitivity.ipynb` (to be substituted with a python tool) is used to compute sensitivities.
-The python script `tuner.py` is used to compute new suggested parameter values starting from a `base` experiment.
-The two `year` arguments control the range of years used to identify the ECmean output.
+### Compute sensitivities to model parameters
 
-For example:
+The python script `sensitivity.py` is used to compute sensitivities of radiative fluxes and other target variables to model parameters. Before doing this, you will need an ensemble of simulations modifying one parameter at a time in both directions. 
+In the config file, you need to specify your directories (where to find the experiments, their tuning files and the ecmean output files). If the ecmean calculations have not been computed, the code computes them automatically. 
+A pattern for the name of the ensemble members is needed, e.g. "s???", and can be specified either in the config or in command line. The first and last years to consider are also taken from either the config or the command line. The experiment numbering can be arbitrary, the code will automatically recognize the parameters changed in each run. 
 ```
-ectuner.py s000 1990 1997
+python sensitivity.py -c config_tuner.yaml
+```
+If the base experiment is not found, you can set it explicitly:
+```
+python sensitivity.py s000 -c config_tuner.yaml
+```
+
+### Find the optimal tuning of parameters
+
+The python script `ectuner.py` is used to compute new suggested parameter values starting from a `base` experiment.
+The two `year` arguments control the range of years used to identify the ECmean output. The tuner can only be run after the sensitivities have been computed (see above).
+
+For example (s000 is the base unperturbed experiment, considering only 1990-1997):
+```
+python ectuner.py s000 1990 1997
 ```
 
 will produce this output
