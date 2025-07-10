@@ -38,6 +38,7 @@ import numpy as np
 from scipy import optimize
 import math
 from tabulate import tabulate
+import copy
 
 from logger import setup_logger
 
@@ -82,30 +83,35 @@ def load_reference(ref_file='gm_reference_EC23.yml'):
     
     return reference
 
-import copy
+def flatten_singleton_lists(d):
+    if isinstance(d, dict):
+        return {k: flatten_singleton_lists(v) for k, v in d.items()}
+    elif isinstance(d, list) and len(d) == 1:
+        return d[0]
+    else:
+        return d
 
-def apply_temperature_correction(reference, slopes, delta_t, weights):
+def apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region):
     """
-    Modify reference fluxes by adding delta_t * slope only if slope exists.
-    Raise error only if weight > 0 and slope is missing for any (var, season, region).
-
-    reference: nested dict {var: {season: {region: flux}}}
-    slopes: nested dict {var: {season: {region: slope}}}
-    delta_t: float
-    weights: dict {var: weight}
+    Modify reference fluxes by adding delta_t * slope, only if slope exists.
+    Raise error only if combined weight > 0 and slope is missing.
     """
-    corrected_reference = copy.deepcopy(reference)  # preserve original
+    corrected_reference = copy.deepcopy(reference)
 
     for var in corrected_reference:
-        weight = weights.get(var, 0.0)
+        var_weight = weights.get(var, 0.0)
 
         for season in corrected_reference[var]:
+            season_weight = weights_season.get(season, 0.0)
+
             for region in corrected_reference[var][season]:
-                # Default slope = 0 if weight = 0
-                if weight == 0.0:
-                    slope = 0.0
+                region_weight = weights_region.get(region, 0.0)
+
+                combined_weight = var_weight * season_weight * region_weight
+
+                if combined_weight == 0.0:
+                    slope = 0.0  # skip correction
                 else:
-                    # Try to get the slope from the nested structure
                     try:
                         slope = slopes[var][season][region]
                         if slope is None:
@@ -113,7 +119,7 @@ def apply_temperature_correction(reference, slopes, delta_t, weights):
                     except KeyError:
                         raise ValueError(
                             f"Slope missing for variable '{var}', season '{season}', region '{region}', "
-                            f"but its weight is {weight} (> 0)."
+                            f"but its combined weight is {combined_weight} (> 0)."
                         )
 
                 corrected_reference[var][season][region] += delta_t * slope
@@ -333,11 +339,14 @@ if __name__ == '__main__':
         print("Delta T and slope file are given, correction applied.")
         slopes_yaml = load_sensitivity(slope_file)
         # Adjust this depending on slope file structure
-        slopes = slopes_yaml.get('T_slope', {})
+        slopes_raw = slopes_yaml.get('T_slope', {})
+        slopes = flatten_singleton_lists(slopes_raw)
         weights = config.get('weights', {})
+        weights_season=config.get('weights_season', {})
+        weights_region=config.get('weights_region', {})
 
         # Apply correction
-        corrected_reference = apply_temperature_correction(reference, slopes, delta_t, weights)
+        corrected_reference = apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region)
     else:
         corrected_reference = reference
         print("Delta T or slope file not specified in config, no correction applied.")

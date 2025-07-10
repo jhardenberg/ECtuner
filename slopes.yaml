@@ -58,7 +58,7 @@ T_slope:
     net_toa: 
         ALL:
             Global:
-            -0.337586
+            - 0.337586
             North Midlat:
             South Midlat:
             Tropical:
@@ -75,7 +75,7 @@ T_slope:
     rsnt: 
         ALL:
             Global:
-            1.189083
+            - 1.189083
             North Midlat:
             South Midlat:
             Tropical:
@@ -92,7 +92,7 @@ T_slope:
     rlnt: 
         ALL:
             Global:
-            -1.526779
+            - -1.526779
             North Midlat:
             South Midlat:
             Tropical:
