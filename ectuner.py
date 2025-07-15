@@ -109,20 +109,24 @@ def apply_temperature_correction(reference, slopes, delta_t, weights, weights_se
 
                 combined_weight = var_weight * season_weight * region_weight
 
-                if combined_weight == 0.0:
-                    slope = 0.0  # skip correction
-                else:
-                    try:
-                        slope = slopes[var][season][region]
-                        if slope is None:
-                            raise KeyError
-                    except KeyError:
+                # Try to safely get the slope, return None if any level is missing
+                slope = (
+                    slopes.get(var, {})
+                          .get(season, {})
+                          .get(region)
+                )
+
+                # If missing or invalid, handle based on weight
+                if slope is None or (isinstance(slope, float) and math.isnan(slope)):
+                    if combined_weight > 0.0:
                         raise ValueError(
-                            f"Slope missing for variable '{var}', season '{season}', region '{region}', "
+                            f"Slope missing or NaN for variable '{var}', season '{season}', region '{region}', "
                             f"but its combined weight is {combined_weight} (> 0)."
                         )
+                    else:
+                        slope = 0.0  # Safe fallback if weight is zero
 
-                corrected_reference[var][season][region] += delta_t * slope
+                corrected_reference[var][season][region] -= delta_t * slope
 
     return corrected_reference
 
@@ -333,14 +337,12 @@ if __name__ == '__main__':
     
     # Modify reference file if there is delta t in config file and the slope file
     # Check if delta_t and sensitivity (slopes) file exist in config
-    delta_t = config.get('args', {}).get('deltaT') # modifica
+    delta_t = config.get('args', {}).get('deltaT') 
     slope_file = config['files'].get('slope_file')
     if delta_t is not None and slope_file is not None:
         print("Delta T and slope file are given, correction applied.")
         slopes_yaml = load_sensitivity(slope_file)
-        # Adjust this depending on slope file structure
-        slopes_raw = slopes_yaml.get('T_slope', {})
-        slopes = flatten_singleton_lists(slopes_raw)
+        slopes = slopes_yaml.get('T_slope', {}) 
         weights = config.get('weights', {})
         weights_season=config.get('weights_season', {})
         weights_region=config.get('weights_region', {})

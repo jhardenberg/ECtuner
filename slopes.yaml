@@ -1,64 +1,8 @@
-#c4c9
-# T_slope:
-#     net_toa: 
-#         ALL:
-#             Global:
-#             -0.759694
-#             North Midlat:
-#             South Midlat:
-#             Tropical:
-#         DJF:
-#             Global:
-#             North Midlat:
-#             South Midlat:
-#             Tropical:
-#         JJA:
-#             Global:
-#             North Midlat:
-#             South Midlat:
-#             Tropical:
-#     rsnt: 
-#         ALL:
-#             Global:
-#             0.851892
-#             North Midlat:
-#             South Midlat:
-#             Tropical:
-#         DJF:
-#             Global:
-#             North Midlat:
-#             South Midlat:
-#             Tropical:
-#         JJA:
-#             Global:
-#             North Midlat:
-#             South Midlat:
-#             Tropical:
-#     rlnt: 
-#         ALL:
-#             Global:
-#             -1.612037
-#             North Midlat:
-#             South Midlat:
-#             Tropical:
-#         DJF:
-#             Global:
-#             North Midlat:
-#             South Midlat:
-#             Tropical:
-#         JJA:
-#             Global:
-#             North Midlat:
-#             South Midlat:
-#             Tropical:
-
-
-#pic9
+#slope value
 T_slope:
     net_toa: 
         ALL:
-            Global:
-            - 0.337586
+            Global: -0.800050
             North Midlat:
             South Midlat:
             Tropical:
@@ -74,8 +18,7 @@ T_slope:
             Tropical:
     rsnt: 
         ALL:
-            Global:
-            - 1.189083
+            Global: 0.850826
             North Midlat:
             South Midlat:
             Tropical:
@@ -91,8 +34,7 @@ T_slope:
             Tropical:
     rlnt: 
         ALL:
-            Global:
-            - -1.526779
+            Global: -1.645666
             North Midlat:
             South Midlat:
             Tropical:
@@ -106,5 +48,4 @@ T_slope:
             North Midlat:
             South Midlat:
             Tropical:
-    
      
