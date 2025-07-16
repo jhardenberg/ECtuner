@@ -1,0 +1,51 @@
+#slope value
+T_slope:
+    net_toa: 
+        ALL:
+            Global: -0.800050
+            North Midlat:
+            South Midlat:
+            Tropical:
+        DJF:
+            Global:
+            North Midlat:
+            South Midlat:
+            Tropical:
+        JJA:
+            Global:
+            North Midlat:
+            South Midlat:
+            Tropical:
+    rsnt: 
+        ALL:
+            Global: 0.850826
+            North Midlat:
+            South Midlat:
+            Tropical:
+        DJF:
+            Global:
+            North Midlat:
+            South Midlat:
+            Tropical:
+        JJA:
+            Global:
+            North Midlat:
+            South Midlat:
+            Tropical:
+    rlnt: 
+        ALL:
+            Global: -1.645666
+            North Midlat:
+            South Midlat:
+            Tropical:
+        DJF:
+            Global:
+            North Midlat:
+            South Midlat:
+            Tropical:
+        JJA:
+            Global:
+            North Midlat:
+            South Midlat:
+            Tropical:
+     
