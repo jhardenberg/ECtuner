@@ -83,17 +83,10 @@ def load_reference(ref_file='gm_reference_EC23.yml'):
     
     return reference
 
-def flatten_singleton_lists(d):
-    if isinstance(d, dict):
-        return {k: flatten_singleton_lists(v) for k, v in d.items()}
-    elif isinstance(d, list) and len(d) == 1:
-        return d[0]
-    else:
-        return d
 
 def apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region):
     """
-    Modify reference fluxes by adding delta_t * slope, only if slope exists.
+    Modify reference fluxes by subtracting delta_t * slope, only if slope exists.
     Raise error only if combined weight > 0 and slope is missing.
     """
     corrected_reference = copy.deepcopy(reference)
