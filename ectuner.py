@@ -38,6 +38,7 @@ import numpy as np
 from scipy import optimize
 import math
 from tabulate import tabulate
+import copy
 
 from logger import setup_logger
 
@@ -81,6 +82,50 @@ def load_reference(ref_file='gm_reference_EC23.yml'):
         reference[t] = reft
     
     return reference
+
+
+def apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region):
+    """
+    Modify reference fluxes by subtracting delta_t * slope, only if slope exists.
+    Raise error only if combined weight > 0 and slope is missing.
+    """
+    corrected_reference = copy.deepcopy(reference)
+
+    for var in corrected_reference:
+        var_weight = weights.get(var, 0.0)
+
+        for season in corrected_reference[var]:
+            season_weight = weights_season.get(season, 0.0)
+
+            for region in corrected_reference[var][season]:
+                region_weight = weights_region.get(region, 0.0)
+
+                combined_weight = var_weight * season_weight * region_weight
+
+                # Try to safely get the slope, return None if any level is missing
+                slope = (
+                    slopes.get(var, {})
+                          .get(season, {})
+                          .get(region)
+                )
+
+                # If missing or invalid, handle based on weight
+                if slope is None or (isinstance(slope, float) and math.isnan(slope)):
+                    if combined_weight > 0.0:
+                        raise ValueError(
+                            f"Slope missing or NaN for variable '{var}', season '{season}', region '{region}', "
+                            f"but its combined weight is {combined_weight} (> 0)."
+                        )
+                    else:
+                        slope = 0.0  # Safe fallback if weight is zero
+
+                delta_flux = delta_t * slope
+                old_value = corrected_reference[var][season][region]
+                new_value = old_value + delta_flux
+                corrected_reference[var][season][region] = new_value
+
+    return corrected_reference
+
 
 def load_base(base_file='ecmean/global_mean_s000_EC-Earth4_r1i1p1f1_1990_1997.yml'):
     """
@@ -136,7 +181,7 @@ def compute_difference(base, reference):
             #     difference[key][subkey] = np.nan
     return difference
 
-# Objective function to minimize: sum of squared differences + penalty for exceeding maximum parameter changes
+#Objective function to minimize: sum of squared differences + penalty for exceeding maximum parameter changes
 def objective_function(changes, params, values, reference_pars, penalty, sensitivity,
                        difference, weights_flux, weights_season, weights_region):
     """
@@ -287,6 +332,25 @@ if __name__ == '__main__':
     ref_file = config['files']['reference']
     reference = load_reference(ref_file)
     
+    # Modify reference file if there is delta t in config file and the slope file
+    # Check if delta_t and sensitivity (slopes) file exist in config
+    delta_t = config.get('args', {}).get('deltaT') 
+    slope_file = config['files'].get('slope_file')
+    if delta_t is not None and slope_file is not None:
+        print("Delta T and slope file are given, correction applied.")
+        slopes_yaml = load_sensitivity(slope_file)
+        slopes = slopes_yaml.get('T_slope', {}) 
+        weights = config.get('weights', {})
+        weights_season=config.get('weights_season', {})
+        weights_region=config.get('weights_region', {})
+
+        # Apply correction
+        corrected_reference = apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region)
+    else:
+        corrected_reference = reference
+        print("Delta T or slope file not specified in config, no correction applied.")
+
+    
     # Load fluxes of configuration to tune
     base_file = config['files']['base'].format(exp=exp, year1=year1, year2=year2)
     base_file = os.path.join(config['files']['ecmean'], base_file)
@@ -297,7 +361,7 @@ if __name__ == '__main__':
     param_file = os.path.join(config['files']['exps'], param_file)
     params, vals = load_params(param_file)
 
-    difference = compute_difference(base, reference)
+    difference = compute_difference(base, corrected_reference)
 
     minval = {}
     maxval = {}
@@ -342,7 +406,7 @@ if __name__ == '__main__':
 
     logger.info("Target offset after and before optimization:")
     logger.info("-------------------------------------------")
-    print_change(logger, result.x)
+    print_change(logger, result.x) # aggiungi stampa target valore prima e dopo 
 
     initial_guess = np.zeros(len(params))
     logger.info("")

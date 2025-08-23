@@ -6,6 +6,7 @@ files:
   ecmean: ./ecmean  # directory for ecmean output files
   exps: ./exps  # directory for parameter files for each experiment
   exp_temp: s??? # template name for sensitivity runs (can include ?, *)
+  slope_file: /ec/res4/hpcperm/ecme3038//ecearth/ecearth4/ECtuner/slopes.yaml # file with slopes for temperature correction
 
 ecmean:
   ecmean_config: config_ecmean.yml
@@ -16,7 +17,8 @@ args:
   year2: 2000
   penalty: 10  # Penalty for deviation from reference parameter values
   inc: 0.2  # Maximum acceptable parameter change
-  method: 'dual_annealing' # Optimization method (dual_annealing (recommended), differential_evolution, shgo (not recommended))
+  method: 'dual_annealing' # Optimization method (dual_annealing (recommended), differential_evolution, shgo (not 
+  deltaT: 0.5 # Time step for the reference correction 
 
 reference_parameters: # Default OIFS parameter values (used for penalty)
   RPRCON: 0.0014
