@@ -119,9 +119,13 @@ def apply_temperature_correction(reference, slopes, delta_t, weights, weights_se
                     else:
                         slope = 0.0  # Safe fallback if weight is zero
 
-                corrected_reference[var][season][region] -= delta_t * slope
+                delta_flux = delta_t * slope
+                old_value = corrected_reference[var][season][region]
+                new_value = old_value + delta_flux
+                corrected_reference[var][season][region] = new_value
 
     return corrected_reference
+
 
 def load_base(base_file='ecmean/global_mean_s000_EC-Earth4_r1i1p1f1_1990_1997.yml'):
     """
@@ -177,7 +181,7 @@ def compute_difference(base, reference):
             #     difference[key][subkey] = np.nan
     return difference
 
-# Objective function to minimize: sum of squared differences + penalty for exceeding maximum parameter changes
+#Objective function to minimize: sum of squared differences + penalty for exceeding maximum parameter changes
 def objective_function(changes, params, values, reference_pars, penalty, sensitivity,
                        difference, weights_flux, weights_season, weights_region):
     """
@@ -402,7 +406,7 @@ if __name__ == '__main__':
 
     logger.info("Target offset after and before optimization:")
     logger.info("-------------------------------------------")
-    print_change(logger, result.x)
+    print_change(logger, result.x) # aggiungi stampa target valore prima e dopo 
 
     initial_guess = np.zeros(len(params))
     logger.info("")
