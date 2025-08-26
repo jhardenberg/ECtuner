@@ -119,7 +119,7 @@ def apply_temperature_correction(reference, slopes, delta_t, weights, weights_se
                     else:
                         slope = 0.0  # Safe fallback if weight is zero
 
-                delta_flux = delta_t * slope
+                delta_flux = -(delta_t * slope)
                 old_value = corrected_reference[var][season][region]
                 new_value = old_value + delta_flux
                 corrected_reference[var][season][region] = new_value
