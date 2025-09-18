@@ -450,7 +450,7 @@ if __name__ == '__main__':
         for pg in config['parameter_group']:
             outdict['tuning'][pg] = {}
             for p in config['parameter_group'][pg]:
-                outdict['tuning'][pg][p] = float(values[p]+optimal_changes[p])
+                outdict['tuning'][pg][p] = float(f"{(values[p]+optimal_changes[p]):.4e}") # keep only 4 decimal digits
 
         with open(out, 'w') as file:
             yaml.dump(outdict, file)
