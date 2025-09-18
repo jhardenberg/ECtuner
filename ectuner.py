@@ -84,6 +84,32 @@ def load_reference(ref_file='gm_reference_EC23.yml'):
     return reference
 
 
+def apply_imbalance_correction(reference, imbalance = 0., adjust_individual_fluxes = True, sw_fraction = 0.5):
+    """
+    Correct net_toa target for intrinsic model imbalances.
+
+    If the imbalances are > 0, the model creates energy. If < 0, the model destroys energy.
+    So the net_toa reference is corrected in the opposite direction: if the model destroys energy, as it is for ece4 lowres, the net_toa equilibrates at a value > 0.
+
+    If adjust_individual_fluxes is set, the imbalance is propagated to rsnt and rlnt (annual, global). sw_fraction is the part attributed to rsnt (by default it is 0.5), (1-sw_fraction) is attributed to rlnt.
+    """
+    corrected_reference = copy.deepcopy(reference)
+
+    if 'net_toa' in corrected_reference:
+        corrected_reference['net_toa']['ALL']['Global'] -= imbalance
+        print(f'net toa reference: old {reference['net_toa']['ALL']['Global']} -> new {corrected_reference['net_toa']['ALL']['Global']}')
+    
+    if adjust_individual_fluxes:
+        print('Propagating imbalance correction to rsnt and rlnt')
+        if 'rsnt' in corrected_reference:
+            corrected_reference['rsnt']['ALL']['Global'] -= sw_fraction*imbalance
+        
+        if 'rlnt' in corrected_reference:
+            corrected_reference['rlnt']['ALL']['Global'] -= (1-sw_fraction)*imbalance
+
+    return corrected_reference
+
+
 def apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region):
     """
     Modify reference fluxes by subtracting delta_t * slope, only if slope exists.
@@ -332,24 +358,32 @@ if __name__ == '__main__':
     ref_file = config['files']['reference']
     reference = load_reference(ref_file)
     
+    if 'model_imbalance' in config['args']:
+        if config['args']['model_imbalance'] is not None:
+            print(f'Modifying net_toa target to cope with an intrinsic model imbalance of {config['args']['model_imbalance']} W/m2')
+            reference = apply_imbalance_correction(reference, config['args']['model_imbalance'])
+
     # Modify reference file if there is delta t in config file and the slope file
     # Check if delta_t and sensitivity (slopes) file exist in config
-    delta_t = config.get('args', {}).get('deltaT') 
-    slope_file = config['files'].get('slope_file')
-    if delta_t is not None and slope_file is not None:
-        print("Delta T and slope file are given, correction applied.")
-        slopes_yaml = load_sensitivity(slope_file)
-        slopes = slopes_yaml.get('T_slope', {}) 
-        weights = config.get('weights', {})
-        weights_season=config.get('weights_season', {})
-        weights_region=config.get('weights_region', {})
+    if 'deltaT' in config['args'] and 'slope_file' in config['files']:
+        delta_t = config.get('args', {}).get('deltaT') 
+        slope_file = config['files'].get('slope_file')
+        if delta_t is not None and slope_file is not None:
+            print("Delta T and slope file are given, temperature correction applied.")
+            slopes_yaml = load_sensitivity(slope_file)
+            slopes = slopes_yaml.get('T_slope', {}) 
+            weights = config.get('weights', {})
+            weights_season=config.get('weights_season', {})
+            weights_region=config.get('weights_region', {})
 
-        # Apply correction
-        corrected_reference = apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region)
+            # Apply correction
+            corrected_reference = apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region)
+        else:
+            corrected_reference = reference
+            print("Delta T or slope file not specified in config, no temperature correction applied.")
     else:
         corrected_reference = reference
-        print("Delta T or slope file not specified in config, no correction applied.")
-
+        print("Delta T or slope file not specified in config, no temperature correction applied.")
     
     # Load fluxes of configuration to tune
     base_file = config['files']['base'].format(exp=exp, year1=year1, year2=year2)
