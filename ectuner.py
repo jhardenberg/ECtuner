@@ -366,7 +366,7 @@ if __name__ == '__main__':
         delta_t = config.get('args', {}).get('deltaT') 
         slope_file = config['files'].get('slope_file')
         if delta_t is not None and slope_file is not None:
-            print("Delta T and slope file are given, temperature correction applied.")
+            print(f"Delta T and slope file are given, temperature correction applied: {delta_t} K.")
             slopes_yaml = load_sensitivity(slope_file)
             slopes = slopes_yaml.get('T_slope', {}) 
             weights = config.get('weights', {})
