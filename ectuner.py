@@ -251,6 +251,8 @@ if __name__ == '__main__':
         sys.exit(1)
 
     config = load_config(config_file)
+    logger.info("==== ECtuner configuration ====")
+    logger.info("\n" + yaml.safe_dump(config, sort_keys=False))
 
     if not year1:
         year1 = config['args']['year1']
@@ -351,15 +353,41 @@ if __name__ == '__main__':
     logger.info("")
 
     if out:
-        outdict = {'tuning': {}}
-        for pg in config['parameter_group']:
-            outdict['tuning'][pg] = {}
-            for p in config['parameter_group'][pg]:
-                outdict['tuning'][pg][p] = float(values[p]+optimal_changes[p])
+        from ruamel.yaml import YAML
+        from ruamel.yaml.comments import CommentedMap
 
-        with open(out, 'w') as file:
-            yaml.dump(outdict, file)
-            logger.info("Optimal new parameters written to %s", out)
+        yaml_ru = YAML()
+        yaml_ru.indent(mapping=2, sequence=2, offset=2) 
+        yaml_ru.preserve_quotes = True
+        tuning_block = CommentedMap()
+        for pg in config['parameter_group']:
+            tuning_block[pg] = CommentedMap()
+            for p in config['parameter_group'][pg]:
+                new_val = float(values[p] + optimal_changes[p])
+                tuning_block[pg][p] = new_val
+        output_dict = CommentedMap()
+        output_dict["base.context"] = CommentedMap()
+        output_dict["base.context"]["model_config"] = CommentedMap()
+        output_dict["base.context"]["model_config"]["oifs"] = CommentedMap()
+        output_dict["base.context"]["model_config"]["oifs"]["tuning"] = tuning_block
+        
+        with open(out, "w") as f:
+            yaml_ru.dump(output_dict, f)
+            f.write("\n")
+            f.write("# --- ECtuner meta-parameters ---\n")
+            f.write(f"# penalty: {penalty}\n")
+            f.write(f"# inc (fractional max change): {inc}\n")
+            f.write("# weights (flux):\n")
+            for k, v in weights_flux.items():
+                f.write(f"#   {k}: {v}\n")
+            f.write("# weights (region):\n")
+            for k, v in weights_region.items():
+                f.write(f"#   {k}: {v}\n")
+            f.write("# weights (season):\n")
+            for k, v in weights_season.items():
+                f.write(f"#   {k}: {v}\n")
+
+        logger.info("Structured tuning YAML written to %s", out)
 
     print("\nParameters:")
     print("-----------")
