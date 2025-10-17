@@ -272,6 +272,10 @@ def parse_arguments(arguments):
                         help='penalty for distance from reference parameters')
     parser.add_argument('-i', '--inc', type=float,
                         help='fractional maximum parameter change wrt reference')
+    parser.add_argument('-dT', '--deltaT', type=float, 
+                        help='Temperature adjustment for reference correction')
+    parser.add_argument('-mi', '--model_imbalance', type=float, 
+                        help='Intrinsic model imbalance to correct net_toa')
     # positional
     parser.add_argument('exp', type=str, help='experiment to tune')
     parser.add_argument('year1', type=int, help='start year', nargs='?', default=None)
@@ -355,33 +359,30 @@ if __name__ == '__main__':
     ref_file = config['files']['reference']
     reference = load_reference(ref_file)
     
-    if 'model_imbalance' in config['args']:
-        if config['args']['model_imbalance'] is not None:
-            print(f'Modifying net_toa target to cope with an intrinsic model imbalance of {config['args']['model_imbalance']} W/m2')
-            reference = apply_imbalance_correction(reference, config['args']['model_imbalance'])
+    # model_imbalance from command line or config if needed
+    model_imbalance = args.model_imbalance if args.model_imbalance is not None else config.get('args', {}).get('model_imbalance')
+    if model_imbalance is not None:
+        print(f'Modifying net_toa target to cope with an intrinsic model imbalance of {model_imbalance} W/m2')
+        reference = apply_imbalance_correction(reference, model_imbalance)
 
     # Modify reference file if there is delta t in config file and the slope file
     # Check if delta_t and sensitivity (slopes) file exist in config
-    if 'deltaT' in config['args'] and 'slope_file' in config['files']:
-        delta_t = config.get('args', {}).get('deltaT') 
-        slope_file = config['files'].get('slope_file')
-        if delta_t is not None and slope_file is not None:
-            print(f"Delta T and slope file are given, temperature correction applied: {delta_t} K.")
-            slopes_yaml = load_sensitivity(slope_file)
-            slopes = slopes_yaml.get('T_slope', {}) 
-            weights = config.get('weights', {})
-            weights_season=config.get('weights_season', {})
-            weights_region=config.get('weights_region', {})
+    delta_t = args.deltaT if args.deltaT is not None else config.get('args', {}).get('deltaT')
+    slope_file = config['files'].get('slope_file')
+    if delta_t is not None and slope_file is not None:
+        print(f"Delta T and slope file are given, temperature correction applied: {delta_t} K.")
+        slopes_yaml = load_sensitivity(slope_file)
+        slopes = slopes_yaml.get('T_slope', {}) 
+        weights = config.get('weights', {})
+        weights_season = config.get('weights_season', {})
+        weights_region = config.get('weights_region', {})
 
-            # Apply correction
-            corrected_reference = apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region)
-        else:
-            corrected_reference = reference
-            print("Delta T or slope file not specified in config, no temperature correction applied.")
+        # Apply correction
+        corrected_reference = apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region)
     else:
         corrected_reference = reference
-        print("Delta T or slope file not specified in config, no temperature correction applied.")
-    
+        print("Delta T or slope file not specified or deltaT missing, no temperature correction applied.")
+        
     # Load fluxes of configuration to tune
     base_file = config['files']['base'].format(exp=exp, year1=year1, year2=year2)
     base_file = os.path.join(config['files']['ecmean'], base_file)
