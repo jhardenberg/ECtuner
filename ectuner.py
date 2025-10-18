@@ -354,25 +354,30 @@ if __name__ == '__main__':
 
     if out:
         from ruamel.yaml import YAML
-        from ruamel.yaml.comments import CommentedMap
+        from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
-        yaml_ru = YAML()
-        yaml_ru.indent(mapping=2, sequence=2, offset=2) 
-        yaml_ru.preserve_quotes = True
+        yaml_ru = YAML(typ="rt")  
+        yaml_ru.indent(mapping=2, sequence=2, offset=0)  
+
         tuning_block = CommentedMap()
         for pg in config['parameter_group']:
             tuning_block[pg] = CommentedMap()
             for p in config['parameter_group'][pg]:
                 new_val = float(values[p] + optimal_changes[p])
                 tuning_block[pg][p] = new_val
-        output_dict = CommentedMap()
-        output_dict["base.context"] = CommentedMap()
-        output_dict["base.context"]["model_config"] = CommentedMap()
-        output_dict["base.context"]["model_config"]["oifs"] = CommentedMap()
-        output_dict["base.context"]["model_config"]["oifs"]["tuning"] = tuning_block
-        
+
+        oifs_block = CommentedMap()
+        oifs_block["tuning"] = tuning_block
+        model_config_block = CommentedMap()
+        model_config_block["oifs"] = oifs_block
+        base_context_block = CommentedMap()
+        base_context_block["model_config"] = model_config_block
+
+        output_list = CommentedSeq()
+        output_list.append(CommentedMap({"base.context": base_context_block}))
+
         with open(out, "w") as f:
-            yaml_ru.dump(output_dict, f)
+            yaml_ru.dump(output_list, f)
             f.write("\n")
             f.write("# --- ECtuner meta-parameters ---\n")
             f.write(f"# penalty: {penalty}\n")
