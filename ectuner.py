@@ -38,6 +38,7 @@ import numpy as np
 from scipy import optimize
 import math
 from tabulate import tabulate
+import copy
 
 from logger import setup_logger
 
@@ -81,6 +82,73 @@ def load_reference(ref_file='gm_reference_EC23.yml'):
         reference[t] = reft
     
     return reference
+
+
+def apply_imbalance_correction(reference, imbalance = 0., adjust_individual_fluxes = True, sw_fraction = 0.5):
+    """
+    Correct net_toa target for intrinsic model imbalances.
+
+    If the imbalances are > 0, the model creates energy. If < 0, the model destroys energy.
+    So the net_toa reference is corrected in the opposite direction: if the model destroys energy, as it is for ece4 lowres, the net_toa equilibrates at a value > 0.
+
+    If adjust_individual_fluxes is set, the imbalance is propagated to rsnt and rlnt (annual, global). sw_fraction is the part attributed to rsnt (by default it is 0.5), (1-sw_fraction) is attributed to rlnt.
+    """
+    corrected_reference = copy.deepcopy(reference)
+
+    if 'net_toa' in corrected_reference:
+        corrected_reference['net_toa']['ALL']['Global'] -= imbalance
+        print(f'net toa reference: old {reference['net_toa']['ALL']['Global']} -> new {corrected_reference['net_toa']['ALL']['Global']}')
+    
+    if adjust_individual_fluxes:
+        print('Propagating imbalance correction to rsnt and rlnt')
+        if 'rsnt' in corrected_reference:
+            corrected_reference['rsnt']['ALL']['Global'] -= sw_fraction*imbalance
+        
+        if 'rlnt' in corrected_reference:
+            corrected_reference['rlnt']['ALL']['Global'] -= (1-sw_fraction)*imbalance
+
+    return corrected_reference
+
+
+def apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region):
+    """
+    Modify reference fluxes by subtracting delta_t * slope, only if slope exists.
+    Raise error only if combined weight > 0 and slope is missing.
+    """
+    corrected_reference = copy.deepcopy(reference)
+
+    for var in corrected_reference:
+        var_weight = weights.get(var, 0.0)
+
+        for season in corrected_reference[var]:
+            season_weight = weights_season.get(season, 0.0)
+
+            for region in corrected_reference[var][season]:
+                region_weight = weights_region.get(region, 0.0)
+
+                combined_weight = var_weight * season_weight * region_weight
+
+                # Try to safely get the slope, return None if any level is missing
+                slope = (
+                    slopes.get(var, {})
+                          .get(season, {})
+                          .get(region)
+                )
+
+                # If missing or invalid, handle based on weight
+                if slope is None or (isinstance(slope, float) and math.isnan(slope)):
+                    if combined_weight > 0.0:
+                        raise ValueError(
+                            f"Slope missing or NaN for variable '{var}', season '{season}', region '{region}', "
+                            f"but its combined weight is {combined_weight} (> 0)."
+                        )
+                    else:
+                        slope = 0.0  # Safe fallback if weight is zero
+
+                corrected_reference[var][season][region] += -(delta_t * slope)
+            
+    return corrected_reference
+
 
 def load_base(base_file='ecmean/global_mean_s000_EC-Earth4_r1i1p1f1_1990_1997.yml'):
     """
@@ -136,7 +204,7 @@ def compute_difference(base, reference):
             #     difference[key][subkey] = np.nan
     return difference
 
-# Objective function to minimize: sum of squared differences + penalty for exceeding maximum parameter changes
+#Objective function to minimize: sum of squared differences + penalty for exceeding maximum parameter changes
 def objective_function(changes, params, values, reference_pars, penalty, sensitivity,
                        difference, weights_flux, weights_season, weights_region):
     """
@@ -204,6 +272,10 @@ def parse_arguments(arguments):
                         help='penalty for distance from reference parameters')
     parser.add_argument('-i', '--inc', type=float,
                         help='fractional maximum parameter change wrt reference')
+    parser.add_argument('-dT', '--deltaT', type=float, 
+                        help='Temperature adjustment for reference correction')
+    parser.add_argument('-mi', '--model_imbalance', type=float, 
+                        help='Intrinsic model imbalance to correct net_toa')
     # positional
     parser.add_argument('exp', type=str, help='experiment to tune')
     parser.add_argument('year1', type=int, help='start year', nargs='?', default=None)
@@ -289,6 +361,30 @@ if __name__ == '__main__':
     ref_file = config['files']['reference']
     reference = load_reference(ref_file)
     
+    # model_imbalance from command line or config if needed
+    model_imbalance = args.model_imbalance if args.model_imbalance is not None else config.get('args', {}).get('model_imbalance')
+    if model_imbalance is not None:
+        print(f'Modifying net_toa target to cope with an intrinsic model imbalance of {model_imbalance} W/m2')
+        reference = apply_imbalance_correction(reference, model_imbalance)
+
+    # Modify reference file if there is delta t in config file and the slope file
+    # Check if delta_t and sensitivity (slopes) file exist in config
+    delta_t = args.deltaT if args.deltaT is not None else config.get('args', {}).get('deltaT')
+    slope_file = config['files'].get('slope_file')
+    if delta_t is not None and slope_file is not None:
+        print(f"Delta T and slope file are given, temperature correction applied: {delta_t} K.")
+        slopes_yaml = load_sensitivity(slope_file)
+        slopes = slopes_yaml.get('T_slope', {}) 
+        weights = config.get('weights', {})
+        weights_season = config.get('weights_season', {})
+        weights_region = config.get('weights_region', {})
+
+        # Apply correction
+        corrected_reference = apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region)
+    else:
+        corrected_reference = reference
+        print("Delta T or slope file not specified or deltaT missing, no temperature correction applied.")
+        
     # Load fluxes of configuration to tune
     base_file = config['files']['base'].format(exp=exp, year1=year1, year2=year2)
     base_file = os.path.join(config['files']['ecmean'], base_file)
@@ -299,7 +395,7 @@ if __name__ == '__main__':
     param_file = os.path.join(config['files']['exps'], param_file)
     params, vals = load_params(param_file)
 
-    difference = compute_difference(base, reference)
+    difference = compute_difference(base, corrected_reference)
 
     minval = {}
     maxval = {}
@@ -344,7 +440,7 @@ if __name__ == '__main__':
 
     logger.info("Target offset after and before optimization:")
     logger.info("-------------------------------------------")
-    print_change(logger, result.x)
+    print_change(logger, result.x) # aggiungi stampa target valore prima e dopo 
 
     initial_guess = np.zeros(len(params))
     logger.info("")
@@ -363,7 +459,7 @@ if __name__ == '__main__':
         for pg in config['parameter_group']:
             tuning_block[pg] = CommentedMap()
             for p in config['parameter_group'][pg]:
-                new_val = float(values[p] + optimal_changes[p])
+                new_val = float(f"{(values[p]+optimal_changes[p]):.4e}") # keep only 4 decimal digits
                 tuning_block[pg][p] = new_val
 
         oifs_block = CommentedMap()
