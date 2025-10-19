@@ -21,6 +21,11 @@ args:
   model_imbalance: -0.74 # Model imbalance to be corrected: - (netTOA-netSFC) + (oce_imbalance), -0.74 for low res
   deltaT: 0.5 # Time step for the reference correction 
 
+# Parameters to keep fixed during tuning (example)
+frozen_parameters:
+  - RCLDIFF_CONVI 
+  - RPRCON
+
 reference_parameters: # Default OIFS parameter values (used for penalty)
   RPRCON: 0.0014
   ENTRORG: 0.00175

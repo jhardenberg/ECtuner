@@ -8,17 +8,20 @@ Usage:
     python ectuner.py [options] <experiment> <year1> <year2>
     
 Options:    
-    -c, --config <file>     yaml configuration file
-    -o, --output <file>     output yaml for Script Engine
-    -l, --loglevel <level>  logging level
-    -m, --method <method>   optimization method (shgo (not recommended), dual_annealing (default), differential_evolution)
-    -p, --penalty <value>   penalty for distance from reference parameters
-    -i, --inc <value>       fractional maximum parameter change wrt reference
+    -c, --config <file>        yaml configuration file
+    -o, --output <file>        output yaml for Script Engine
+    -l, --loglevel <level>     logging level
+    -m, --method <method>      optimization method (shgo (not recommended), dual_annealing (default), differential_evolution)
+    -p, --penalty <value>      penalty for distance from reference parameters
+    -i, --inc <value>          fractional maximum parameter change wrt reference
+    -dT, --deltaT <value>      temperature adjustment for reference correction
+    -imb, --imbalance <value>  intrinsic model imbalance to correct net_toa
+    --freeze <param1> [param2 ...]   list of parameters to keep fixed during tuning
 
 Arguments:
-    experiment              experiment to tune
-    year1                   start year
-    year2                   end year
+    experiment                  experiment to tune
+    year1                       start year
+    year2                       end year
 
 Example:
     python ectuner.py -c config-tuner.yaml -l INFO -p 0.5 -i 0.1 -o tuned_parameters.yml -m dual_annealing s000 1990 1997
@@ -206,32 +209,49 @@ def compute_difference(base, reference):
 
 #Objective function to minimize: sum of squared differences + penalty for exceeding maximum parameter changes
 def objective_function(changes, params, values, reference_pars, penalty, sensitivity,
-                       difference, weights_flux, weights_season, weights_region):
+                       difference, weights_flux, weights_season, weights_region,
+                       frozen_params=None):
     """
-    Objective function to minimize: sum of squared differences + penalty for exceeding maximum parameter changes
+    Objective function with frozen parameters support.
     
     Parameters:
-        changes (list): list of parameter changes
-    
+        changes (list): list of changes for free parameters only
+        params (list): all parameters (free + frozen)
+        frozen_params (dict): dictionary of frozen parameters {param_name: value}
     Returns:
         float: score to minimize
     """
+
+    if frozen_params is None:
+        frozen_params = {}
+
+    # Reconstrtuction of all changes including frozen parameters
+    all_changes = []
+    free_idx = 0
+    for p in params:
+        if p in frozen_params:
+            all_changes.append(0.0)
+        else:
+            all_changes.append(changes[free_idx])
+            free_idx += 1
+
     total_difference = 0
     param_difference = 0
+
     for fluxname in sensitivity[params[0]].keys():
-        for season in  sensitivity[params[0]][fluxname].keys():
+        for season in sensitivity[params[0]][fluxname].keys():
             for region in sensitivity[params[0]][fluxname][season].keys():
-                if not math.isnan(difference.get(fluxname,{}).get(season, {}).get(region, np.nan)):  # Skip NaN values
-                    # Calculate the sum of the product of sensitivity and parameter changes
-                    flux_change = sum(sensitivity[param][fluxname][season][region][0] * changes[i] for i, param in enumerate(params))
-                    # Difference between current and desired state minus the calculated flux change
-                    total_difference += weights_flux[fluxname] * weights_region[region] * weights_season[season] * (difference[fluxname][season][region] + flux_change) ** 2
+                if not math.isnan(difference.get(fluxname,{}).get(season, {}).get(region, np.nan)):
+                    flux_change = sum(sensitivity[param][fluxname][season][region][0] * all_changes[i]
+                                      for i, param in enumerate(params))
+                    total_difference += (weights_flux[fluxname] *
+                                         weights_region[region] *
+                                         weights_season[season] *
+                                         (difference[fluxname][season][region] + flux_change) ** 2)
 
-    param_difference += sum([((reference_pars[param] - (values[param] + changes[i]) ) / reference_pars[param]) ** 2 for i, param in enumerate(params)])
+    param_difference += sum([((reference_pars[param] - (values[param] + all_changes[i])) / reference_pars[param]) ** 2
+                             for i, param in enumerate(params)])
 
-
-
-    # print(total_difference, param_difference)
     return total_difference + param_difference * penalty
 
 def print_change(logger, changes):
@@ -395,42 +415,64 @@ if __name__ == '__main__':
     param_file = os.path.join(config['files']['exps'], param_file)
     params, vals = load_params(param_file)
 
+    values = {p: vals[i] for i, p in enumerate(params)}
     difference = compute_difference(base, corrected_reference)
 
+    # Frozen parameters
+    frozen_params_list = config.get('frozen_parameters', [])
+    frozen_params = {p: values[p] for p in frozen_params_list if p in values}  
+
+    if frozen_params:
+        logger.info("Frozen parameters detected: %s", ", ".join(f"{p}={v}" for p, v in frozen_params.items()))
+    else:
+        logger.info("No frozen parameters specified.")
+
+    opt_params = [p for p in params if p not in frozen_params]
+
+    # Minval and maxval 
+    epsilon = 1e-12
     minval = {}
     maxval = {}
-    values = {}
+    for p in params:
+        if p in frozen_params:
+            minval[p] = values[p] - epsilon
+            maxval[p] = values[p] + epsilon
+        else:
+            minval[p] = reference_pars[p] * (1 - inc) - values[p]
+            maxval[p] = reference_pars[p] * (1 + inc) - values[p]
 
-    for i in range(len(params)):
-        p = params[i]
-        minval[p] = reference_pars[p] * (1 - inc) - vals[i]  # Minimum value
-        maxval[p] = reference_pars[p] * (1 + inc) - vals[i]  # Maximum value
-        values[p] = vals[i]
+    bounds = [(minval[p], maxval[p]) for p in opt_params]
 
-    bounds = [(minval[params[i]], maxval[params[i]]) for i in range(len(params))]
     logger.debug("Parameter bounds:")
     logger.debug("-----------------")
-    for i in range(len(params)):
-        logger.debug("%s: %s - %s", params[i], minval[params[i]], maxval[params[i]])
+    for p in opt_params:
+        logger.debug("%s: %s - %s", p, minval[p], maxval[p])
 
     logger.info(f"Optimizing parameters using {method} ...")
 
-    # shgo or dual_annealing
-    if method == 'shgo':  # Not recommended
-        result = optimize.shgo(objective_function, bounds,
-                    args=(params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
-    elif method == 'dual_annealing':  # Recommended!
-        result = optimize.dual_annealing(objective_function, bounds,
-                    args=(params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
+    # shgo, dual_annealing o differential_evolution
+    if method == 'shgo':
+        result = optimize.shgo(objective_function, bounds,args=(params, values, reference_pars, penalty, sensitivity, difference,
+                               weights_flux, weights_season, weights_region, frozen_params))
+    elif method == 'dual_annealing':
+        result = optimize.dual_annealing(objective_function, bounds, args=(params, values, reference_pars, penalty, sensitivity, difference,
+                                         weights_flux, weights_season, weights_region,frozen_params))
     elif method == 'differential_evolution':
-        result = optimize.differential_evolution(objective_function, bounds,
-                    args=(params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
+        result = optimize.differential_evolution(objective_function, bounds, args=(params, values, reference_pars, penalty, sensitivity, difference,
+                                                 weights_flux, weights_season, weights_region,frozen_params))
     else:
         logger.error("Method not supported")
         sys.exit(1)
     
     # Print the optimal parameter changes
-    optimal_changes = {params[i]: result.x[i] for i in range(len(params))}
+    optimal_changes = {}
+    free_idx = 0
+    for p in params:
+        if p in frozen_params:
+            optimal_changes[p] = 0.0
+        else:
+            optimal_changes[p] = result.x[free_idx]
+            free_idx += 1
 
     logger.debug("Optimization result:")
     logger.debug("--------------------")
@@ -440,13 +482,16 @@ if __name__ == '__main__':
 
     logger.info("Target offset after and before optimization:")
     logger.info("-------------------------------------------")
-    print_change(logger, result.x) # aggiungi stampa target valore prima e dopo 
+    print_change(logger, [optimal_changes[p] for p in params])
 
-    initial_guess = np.zeros(len(params))
-    logger.info("")
-    logger.info("Total score before optimization: %s", objective_function(initial_guess, params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
-    logger.info("Total score after optimization: %s", objective_function(result.x, params, values, reference_pars, penalty, sensitivity, difference, weights_flux, weights_season, weights_region))
-    logger.info("")
+    initial_guess_free = np.zeros(len(opt_params))
+    logger.info("Total score before optimization: %s", 
+            objective_function(initial_guess_free, params, values, reference_pars, penalty, 
+                               sensitivity, difference, weights_flux, weights_season, weights_region, frozen_params))
+
+    logger.info("Total score after optimization: %s", 
+            objective_function(result.x, params, values, reference_pars, penalty, 
+                               sensitivity, difference, weights_flux, weights_season, weights_region, frozen_params))
 
     if out:
         from ruamel.yaml import YAML
@@ -459,8 +504,9 @@ if __name__ == '__main__':
         for pg in config['parameter_group']:
             tuning_block[pg] = CommentedMap()
             for p in config['parameter_group'][pg]:
-                new_val = float(f"{(values[p]+optimal_changes[p]):.4e}") # keep only 4 decimal digits
-                tuning_block[pg][p] = new_val
+                val_to_write = values[p] if p in frozen_params else values[p] + optimal_changes[p]
+                tuning_block[pg][p] = float(f"{val_to_write:.4e}")
+
 
         oifs_block = CommentedMap()
         oifs_block["tuning"] = tuning_block
