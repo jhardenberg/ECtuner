@@ -1,0 +1,36 @@
+# EC-Earth4 conda environment file
+#
+#
+# Sample usage:
+#
+# (1) Install environment in a local ".conda" directory
+# > conda env create --prefix .conda --file environment.yml
+# > conda activate ./.conda
+#
+# (2) Install environment with name "ece4"
+# > conda env create --name ece4 --file environment.yml
+# > conda activate ece4
+#
+# (3) Update environment
+# > conda activate ece4
+# > conda env update --file environment.yml --prune
+# 
+channels:
+  - conda-forge
+  - nodefaults
+
+dependencies:
+  - python
+  - pip
+  - "esmf=*=nompi_*"
+  - xesmf  # for ECmean4 regridding
+  - eccodes  # binary eccodes package
+  - python-eccodes  # Python API for eccodes
+  - scriptengine>=1.2.0
+  #- scriptengine-tasks-ecearth>=0.8.0  # Needed for ECE4 monitoring only!
+  - pip:
+    - scriptengine-tasks-ecearth==v0.8.0  
+    - rdy2cpl @ git+https://github.com/uwefladrich/rdy2cpl.git@main
+    - scriptengine-tasks-hpc==v1.0.0rc2 # temporary for bug in SE
+    - ECmean4 # for ECmean4 diagnostics
+    - ecbundle @ git+https://github.com/ecmwf/ecbundle.git
