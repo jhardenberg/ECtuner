@@ -184,6 +184,11 @@ def load_params(param_file):
         for ke1 in old_par['tuning']:
             for ke2 in old_par['tuning'][ke1]:
                 params[ke2] = old_par['tuning'][ke1][ke2]
+        
+        # Cast all values to float
+    for p in params:
+        params[p] = float(params[p])
+
 
     return list(params.keys()), list(params.values())
 
