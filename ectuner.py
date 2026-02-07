@@ -185,11 +185,6 @@ def load_params(param_file):
             for ke2 in old_par['tuning'][ke1]:
                 params[ke2] = old_par['tuning'][ke1][ke2]
         
-        # Cast all values to float
-    for p in params:
-        params[p] = float(params[p])
-
-
     # Cast all values to float
     for p in params:
         params[p] = float(params[p])
