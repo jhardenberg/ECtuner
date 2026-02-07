@@ -190,6 +190,10 @@ def load_params(param_file):
         params[p] = float(params[p])
 
 
+    # Cast all values to float
+    for p in params:
+        params[p] = float(params[p])
+
     return list(params.keys()), list(params.values())
 
 def compute_difference(base, reference):
