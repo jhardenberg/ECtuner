@@ -1,46 +1,61 @@
 """
 Sensitivities for ECtuner.
+-------------------------
+Script to compute sensitivity coefficients from an ensemble of tuning runs. 
+It performs a linear regression between parameter perturbations and model diagnostic changes (via ECmean4).
 
-Script to compute sensitivities out of an ensemble of tuning runs that perturb a single parameter at a time. Free naming of experiments, automatic recognition of parameter change through the tuning file.
-One of the experiments has to be with the default parameter set specified in the config file.
-If the corresponding ecmean files are not there, they are automatically produced.
-
-<<<< Important! Check that the path of the directories containing the tuning files (simple yaml, or in SE format) and the ecmean files is indicated in the config file. 
-Also check that the "exp_temp" placeholder for the experiments naming convention and the "params" placeholder for the tuning files naming convention are correct. >>>>
+Prerequisites:
+    1. AMIP Experiments: A set of simulations perturbing one parameter at a time (OAT), free naming of experiments. 
+    2. Control Run: One experiment must use the default parameter set. (e.g. s000 or k000)
+    3. Tuning Files: YAML files for each experiment containing the parameter values, located in the directory specified by 'exps' in the config file.
+    4. Diagnostics: Global mean files (.yml) produced by ECmean4. 
+       Note: If these files are missing, the script will attempt to calculate them automatically (requires ECmean4 config).
 
 Usage:
-    python sensitivity.py [options] <ref_tag> <exp_temp> <year1> <year2>
+    python sensitivity.py -c <config.yaml> [ref_tag] [exp_temp] [year1] [year2]
     
 Options:    
     -c, --config <file>     yaml configuration file
 
-Arguments (optional, can be specified in the config file as well):
-    ref_tag                 name of reference experiment, useful if not recognized automatically
-    exp_temp              template for experiment name (e.g. "s???"). The code looks for matching tuning files in the specified "exps" folder.
-    year1                   start year
-    year2                   end year
+Arguments:
+    -c, --config    Path to the YAML configuration file.
+    ref_tag         (Optional) The tag of the control experiment (e.g., s000 or 00).
+    exp_temp        (Optional) Glob pattern for tags (e.g., "s???" or "??").
+    year1, year2    (Optional) Start and end years for the analysis.
 
-Example:
-    python sensitivity.py -c config-tuner.yaml 1991 1999
+Examples:
+    # Example 1: Using 's' prefix and 4-digit tags
+    python sensitivity.py -c config_sens.yaml s000 "s???" 1990 1997
 
-Authors:  Federico Fabiano, Jost von Hardenberg    
-Date:    2025-06-04
+    # Example 2: Using standard 2-digit tags
+    python sensitivity.py -c config_sens.yaml 00 "??" 1991 2000
 
 #########################################################################
-###             A selection of tuning parameters:
-#
-#               RPRCON: 0.14E-02    # coefficients for determining conversion from cloud water to rain
-#               ENTRORG: 0.175E-02  # entrainment rate (positive buoyant convection)
-#               DETRPEN: 0.75E-04   # detrainment rate for penetrative convection
-#               ENTRDD: 0.3E-03     # entrainment rate for cumulus downdrafts
-#               RMFDEPS: 0.3        # fractional massflux for downdrafts at lfs
-#           namcldp:
-#               RVICE: 0.13         # fixed ice fallspeed
-#               RLCRITSNOW: 0.3E-04 # critical autoconversion threshold
-#               RSNOWLIN2: 0.3E-01  # Constant governing of the temperature dependence of the autoconversion
-#                                   # of ice crystals to snow in large-scale precipitation
-#               RCLDIFF: 0.3E-05    # diffusion-coefficient for evaporation by turbulent mixing
-#               RCLDIFF_CONVI: 7.0  # enhancement factor of rcldiff for convection
+## A selection of tuning parameters:
+#           
+#    namcumf:
+#        RPRCON            # conversion from cloud water to rain
+#        ENTRORG           # entrainment rate (positive buoyant convection)
+#        DETRPEN           # detrainment rate for penetrative convection
+#        ENTRDD            # entrainment rate for cumulus downdrafts
+#        RMFDEPS           # fractional massflux for downdrafts at lfs
+#    namcldp:
+#        RVICE             # fixed ice fallspeed
+#        RLCRITSNOW        # critical autoconversion threshold
+#        RSNOWLIN2         # temp dependence of ice-to-snow autoconversion
+#        RCLDIFF           # diffusion-coefficient for evaporation
+#        RCLDIFF_CONVI     # enhancement factor of rcldiff for convection
+#        RDEPLIQREFRATE    # deposition efficiency in top layer
+#        RDEPLIQREFDEPTH   # recovery depth scale (m)
+#        RCL_OVERLAPLIQICE # overlap assumption for liquid and ice
+#        RCL_INHOMOGAUT    # inhomogeneity factor for autoconversion
+#        RCL_INHOMOGACC    # inhomogeneity factor for accretion
+#    naerad:
+#        RMINICE           # min ice crystal radius for sedimentation (microns)
+
+
+Authors: Federico Fabiano, Jost von Hardenberg
+Date: 2025-06-04 (Updated: 2026-02-24)
 
 """
 
@@ -82,19 +97,44 @@ def flatten_yaml_dict(nested_dict: Dict[str, Any], parent_key: str = '', sep: st
     
     return flattened
 
-def extract_tag_from_filename(filename: str) -> str:
-    """
-    Extract tag from filename pattern 'tuning_{tag}.yml'
-    """
-    # Try to match pattern tuning_{tag}.yml or tuning_{tag}.yaml
-    match = re.search(r'tuning_([^.]+)\.ya?ml?$', filename)
-    if match:
-        return match.group(1)
+# def extract_tag_from_filename(filename: str) -> str:
+#     """
+#     Extract tag from filename pattern 'tuning_{tag}.yml'
+#     """
+#     # Try to match pattern tuning_{tag}.yml or tuning_{tag}.yaml
+#     match = re.search(r'tuning_([^.]+)\.ya?ml?$', filename)
+#     if match:
+#         return match.group(1)
     
-    # Fallback: use the filename without extension if pattern doesn't match
-    return Path(filename).stem
+#     # Fallback: use the filename without extension if pattern doesn't match
+#     return Path(filename).stem
 
-def read_yaml_files(yaml_files: List[str]) -> Dict[str, Dict[str, float]]:
+# def read_yaml_files(yaml_files: List[str]) -> Dict[str, Dict[str, float]]:
+#     """
+#     Read multiple YAML files and return flattened dictionaries.
+#     Uses tags extracted from filenames as keys.
+#     """
+#     all_data = {}
+    
+#     for yaml_file in yaml_files:
+#         try:
+#             with open(yaml_file, 'r') as f:
+#                 data = yaml.safe_load(f)
+#                 if isinstance(data, list):
+#                     # new tuning file in se format
+#                     flattened = flatten_yaml_dict(data[0]['base.context']['model_config']['oifs'])
+#                 else:
+#                     flattened = flatten_yaml_dict(data)
+                    
+#                 tag = extract_tag_from_filename(yaml_file)
+#                 all_data[tag] = flattened
+#                 print(f"Loaded {len(flattened)} parameters from {yaml_file} (tag: {tag})")
+#         except Exception as e:
+#             print(f"Error reading {yaml_file}: {e}")
+    
+#     return all_data
+
+def read_yaml_files(yaml_files: List[str], params_template: str) -> Dict[str, Dict[str, float]]:
     """
     Read multiple YAML files and return flattened dictionaries.
     Uses tags extracted from filenames as keys.
@@ -102,18 +142,34 @@ def read_yaml_files(yaml_files: List[str]) -> Dict[str, Dict[str, float]]:
     all_data = {}
     
     for yaml_file in yaml_files:
+        filename = os.path.basename(yaml_file)
+        # Usiamo la funzione flessibile che hai già nel codice
+        tag = extract_tag_by_position(params_template, filename)
+        
+        if tag is None:
+            print(f"Warning: Could not extract tag from {filename} using template {params_template}")
+            continue
+
         try:
             with open(yaml_file, 'r') as f:
                 data = yaml.safe_load(f)
-                if isinstance(data, list):
-                    # new tuning file in se format
-                    flattened = flatten_yaml_dict(data[0]['base.context']['model_config']['oifs'])
+                
+                # Logica Universale per trovare i parametri:
+                if isinstance(data, list) and len(data) > 0 and 'base.context' in data[0]:
+                    # Caso SE (Nested)
+                    raw_params = data[0]['base.context']['model_config']['oifs']
+                elif isinstance(data, dict) and 'tuning' in data:
+                    # Caso Formato 1 (Con chiave 'tuning')
+                    raw_params = data['tuning']
                 else:
-                    flattened = flatten_yaml_dict(data)
-                    
-                tag = extract_tag_from_filename(yaml_file)
+                    # Caso Formato 2 (Piatto/Flat)
+                    raw_params = data
+                
+                # Appiattiamo qualunque cosa abbiamo trovato
+                flattened = flatten_yaml_dict(raw_params)
                 all_data[tag] = flattened
-                print(f"Loaded {len(flattened)} parameters from {yaml_file} (tag: {tag})")
+                print(f"Loaded {len(flattened)} parameters from {filename} (tag: {tag})")
+                
         except Exception as e:
             print(f"Error reading {yaml_file}: {e}")
     
@@ -444,40 +500,55 @@ if __name__ == '__main__':
 
     # Directory containing the tuning YAML files
     yaml_dir = config['files']['exps']
-    yaml_template = config['files']['params'].format(exp = exp_temp)
+    # yaml_template = config['files']['params'].format(exp = exp_temp)
+    params_template = config['files']['params'] # Es: tuning_{exp}.yml
+    yaml_template_glob = params_template.format(exp = exp_temp)
 
     ### Look for tuning YAML files
-    tuning_files = find_files_from_template(yaml_template, yaml_dir)
-    print(yaml_template, yaml_dir, config['files']['params'], len(tuning_files))
-    if len(tuning_files) == 0:
-        errmess = f'No tuning files found matching this pattern: {os.path.join(yaml_dir, yaml_template)}. Move files to {yaml_dir} directory.'
-        raise ValueError(errmess)
+    # tuning_files = find_files_from_template(yaml_template, yaml_dir)
+    # print(yaml_template, yaml_dir, config['files']['params'], len(tuning_files))
+    # if len(tuning_files) == 0:
+    #     errmess = f'No tuning files found matching this pattern: {os.path.join(yaml_dir, yaml_template)}. Move files to {yaml_dir} directory.'
+    #     raise ValueError(errmess)
 
-    allmems = [extract_tag_by_position(config['files']['params'], filnam) for filnam in tuning_files]
+    # allmems = [extract_tag_by_position(config['files']['params'], filnam) for filnam in tuning_files]
 
+    # print('All exps found: ', allmems)
+
+    # Read the set of tuning parameters for each experiment
+    # print("Reading sets of tuning parameters...")
+    # tunsets = read_yaml_files([os.path.join(yaml_dir, fil) for fil in tuning_files])
+    
+    # print(reference_dict)
+
+
+
+    # 1. Troviamo i file fisici
+    tuning_files_paths = [os.path.join(yaml_dir, f) for f in find_files_from_template(yaml_template_glob, yaml_dir)]
+    
+    if not tuning_files_paths:
+        raise ValueError(f"Nessun file trovato in {yaml_dir} con pattern {yaml_template_glob}")
+
+    # 2. Carichiamo i dati (Logica Universale)
+    print("Reading sets of tuning parameters...")
+    tunsets = read_yaml_files(tuning_files_paths, params_template)
+    allmems = list(tunsets.keys())
     print('All exps found: ', allmems)
 
     reference_dict = config['reference_parameters'] # could also read these from the control exp
     
-    # Read the set of tuning parameters for each experiment
-    print("Reading sets of tuning parameters...")
-    tunsets = read_yaml_files([os.path.join(yaml_dir, fil) for fil in tuning_files])
-
-    print(reference_dict)
-
     if ref_tag is None:
         for exp in tunsets:
             if dicts_equal(tunsets[exp], reference_dict):
                 print(f'{exp} is the reference exp')
                 ref_tag = exp
-    
+                break
     if ref_tag is None:
         raise ValueError('No reference exp found! Automatic recognition may fail if the reference exp was run with different parameters than specified in the config file. Set it manually running: python sensitivity.py ref_tag -c config.yml')
 
     if tunsets:
         print("Comparing parameters with reference...")
         pardict = compare_with_reference(tunsets, reference_dict)
-        
         print_summary(pardict, show_unchanged=True)
     else:
         print("No YAML files were successfully loaded.")
@@ -487,8 +558,7 @@ if __name__ == '__main__':
     print("Reading sets of ecmean indices...")
     res_all = dict()
     for mem in allmems:
-        print(mem)
-
+        print(f"Processing experiment: {mem}")
         base_file = os.path.join(config['files']['ecmean'], config['files']['base'].format(exp=mem, year1=year1, year2=year2))
 
         if os.path.isfile(base_file):
@@ -506,12 +576,10 @@ if __name__ == '__main__':
     
     # Compute regressions and save sensitivities.
     targets = ['net_toa', 'rsnt', 'rlnt', 'swcf', 'lwcf', 'rsns', 'rlns', 'hfss', 'hfls', 'net_sfc', 'toamsfc'] # could be specified in the config?
-
     parnames = reference_dict.keys()
-
     sensitivity = {}
 
-    for p, parnam in enumerate(parnames):
+    for parnam in parnames:
         sensitivity[parnam] = {}
         st0 = res_all[ref_tag]
         st1 = res_all[pardict[parnam]['min_tag']]

@@ -1,36 +1,42 @@
 """
 ECtuner: A tuning tool for EC-Earth
-This atmospheric tuning tool uses ECmean output files to compute new suggested values for EC-Earth OIFS parameters.
-The tool uses a reference dataset and a sensitivity dataset to compute the optimal parameter changes.
-The tool is based on the scipy.optimize module and uses the dual_annealing optimization method by default.
+----------------------------------------------
+This atmospheric tool computes optimal parameter suggestions for the EC-Earth OIFS component
+by minimizing a cost function based on model biases and parameter deviations.
+
+How it works:
+    1. It reads model diagnostics (Global Means) via ECmean4.
+    2. It compares model output against a reference dataset (Observations).
+    3. It uses a pre-computed Sensitivity Matrix to estimate how parameter
+       changes affect model biases.
+    4. It identifies the optimal parameter set using global optimization 
+       algorithms (Scipy-based) and uses the dual_annealing optimization method by default.
 
 Usage:
     python ectuner.py [options] <experiment> <year1> <year2>
-    
-Options:    
-    -c, --config <file>        yaml configuration file
-    -o, --output <file>        output yaml for Script Engine
-    -l, --loglevel <level>     logging level
-    -m, --method <method>      optimization method (shgo (not recommended), dual_annealing (default), differential_evolution)
-    -p, --penalty <value>      penalty for distance from reference parameters
-    -i, --inc <value>          fractional maximum parameter change wrt reference
-    -dT, --deltaT <value>      temperature adjustment for reference correction
-    -imb, --imbalance <value>  intrinsic model imbalance to correct net_toa
-    --freeze <param1> [param2 ...]   list of parameters to keep fixed during tuning
 
 Arguments:
-    experiment                  experiment to tune
-    year1                       start year
-    year2                       end year
-
-Example:
-    python ectuner.py -c config-tuner.yaml -l INFO -p 0.5 -i 0.1 -o tuned_parameters.yml -m dual_annealing s000 1990 1997
+    experiment          Experiment tag to be tuned.
+    year1, year2        Start and end years for the tuning period.
     
-    mio:
+Options:
+    -c, --config        Path to the YAML configuration file.
+    -o, --output        Output YAML file with tuned parameters (Script Engine format).
+    -l, --loglevel      Logging level (DEBUG, INFO, WARNING, ERROR).
+    -m, --method        Optimization method: 'dual_annealing' (recommended), 
+                        'differential_evolution', or 'shgo'.
+    -p, --penalty       Weight for the penalty term (distance from reference params).
+    -i, --inc           Maximum allowed fractional change for parameters (e.g., 0.2 = 20%).
+    -dT, --deltaT       Global temperature adjustment (K) for reference correction.
+    -imb, --imbalance   Target NetTOA imbalance (W/m2) to correct.
+    --freeze            List of parameter names to keep fixed during optimization.
+
+Examples:
+    python ectuner.py -c config-tuner.yaml -l INFO -p 0.5 -i 0.1 -o tuned_parameters.yml -m dual_annealing s000 1990 1997
     python ectuner.py lr00 1990 2000 -c config_tuner_TL63.yaml -p 0.5 -i 0.1 -o tuned_params_TL63.yml -m dual_annealing
 
 Author:  Jost von Hardenberg    
-Date:    2024-10-15
+Updated: 2026-02-24
 """
 
 import sys
