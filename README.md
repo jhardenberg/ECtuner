@@ -73,7 +73,7 @@ You can override configuration defaults using the following flags:
 When running the tuner, the tool identifies the optimal parameter set. Below is an example of a tuning run involving 16 parameters:
 
 |     Parameter     |     New value |   Old value |       Change |   Relative change |   Min change |   Max change |   Rel. dist. from ref. |
-|-------------------+---------------+-------------+--------------+-------------------+--------------+--------------+------------------------|
+|-------------------|---------------|-------------|--------------|-------------------|--------------|--------------|------------------------|
 |      RPRCON       |   0.00138269  |     0.0014  | -1.73056e-05 |      -0.0123611   |     -0.00084 |      0.00084 |           -0.0123611   |
 |      ENTRORG      |   0.00158176  |     0.00175 | -0.000168237 |      -0.0961354   |     -0.00105 |      0.00105 |           -0.0961354   |
 |      DETRPEN      |   7.40646e-05 |     7.5e-05 | -9.35368e-07 |      -0.0124716   |     -4.5e-05 |      4.5e-05 |           -0.0124716   |
