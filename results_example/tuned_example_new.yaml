@@ -3,24 +3,24 @@
       oifs:
         tuning:
           namcumf:
-            RPRCON: 0.0013827
-            ENTRORG: 0.0015818
-            DETRPEN: 7.4065e-05
-            ENTRDD: 0.00030596
-            RMFDEPS: 0.29622
+            RPRCON: 0.0013874
+            ENTRORG: 0.0015704
+            DETRPEN: 7.4162e-05
+            ENTRDD: 0.00030571
+            RMFDEPS: 0.29624
           namcldp:
-            RVICE: 0.12499
-            RLCRITSNOW: 2.0213e-05
-            RSNOWLIN2: 0.031218
-            RCLDIFF: 3.0363e-06
-            RCLDIFF_CONVI: 10.181
-            RDEPLIQREFRATE: 0.50098
-            RDEPLIQREFDEPTH: 499.54
+            RVICE: 0.12505
+            RLCRITSNOW: 2.0208e-05
+            RSNOWLIN2: 0.031222
+            RCLDIFF: 3.0356e-06
+            RCLDIFF_CONVI: 10.152
+            RDEPLIQREFRATE: 0.50182
+            RDEPLIQREFDEPTH: 499.2
             RCL_OVERLAPLIQICE: 0.1
-            RCL_INHOMOGAUT: 1.523
-            RCL_INHOMOGACC: 3.1912
+            RCL_INHOMOGAUT: 1.5222
+            RCL_INHOMOGACC: 3.1624
           naerad:
-            RMINICE: 58.492
+            RMINICE: 58.38
 
 # --- ECtuner meta-parameters ---
 # penalty: 10
@@ -39,9 +39,9 @@
 #   toamsfc: 0.0
 # weights (region):
 #   Global: 1.0
+#   Tropical: 0.0
 #   North Midlat: 0.0
 #   South Midlat: 0.0
-#   Tropical: 0.0
 #   NH: 0.0
 #   SH: 0.0
 #   Equatorial: 0.0

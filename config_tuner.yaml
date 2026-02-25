@@ -5,7 +5,7 @@ files:
   slope_file: /path/to/ectuner/utils/slopes.yaml # file with slopes for temperature correction
   # TEMPLATES
   base: global_mean_{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml  # ECmean output pattern for the experiment to be tuned
-  params: params_{exp}.yaml  # template for your tuining file
+  params: params_{exp}.yml  # template for your tuining file
   #DIRECTORIES
   ecmean: "/path/to/folder/of/computed/global_mean" # Directory for 'base' ECmean files
   exps: "/path/to/folder/of/tuning/parameter/to/tune" # Directory for 'params' tuning files

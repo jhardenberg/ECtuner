@@ -264,22 +264,56 @@ def objective_function(changes, params, values, reference_pars, penalty, sensiti
 
     return total_difference + param_difference * penalty
 
-def print_change(logger, changes):
-    """
-    Print the change in fluxes after optimization
-    """
-    for fluxname in targets:
-        for region in difference[fluxname]['ALL']:
-            if not math.isnan(difference[fluxname]['ALL'][region]):  # Skip NaN values
-                flux_change = sum(sensitivity[param][fluxname]['ALL'][region][0] * changes[i] for i, param in enumerate(params))
+def print_table(logger, data):
+    """Prints formatted rows for a professional look"""
+    # Header della tabella
+    header = f"{'Variable':<12} | {'Season':<6} | {'Region':<12} | {'Weight':<6} | {'Bias Init':>10} -> {'Bias Final':>10} | {'Status'}"
+    logger.info(header)
+    logger.info("-" * len(header))
 
-                # Paint green if the change is in the right direction, red otherwise
-                if abs(difference[fluxname]['ALL'][region] + flux_change) < abs(difference[fluxname]['ALL'][region]):
-                    fmt = "\033[92m%s %s %s %s\033[0m"
+    for r in data:
+        is_improved = abs(r[5]) < abs(r[4])
+        status = "IMPROVED" if is_improved else "WORSENED"
+        color = "\033[92m" if is_improved else "\033[91m"
+        reset = "\033[0m"
+        
+        # r[0]:var, r[1]:season, r[2]:region, r[3]:weight, r[4]:bias_init, r[5]:bias_final
+        logger.info(f"{r[0]:<12} | {r[1]:<6} | {r[2]:<12} | {r[3]:<6} | {r[4]:>10.3f} -> {color}{r[5]:>10.3f}{reset} | {status}")
+
+def log_optimization_results(logger, params, optimal_changes_list, sensitivity, difference, weights_flux):
+    targets = []
+    diagnostics = []
+
+    for fluxname in difference:
+        if fluxname not in sensitivity[params[0]]: continue
+
+        for season in difference[fluxname]:
+            for region in difference[fluxname][season]:
+                bias_init = difference[fluxname][season][region]
+                if math.isnan(bias_init): continue
+
+                flux_change = sum(sensitivity[p][fluxname][season][region][0] * optimal_changes_list[i] 
+                                  for i, p in enumerate(params))
+                bias_final = bias_init + flux_change
+                weight = weights_flux.get(fluxname, 0)
+                
+                # Aggiungiamo la stagione (season) nei dati
+                row = [fluxname, season, region, weight, bias_init, bias_final]
+                
+                if weight > 0:
+                    targets.append(row)
                 else:
-                    fmt = "\033[91m%s %s %s %s\033[0m"
+                    diagnostics.append(row)
 
-                logger.info(fmt, fluxname, region, difference[fluxname]['ALL'][region] + flux_change, difference[fluxname]['ALL'][region])
+    logger.info("\n" + " OPTIMIZATION SUMMARY (Biases: Model - Target) ".center(90, "="))
+    logger.info("Goal: Bring Biases to 0.0")
+    
+    logger.info("\n" + " PRIMARY TUNING TARGETS ".center(90, "-"))
+    print_table(logger, targets)
+    
+    logger.info("\n" + " DIAGNOSTIC SIDE-EFFECTS ".center(90, "-"))
+    print_table(logger, diagnostics)
+    logger.info("=" * 90 + "\n")
 
 def parse_arguments(arguments):
     """
@@ -390,30 +424,50 @@ if __name__ == '__main__':
     # Load reference fluxes
     ref_file = config['files']['reference']
     reference = load_reference(ref_file)
+    original_reference = copy.deepcopy(reference)
     
     # model_imbalance from command line or config if needed
     model_imbalance = args.model_imbalance if args.model_imbalance is not None else config.get('args', {}).get('model_imbalance')
     if model_imbalance is not None:
-        print(f'Modifying net_toa target to cope with an intrinsic model imbalance of {model_imbalance} W/m2')
+        # LOG PRE-CORRECTION
+        old_val = reference.get('net_toa', {}).get('ALL', {}).get('Global', 0.0)
+        
+        logger.info(f"[PRE-PROC] Applying model imbalance correction: {model_imbalance} W/m2")
         reference = apply_imbalance_correction(reference, model_imbalance)
+        
+        # LOG POST-CORRECTION
+        new_val = reference.get('net_toa', {}).get('ALL', {}).get('Global', 0.0)
+        logger.info(f"           net_toa Global reference: {old_val} -> {new_val}")
 
     # Modify reference file if there is delta t in config file and the slope file
     # Check if delta_t and sensitivity (slopes) file exist in config
     delta_t = args.deltaT if args.deltaT is not None else config.get('args', {}).get('deltaT')
     slope_file = config['files'].get('slope_file')
     if delta_t is not None and slope_file is not None:
-        print(f"Delta T and slope file are given, temperature correction applied: {delta_t} K.")
         slopes_yaml = load_sensitivity(slope_file)
-        slopes = slopes_yaml.get('T_slope', {}) 
+        slopes = slopes_yaml.get('T_slope', {})
         weights = config.get('weights', {})
         weights_season = config.get('weights_season', {})
         weights_region = config.get('weights_region', {})
-
-        # Apply correction
-        corrected_reference = apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region)
+        corrected_reference = apply_temperature_correction(reference, slopes, delta_t, weights_flux, weights_season, weights_region)
     else:
         corrected_reference = reference
-        print("Delta T or slope file not specified or deltaT missing, no temperature correction applied.")
+
+    logger.info("\n" + " PHYSICS-BASED REFERENCE ADJUSTMENTS (Target Shifts) ".center(85, "-"))
+    logger.info(f"{'Variable':<12} | {'Region':<12} | {'Original':>10} | {'Corrected':>10} | {'Total Shift':>12}")
+    logger.info("-" * 85)
+
+    for v in ['net_toa', 'rsnt', 'rlnt']: # key variables
+        if v in corrected_reference:
+            v_orig = original_reference[v]['ALL']['Global']
+            v_corr = corrected_reference[v]['ALL']['Global']
+            shift = v_corr - v_orig
+            logger.info(f"{v:<12} | {'Global':<12} | {v_orig:>10.4f} | {v_corr:>10.4f} | {shift:>+12.4f} W/m2")
+    
+    logger.info("-" * 85)
+    if delta_t: logger.info(f" * Applied Temperature Correction: {delta_t} K")
+    if model_imbalance: logger.info(f" * Applied Model Imbalance: {model_imbalance} W/m2")
+    logger.info("-" * 85 + "\n")
         
     # Load fluxes of configuration to tune
     base_file = config['files']['base'].format(exp=exp, year1=year1, year2=year2)
@@ -490,9 +544,8 @@ if __name__ == '__main__':
 
     logger.info("")
 
-    logger.info("Target offset after and before optimization:")
-    logger.info("-------------------------------------------")
-    print_change(logger, [optimal_changes[p] for p in params])
+    log_optimization_results(logger, params, [optimal_changes[p] for p in params], 
+                             sensitivity, difference, weights_flux)
 
     initial_guess_free = np.zeros(len(opt_params))
     logger.info("Total score before optimization: %s", 
