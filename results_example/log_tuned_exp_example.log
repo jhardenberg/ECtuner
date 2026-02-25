@@ -1,0 +1,184 @@
+2026-02-16 10:10:30 | ectuner |     INFO -> ==== ECtuner configuration ====
+2026-02-16 10:10:30 | ectuner |     INFO -> 
+files:
+  reference: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECmean4/ecmean/reference/gm_reference_PDAY26.yml
+  sensitivity: sensitivity_TL255_415_PD2012.yaml
+  base: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/ecmean_tune/global_mean_ftv9_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml
+  params: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/exps_tune/tuning_{exp}.yaml
+  ecmean: ./ecmean_415
+  exps: ./exps_415
+  exp_temp: ??
+  slope_file: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/slopes.yaml
+ecmean:
+  ecmean_config: config_ecmean.yml
+args:
+  year1: 1991
+  year2: 2000
+  penalty: 10
+  inc: 0.6
+  method: dual_annealing
+  deltaT: 0.6
+frozen_parameters:
+- RCL_OVERLAPLIQICE
+reference_parameters:
+  RPRCON: 0.0014
+  ENTRORG: 0.00175
+  DETRPEN: 7.5e-05
+  ENTRDD: 0.0003
+  RMFDEPS: 0.3
+  RVICE: 0.13
+  RLCRITSNOW: 2.0e-05
+  RSNOWLIN2: 0.03
+  RCLDIFF: 3.0e-06
+  RCLDIFF_CONVI: 10.0
+  RDEPLIQREFRATE: 0.5
+  RDEPLIQREFDEPTH: 500.0
+  RCL_OVERLAPLIQICE: 0.65
+  RCL_INHOMOGAUT: 1.5
+  RCL_INHOMOGACC: 3
+  RMINICE: 60
+parameter_group:
+  namcumf:
+  - RPRCON
+  - ENTRORG
+  - DETRPEN
+  - ENTRDD
+  - RMFDEPS
+  namcldp:
+  - RVICE
+  - RLCRITSNOW
+  - RSNOWLIN2
+  - RCLDIFF
+  - RCLDIFF_CONVI
+  - RDEPLIQREFRATE
+  - RDEPLIQREFDEPTH
+  - RCL_OVERLAPLIQICE
+  - RCL_INHOMOGAUT
+  - RCL_INHOMOGACC
+  naerad:
+  - RMINICE
+weights_season:
+  ALL: 1.0
+  DJF: 0.0
+  JJA: 0.0
+weights_region:
+  Global: 1.0
+  North Midlat: 0.0
+  South Midlat: 0.0
+  Tropical: 0.0
+  NH: 0.0
+  SH: 0.0
+  Equatorial: 0.0
+  North Pole: 0.0
+  South Pole: 0.0
+weights:
+  net_toa: 3.0
+  rsnt: 2.5
+  rlnt: 2.5
+  swcf: 0.0
+  lwcf: 0.0
+  rsns: 0.0
+  rlns: 0.0
+  hfss: 0.0
+  hfls: 0.0
+  net_sfc: 0.0
+  toamsfc: 0.0
+
+2026-02-16 10:10:31 | ectuner |     INFO -> Frozen parameters detected: RCL_OVERLAPLIQICE=0.1
+2026-02-16 10:10:31 | ectuner |     INFO -> Optimizing parameters using dual_annealing ...
+2026-02-16 10:12:07 | ectuner |     INFO -> 
+2026-02-16 10:12:07 | ectuner |     INFO -> Target offset after and before optimization:
+2026-02-16 10:12:07 | ectuner |     INFO -> -------------------------------------------
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mnet_toa Global -0.03623330973221406 -1.2563761063854217[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mnet_toa Tropical -0.7550918269503111 -2.4942470092773448[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mnet_toa North Midlat 0.1650421808324789 -0.37791500854492455[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mnet_toa South Midlat 2.066121618675636 1.2179952392578102[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mnet_toa NH -0.8028732027536588 -1.477869857788086[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mnet_toa SH 1.1666476938662953 0.21218139648437528[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mnet_toa Equatorial -0.5475183726352981 -2.5279360961914037[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mnet_toa North Pole -1.1929990690170817 -1.4429420166015632[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mnet_toa South Pole 4.69285819839078 4.1824717407226615[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mrsnt Global -0.011566802950995103 -0.61106154003906[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mrsnt Tropical 1.8661435261896828 1.1465820312499773[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mrsnt North Midlat -6.995095360698248 -7.3609056396484505[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mrsnt South Midlat -0.4329073271558974 -1.0233826904296848[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mrsnt NH -6.010437047555613 -6.397185913085934[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mrsnt SH -0.8114588618542815 -1.5165417480468761[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mrsnt Equatorial 2.953998864709655 2.2540256347656396[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mrsnt North Pole -10.403671534543724 -10.518010559082029[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mrsnt South Pole 2.6928860305861635 2.5775845947265594[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mrlnt Global -0.025156594888744 -0.6458086324218755[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mrlnt Tropical -2.620295425444625 -3.6398977050781127[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mrlnt North Midlat 7.159131609850995 6.981971557617186[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mrlnt South Midlat 2.4990032938229287 2.241347412109377[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mrlnt NH 5.207545713890586 4.919291259765629[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mrlnt SH 1.9790517360453455 1.729662109374999[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mrlnt Equatorial -3.5015123306644336 -4.781954101562519[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mrlnt North Pole 9.21079861438702 9.07521350097656[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mrlnt South Pole 1.9989998310925692 1.6039405517578018[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mswcf Global -0.32418253935264885 -0.881869293212894[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mswcf Tropical 2.1700806446540866 1.4774556884765602[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mswcf North Midlat -3.3282495301769712 -3.588952941894533[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mswcf South Midlat -2.420842848451876 -3.0027343139648437[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mswcf NH -2.0595392471002625 -2.3557331542968782[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mswcf SH -2.078283809980989 -2.7709330749511736[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mswcf Equatorial 2.9327134827788375 2.2563853149414044[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mswcf North Pole -8.26836887641749 -8.29527212524414[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mswcf South Pole -3.4646231915687076 -3.5979730072021496[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mlwcf Global -3.1836239295557776 -3.7711329193115226[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mlwcf Tropical -6.447308979318818 -7.269276992797852[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mlwcf North Midlat 0.25292723066050543 -0.1351933746337899[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mlwcf South Midlat -0.06731708849053553 -0.3802427520751941[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mlwcf NH -1.2919379937513331 -1.7226201477050793[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mlwcf SH -1.484432627632704 -1.7818532562255847[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mlwcf Equatorial -6.681859624123935 -7.688419509887694[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mlwcf North Pole 5.338077762873845 4.974081420898438[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mlwcf South Pole 5.756407900629122 5.359142623901366[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mrsns Global 2.661508605177723 2.0426177978515625[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mrlns Global -1.7245321460309573 -1.63677978515625[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mhfss Global 2.9898362045938516 2.856485366821289[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [92mhfls Global -2.321526993030343 -2.912628173828125[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mnet_sfc Global 1.1542942283501731 -0.10368043780326841[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> [91mtoamsfc Global -0.32752494062636517 -0.289694219827652[0m
+2026-02-16 10:12:07 | ectuner |     INFO -> Total score before optimization: 13.871368564261847
+2026-02-16 10:12:07 | ectuner |     INFO -> Total score after optimization: 7.353180532321041
+2026-02-16 10:12:07 | ectuner |     INFO -> Structured tuning YAML written to tuned_ftv9_new3.yaml
+Delta T and slope file are given, temperature correction applied: 0.6 K.
+
+Parameters:
+-----------
+RPRCON : 0.0013826944364094048
+ENTRORG : 0.0015817629866175518
+DETRPEN : 7.406463204110114e-05
+ENTRDD : 0.000305958276252914
+RMFDEPS : 0.29621659613334567
+RVICE : 0.12498953982348425
+RLCRITSNOW : 2.0213130595934675e-05
+RSNOWLIN2 : 0.03121794818469198
+RCLDIFF : 3.0363473273655962e-06
+RCLDIFF_CONVI : 10.180547805812783
+RDEPLIQREFRATE : 0.5009845585456851
+RDEPLIQREFDEPTH : 499.5414359458133
+RCL_OVERLAPLIQICE : 0.1
+RCL_INHOMOGAUT : 1.523025106200458
+RCL_INHOMOGACC : 3.1911581195897445
+RMINICE : 58.49185375673214
+
+|     Parameter     |     New value |   Old value |       Change |   Relative change |   Min change |   Max change |   Rel. dist. from ref. |
+|-------------------+---------------+-------------+--------------+-------------------+--------------+--------------+------------------------|
+|      RPRCON       |   0.00138269  |     0.0014  | -1.73056e-05 |      -0.0123611   |     -0.00084 |      0.00084 |           -0.0123611   |
+|      ENTRORG      |   0.00158176  |     0.00175 | -0.000168237 |      -0.0961354   |     -0.00105 |      0.00105 |           -0.0961354   |
+|      DETRPEN      |   7.40646e-05 |     7.5e-05 | -9.35368e-07 |      -0.0124716   |     -4.5e-05 |      4.5e-05 |           -0.0124716   |
+|      ENTRDD       |   0.000305958 |     0.0003  |  5.95828e-06 |       0.0198609   |     -0.00018 |      0.00018 |            0.0198609   |
+|      RMFDEPS      |   0.296217    |     0.3     | -0.0037834   |      -0.0126113   |     -0.18    |      0.18    |           -0.0126113   |
+|       RVICE       |   0.12499     |     0.13    | -0.00501046  |      -0.038542    |     -0.078   |      0.078   |           -0.038542    |
+|    RLCRITSNOW     |   2.02131e-05 |     2e-05   |  2.13131e-07 |       0.0106565   |     -1.2e-05 |      1.2e-05 |            0.0106565   |
+|     RSNOWLIN2     |   0.0312179   |     0.03    |  0.00121795  |       0.0405983   |     -0.018   |      0.018   |            0.0405983   |
+|      RCLDIFF      |   3.03635e-06 |     3e-06   |  3.63473e-08 |       0.0121158   |     -1.8e-06 |      1.8e-06 |            0.0121158   |
+|   RCLDIFF_CONVI   |  10.1805      |    10       |  0.180548    |       0.0180548   |     -6       |      6       |            0.0180548   |
+|  RDEPLIQREFRATE   |   0.500985    |     0.5     |  0.000984559 |       0.00196912  |     -0.3     |      0.3     |            0.00196912  |
+|  RDEPLIQREFDEPTH  | 499.541       |   500       | -0.458564    |      -0.000917128 |   -300       |    300       |           -0.000917128 |
+| RCL_OVERLAPLIQICE |   0.1         |     0.1     |  0           |       0           |      0.1     |      0.1     |           -0.846154    |
+|  RCL_INHOMOGAUT   |   1.52303     |     1.5     |  0.0230251   |       0.0153501   |     -0.9     |      0.9     |            0.0153501   |
+|  RCL_INHOMOGACC   |   3.19116     |     3       |  0.191158    |       0.0637194   |     -1.8     |      1.8     |            0.0637194   |
+|      RMINICE      |  58.4919      |    60       | -1.50815     |      -0.0251358   |    -36       |     36       |           -0.0251358   |
