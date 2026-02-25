@@ -9,7 +9,7 @@ This directory contains pre-computed sensitivity matrices used by ECtuner to est
 
 ## Technical Details by Version
 
-### 1. TL255 - Version 2 (Latest)
+### 1. TL255 1991-2000 - Version 2 (Latest) 
 * **EC-Earth Version:** EC-Earth4 v4.1.5
 * **Reference Years:** 2000-2024
 * **Format:** Nested Namelist
@@ -18,7 +18,7 @@ This directory contains pre-computed sensitivity matrices used by ECtuner to est
     * **namcldp:** `RVICE`, `RLCRITSNOW`, `RSNOWLIN2`, `RCLDIFF`, `RCLDIFF_CONVI`, `RDEPLIQREFRATE`, `RDEPLIQREFDEPTH`, `RCL_OVERLAPLIQICE`, `RCL_INHOMOGAUT`, `RCL_INHOMOGACC`
     * **naerad:** `RMINICE`
 
-### 2. TL255 - Version 1 (Legacy)
+### 2. TL255 1991-2001 / 1990-1997 - Version 1 (Legacy)
 * **EC-Earth Version:** Previous EC-Earth4
 * **Reference Years:** 1991-2021
 * **Format:** Flat
