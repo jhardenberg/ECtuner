@@ -401,15 +401,15 @@ if __name__ == '__main__':
     if not method:
         method = config['args']['method']
 
-    logger.debug("year1: %s", year1)
-    logger.debug("year2: %s", year2)
-    logger.debug("experiment: %s", exp)
-    logger.debug("loglevel: %s", loglevel)
-    # logger.debug("maxiter: %s", maxiter)
-    logger.debug("penalty: %s", penalty)
-    logger.debug("inc: %s", inc)
-    logger.debug("output: %s", out)
-    logger.debug("method: %s", method)
+    # logger.debug("year1: %s", year1)
+    # logger.debug("year2: %s", year2)
+    # logger.debug("experiment: %s", exp)
+    # logger.debug("loglevel: %s", loglevel)
+    # # logger.debug("maxiter: %s", maxiter)
+    # logger.debug("penalty: %s", penalty)
+    # logger.debug("inc: %s", inc)
+    # logger.debug("output: %s", out)
+    # logger.debug("method: %s", method)
 
     reference_pars = config['reference_parameters']
     weights_flux=config['weights']
@@ -425,7 +425,33 @@ if __name__ == '__main__':
     ref_file = config['files']['reference']
     reference = load_reference(ref_file)
     original_reference = copy.deepcopy(reference)
+
+    # Save in results directory
+    if not out:
+        config_files = config.get('files', {})
+        out_dir = config_files.get('output_dir')
+        out_temp = config_files.get('output_template')
+        if out_dir and out_temp:
+            filename = out_temp.format(exp=exp, year1=year1, year2=year2)
+            out = os.path.join(out_dir, filename)
+            os.makedirs(out_dir, exist_ok=True)
     
+    logger.debug("year1: %s", year1)
+    logger.debug("year2: %s", year2)
+    logger.debug("experiment: %s", exp)
+    logger.debug("loglevel: %s", loglevel)
+    # logger.debug("maxiter: %s", maxiter)
+    logger.debug("penalty: %s", penalty)
+    logger.debug("inc: %s", inc)
+    logger.debug("output: %s", out)
+    logger.debug("method: %s", method)
+
+    if out:
+        logger.info(f"[CONFIG] Output will be saved to: {out}")
+    else:
+        logger.warning("[CONFIG] No output path specified. Results will only be printed to screen.")
+
+
     # model_imbalance from command line or config if needed
     model_imbalance = args.model_imbalance if args.model_imbalance is not None else config.get('args', {}).get('model_imbalance')
     if model_imbalance is not None:
