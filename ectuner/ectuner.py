@@ -412,9 +412,17 @@ if __name__ == '__main__':
     # logger.debug("method: %s", method)
 
     reference_pars = config['reference_parameters']
+    for par in reference_pars:
+        reference_pars[par] = float(reference_pars[par])
     weights_flux=config['weights']
+    for we in weights_flux:
+        weights_flux[we] = float(weights_flux[we])
     weights_region=config['weights_region']
+    for we in weights_region:
+        weights_region[we] = float(weights_region[we])
     weights_season=config['weights_season']
+    for we in weights_season:
+        weights_season[we] = float(weights_season[we])
     targets=list(weights_flux.keys())
 
     # Load sensitivities
@@ -593,6 +601,7 @@ if __name__ == '__main__':
         for pg in config['parameter_group']:
             tuning_block[pg] = CommentedMap()
             for p in config['parameter_group'][pg]:
+                if p not in values: continue # skip parameter if not in tuning_file of exp to be tuned
                 val_to_write = values[p] if p in frozen_params else values[p] + optimal_changes[p]
                 tuning_block[pg][p] = float(f"{val_to_write:.4e}")
 
