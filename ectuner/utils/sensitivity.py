@@ -86,53 +86,14 @@ def flatten_yaml_dict(nested_dict: Dict[str, Any], parent_key: str = '', sep: st
         new_key = f"{parent_key}{sep}{key}" if parent_key else key
         
         if isinstance(value, dict):
-            # Recursively flatten nested dictionaries
             flattened.update(flatten_yaml_dict(value, new_key, sep))
         else:
-            # This is a leaf node (parameter value)
             try:
                 flattened[key] = float(value)  # Keep only the last key name
             except (ValueError, TypeError):
                 print(f"Warning: Could not convert {key}={value} to float")
     
     return flattened
-
-# def extract_tag_from_filename(filename: str) -> str:
-#     """
-#     Extract tag from filename pattern 'tuning_{tag}.yml'
-#     """
-#     # Try to match pattern tuning_{tag}.yml or tuning_{tag}.yaml
-#     match = re.search(r'tuning_([^.]+)\.ya?ml?$', filename)
-#     if match:
-#         return match.group(1)
-    
-#     # Fallback: use the filename without extension if pattern doesn't match
-#     return Path(filename).stem
-
-# def read_yaml_files(yaml_files: List[str]) -> Dict[str, Dict[str, float]]:
-#     """
-#     Read multiple YAML files and return flattened dictionaries.
-#     Uses tags extracted from filenames as keys.
-#     """
-#     all_data = {}
-    
-#     for yaml_file in yaml_files:
-#         try:
-#             with open(yaml_file, 'r') as f:
-#                 data = yaml.safe_load(f)
-#                 if isinstance(data, list):
-#                     # new tuning file in se format
-#                     flattened = flatten_yaml_dict(data[0]['base.context']['model_config']['oifs'])
-#                 else:
-#                     flattened = flatten_yaml_dict(data)
-                    
-#                 tag = extract_tag_from_filename(yaml_file)
-#                 all_data[tag] = flattened
-#                 print(f"Loaded {len(flattened)} parameters from {yaml_file} (tag: {tag})")
-#         except Exception as e:
-#             print(f"Error reading {yaml_file}: {e}")
-    
-#     return all_data
 
 def read_yaml_files(yaml_files: List[str], params_template: str) -> Dict[str, Dict[str, float]]:
     """
@@ -143,7 +104,6 @@ def read_yaml_files(yaml_files: List[str], params_template: str) -> Dict[str, Di
     
     for yaml_file in yaml_files:
         filename = os.path.basename(yaml_file)
-        # Usiamo la funzione flessibile che hai già nel codice
         tag = extract_tag_by_position(params_template, filename)
         
         if tag is None:
@@ -154,18 +114,16 @@ def read_yaml_files(yaml_files: List[str], params_template: str) -> Dict[str, Di
             with open(yaml_file, 'r') as f:
                 data = yaml.safe_load(f)
                 
-                # Logica Universale per trovare i parametri:
                 if isinstance(data, list) and len(data) > 0 and 'base.context' in data[0]:
-                    # Caso SE (Nested)
+                    # SE case (list with 'base.context' key)
                     raw_params = data[0]['base.context']['model_config']['oifs']
                 elif isinstance(data, dict) and 'tuning' in data:
-                    # Caso Formato 1 (Con chiave 'tuning')
+                    # Format 1 (Nested with 'tuning' key)
                     raw_params = data['tuning']
                 else:
-                    # Caso Formato 2 (Piatto/Flat)
+                    # Format 2 (Already flat or unknown structure)
                     raw_params = data
                 
-                # Appiattiamo qualunque cosa abbiamo trovato
                 flattened = flatten_yaml_dict(raw_params)
                 all_data[tag] = flattened
                 print(f"Loaded {len(flattened)} parameters from {filename} (tag: {tag})")
@@ -182,7 +140,6 @@ def compare_with_reference(all_data: Dict[str, Dict[str, float]],
     Returns info about min/max values and changes from reference.
     Uses tags instead of filenames.
     """
-    # Get all unique parameter names
     all_params = set()
     for file_data in all_data.values():
         all_params.update(file_data.keys())
@@ -192,7 +149,6 @@ def compare_with_reference(all_data: Dict[str, Dict[str, float]],
     for param in all_params:
         param_values = {}
         
-        # Collect values for this parameter from all files (using tags)
         for tag, file_data in all_data.items():
             if param in file_data:
                 param_values[tag] = file_data[param]
@@ -200,13 +156,11 @@ def compare_with_reference(all_data: Dict[str, Dict[str, float]],
         if not param_values:
             continue
             
-        # Find min and max values (using tags)
         min_tag = min(param_values.keys(), key=lambda x: param_values[x])
         max_tag = max(param_values.keys(), key=lambda x: param_values[x])
         min_value = param_values[min_tag]
         max_value = param_values[max_tag]
         
-        # Check against reference if provided
         ref_value = ref_dict.get(param)
         changed_from_ref = {}
         
@@ -263,34 +217,24 @@ def parse_namelist_to_yaml(log_content: str) -> Dict[str, Any]:
     """
     Parse FORTRAN namelist format and convert to nested dictionary for YAML output.
     """
-    # Initialize the result dictionary
     result = {"tuning": {}}
     
     # Pattern to match namelist blocks: &NAME ... /
     namelist_pattern = r'&([A-Z_]+)\s*(.*?)\s*/'
-    
-    # Find all namelist blocks
     namelists = re.findall(namelist_pattern, log_content, re.DOTALL | re.IGNORECASE)
     
     for namelist_name, content in namelists:
-        # Clean up the namelist name (convert to lowercase)
         clean_name = namelist_name.lower()
-        
-        # Initialize dictionary for this namelist
         result["tuning"][clean_name] = {}
-        
         # Pattern to match parameter assignments: PARAM = value
         param_pattern = r'([A-Z0-9_]+)\s*=\s*([^\n,]+)'
-        
         # Find all parameters in this namelist
         params = re.findall(param_pattern, content, re.IGNORECASE)
         
         for param_name, param_value in params:
-            # Clean up parameter name and value
             param_name = param_name.strip()
             param_value = param_value.strip()
-            
-            # Convert scientific notation and numbers
+        
             converted_value = float(param_value)
             
             result["tuning"][clean_name][param_name] = converted_value
@@ -302,19 +246,15 @@ def extract_and_convert_namelist(log_file_path: str, output_yaml_path: str = Non
     Extract namelist from log file and convert to YAML format.
     """
     try:
-        # Read the log file
         with open(log_file_path, 'r') as f:
             log_content = f.read()
-        
-        # Parse the namelist
+    
         yaml_data = parse_namelist_to_yaml(log_content)
         
-        # Generate output filename if not provided
         if output_yaml_path is None:
             base_name = log_file_path.replace('.log', '').replace('.txt', '').replace('.nam', '')
             output_yaml_path = f"{base_name}.yml"
         
-        # Write to YAML file
         with open(output_yaml_path, 'w') as f:
             yaml.dump(yaml_data, f, default_flow_style=False, indent=2)
         
@@ -385,10 +325,8 @@ def find_dirs_from_template(template, base_path):
     Returns:
         list: List of matching exp names
     """
-    # Create full glob pattern
     full_pattern = os.path.join(base_path, template)
     
-    # Find matching directories
     matching_paths = glob.glob(full_pattern)
     matching_dirs = [os.path.basename(p) for p in matching_paths if os.path.isdir(p)]
 
@@ -406,10 +344,8 @@ def find_files_from_template(template, base_path):
     Returns:
         list: List of matching exp names
     """
-    # Create full glob pattern
     full_pattern = os.path.join(base_path, template)
     
-    # Find matching directories
     matching_paths = glob.glob(full_pattern)
     matching_files = [os.path.basename(p) for p in matching_paths if os.path.isfile(p)]
 
@@ -430,7 +366,6 @@ def extract_tag_by_position(template, formatted_string, tag='exp'):
     """
     tag_placeholder = f"{{{tag}}}"
     
-    # Find where {exp} starts in the template
     start_index = template.find(tag_placeholder)
     if start_index == -1:
         return None  # Tag not found in template
@@ -504,32 +439,11 @@ if __name__ == '__main__':
     params_template = config['files']['params'] # Es: tuning_{exp}.yml
     yaml_template_glob = params_template.format(exp = exp_temp)
 
-    ### Look for tuning YAML files
-    # tuning_files = find_files_from_template(yaml_template, yaml_dir)
-    # print(yaml_template, yaml_dir, config['files']['params'], len(tuning_files))
-    # if len(tuning_files) == 0:
-    #     errmess = f'No tuning files found matching this pattern: {os.path.join(yaml_dir, yaml_template)}. Move files to {yaml_dir} directory.'
-    #     raise ValueError(errmess)
-
-    # allmems = [extract_tag_by_position(config['files']['params'], filnam) for filnam in tuning_files]
-
-    # print('All exps found: ', allmems)
-
-    # Read the set of tuning parameters for each experiment
-    # print("Reading sets of tuning parameters...")
-    # tunsets = read_yaml_files([os.path.join(yaml_dir, fil) for fil in tuning_files])
-    
-    # print(reference_dict)
-
-
-
-    # 1. Troviamo i file fisici
     tuning_files_paths = [os.path.join(yaml_dir, f) for f in find_files_from_template(yaml_template_glob, yaml_dir)]
     
     if not tuning_files_paths:
         raise ValueError(f"Nessun file trovato in {yaml_dir} con pattern {yaml_template_glob}")
 
-    # 2. Carichiamo i dati (Logica Universale)
     print("Reading sets of tuning parameters...")
     tunsets = read_yaml_files(tuning_files_paths, params_template)
     allmems = list(tunsets.keys())
@@ -553,7 +467,6 @@ if __name__ == '__main__':
     else:
         print("No YAML files were successfully loaded.")
 
-
     ### Load ecmean indices. Check if ecmean files are there. If not, run ecmean
     print("Reading sets of ecmean indices...")
     res_all = dict()
@@ -572,7 +485,6 @@ if __name__ == '__main__':
 
         with open(base_file, 'r') as file:
             res_all[mem] = yaml.safe_load(file)
-
     
     # Compute regressions and save sensitivities.
     targets = ['net_toa', 'rsnt', 'rlnt', 'swcf', 'lwcf', 'rsns', 'rlns', 'hfss', 'hfls', 'net_sfc', 'toamsfc'] # could be specified in the config?
