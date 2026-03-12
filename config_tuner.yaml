@@ -1,16 +1,16 @@
 files:
   # INPUT DATA
-  reference: /path/to/ectuner/ecmean/reference/gm_reference_EC23.yml  # Target observations (Obs)
-  sensitivity: /path/to/ectuner/sensitivities/sensitivity_TL255_415_{year1}-{year2}.yaml  # sensitivity file template
-  slope_file: /path/to/ectuner/utils/slopes.yaml # file with slopes for temperature correction
+  reference: ecmean/reference/gm_reference_EC23.yml  # Target observations (Obs)
+  sensitivity: sensitivities/sensitivity_TL255_415_{year1}-{year2}.yaml  # sensitivity file template
+  slope_file: utils/slopes.yaml # file with slopes for temperature correction
   # TEMPLATES
   base: global_mean_{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml  # ECmean output pattern for the experiment to be tuned
   params: params_{exp}.yml  # template for your tuining file
   output_template: tuned_{exp}_{year1}_{year2}.yml  # template for the output file name
   #DIRECTORIES
-  ecmean: "/path/to/folder/of/computed/global_mean" # Directory for 'base' ECmean files
-  exps: "/path/to/folder/of/tuning/parameter/to/tune" # Directory for 'params' tuning files
-  output_dir: "/path/to/folder/for/tuning/output" # Directory for tuning output
+  ecmean: /path/to/folder/of/computed/global_mean # Directory for 'base' ECmean files
+  exps: /path/to/folder/of/tuning/parameter/to/tune # Directory for 'params' tuning files
+  output_dir: /path/to/folder/for/tuning/output # Directory for tuning output
 
 args:
   # Default years for sensitivities

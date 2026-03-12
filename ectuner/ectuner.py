@@ -589,48 +589,49 @@ if __name__ == '__main__':
     logger.info("Total score after optimization: %s", 
             objective_function(result.x, params, values, reference_pars, penalty, 
                                sensitivity, difference, weights_flux, weights_season, weights_region, frozen_params))
-
+    
     if out:
         from ruamel.yaml import YAML
-        from ruamel.yaml.comments import CommentedMap, CommentedSeq
-
         yaml_ru = YAML(typ="rt")  
-        yaml_ru.indent(mapping=2, sequence=2, offset=0)  
+        yaml_ru.indent(mapping=2, sequence=2, offset=0)
+        yaml_ru.preserve_quotes = True
 
-        tuning_block = CommentedMap()
+        tuning_block = {}
         for pg in config['parameter_group']:
-            tuning_block[pg] = CommentedMap()
+            current_group = {}
             for p in config['parameter_group'][pg]:
                 if p not in values: continue # skip parameter if not in tuning_file of exp to be tuned
+                
                 val_to_write = values[p] if p in frozen_params else values[p] + optimal_changes[p]
-                tuning_block[pg][p] = float(f"{val_to_write:.4e}")
+                current_group[p] = float(f"{val_to_write:.4e}")
+            
+            # Only if the group has at least one parameter, we add it to the tuning block
+            if current_group:
+                tuning_block[pg] = current_group
 
-
-        oifs_block = CommentedMap()
-        oifs_block["tuning"] = tuning_block
-        model_config_block = CommentedMap()
-        model_config_block["oifs"] = oifs_block
-        base_context_block = CommentedMap()
-        base_context_block["model_config"] = model_config_block
-
-        output_list = CommentedSeq()
-        output_list.append(CommentedMap({"base.context": base_context_block}))
+        full_structure = [
+            {
+                "base.context": {
+                    "model_config": {
+                        "oifs": {
+                            "tuning": tuning_block
+                        }
+                    }
+                }
+            }
+        ]
 
         with open(out, "w") as f:
-            yaml_ru.dump(output_list, f)
-            f.write("\n")
-            f.write("# --- ECtuner meta-parameters ---\n")
+            yaml_ru.dump(full_structure, f)
+        
+            f.write("\n# --- ECtuner meta-parameters ---\n")
             f.write(f"# penalty: {penalty}\n")
             f.write(f"# inc (fractional max change): {inc}\n")
-            f.write("# weights (flux):\n")
-            for k, v in weights_flux.items():
-                f.write(f"#   {k}: {v}\n")
-            f.write("# weights (region):\n")
-            for k, v in weights_region.items():
-                f.write(f"#   {k}: {v}\n")
-            f.write("# weights (season):\n")
-            for k, v in weights_season.items():
-                f.write(f"#   {k}: {v}\n")
+            
+            for section, data in [("flux", weights_flux), ("region", weights_region), ("season", weights_season)]:
+                f.write(f"# weights ({section}):\n")
+                for k, v in data.items():
+                    f.write(f"#   {k}: {v}\n")
 
         logger.info("Structured tuning YAML written to %s", out)
 
