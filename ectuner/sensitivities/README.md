@@ -3,7 +3,8 @@
 This directory contains pre-computed sensitivity matrices used by ECtuner to estimate model response to parameter perturbations.
 
 ## File Naming Convention
-`sensitivity_{Resolution}_{Version}_{Years}.yaml`
+* **1D (YAML)**`sensitivity_{Resolution}_{Version}_{Years}.yaml`
+* **2D (NetCDF)**`2D/sensitivity_{Resolution}_{Version}_{Years}_2D.yaml`
 
 ---
 
@@ -33,6 +34,17 @@ This directory contains pre-computed sensitivity matrices used by ECtuner to est
     * **namcumf:** `RPRCON`, `ENTRORG`, `DETRPEN`, `ENTRDD`, `RMFDEPS`
     * **namcldp:** `RVICE`, `RLCRITSNOW`, `RSNOWLIN2`, `RCLDIFF`, `RCLDIFF_CONVI`, `RDEPLIQREFRATE`, `RDEPLIQREFDEPTH`, `RCL_OVERLAPLIQICE`, `RCL_INHOMOGAUT`, `RCL_INHOMOGACC`
 
+### 4. 2D Spatial Sensitivities TL255 1991-2000 - Version 2 
+Located in the `2D/ subdirectory`. These files allow for spatial tuning by providing pixel-by-pixel response maps.
+* **EC-Earth Version:** Ec-Earth4 v4.1.5
+* **Reference Years:** 2000-2024
+* **Format:** NetCDF
+* **Dimensions:** `(variable, parameter, lat, lon)`
+* **Grid:** `r180x90`
+* **Parameters Considered (16 total):**
+    * **namcumf:** `RPRCON`, `ENTRORG`, `DETRPEN`, `ENTRDD`, `RMFDEPS`
+    * **namcldp:** `RVICE`, `RLCRITSNOW`, `RSNOWLIN2`, `RCLDIFF`, `RCLDIFF_CONVI`, `RDEPLIQREFRATE`, `RDEPLIQREFDEPTH`, `RCL_OVERLAPLIQICE`, `RCL_INHOMOGAUT`, `RCL_INHOMOGACC`
+    * **naerad:** `RMINICE`
 ---
 
 ## Usage

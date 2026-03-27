@@ -280,7 +280,8 @@ def print_table(logger, data):
         # r[0]:var, r[1]:season, r[2]:region, r[3]:weight, r[4]:bias_init, r[5]:bias_final
         logger.info(f"{r[0]:<12} | {r[1]:<6} | {r[2]:<12} | {r[3]:<6} | {r[4]:>10.3f} -> {color}{r[5]:>10.3f}{reset} | {status}")
 
-def log_optimization_results(logger, params, optimal_changes_list, sensitivity, difference, weights_flux):
+def log_optimization_results(logger, params, optimal_changes_list, sensitivity, difference, 
+                             weights_flux, weights_season, weights_region):
     targets = []
     diagnostics = []
 
@@ -295,12 +296,15 @@ def log_optimization_results(logger, params, optimal_changes_list, sensitivity, 
                 flux_change = sum(sensitivity[p][fluxname][season][region][0] * optimal_changes_list[i] 
                                   for i, p in enumerate(params))
                 bias_final = bias_init + flux_change
-                weight = weights_flux.get(fluxname, 0)
                 
-                # Aggiungiamo la stagione (season) nei dati
-                row = [fluxname, season, region, weight, bias_init, bias_final]
+                w_flux = weights_flux.get(fluxname, 0)
+                w_season = weights_season.get(season, 0)
+                w_region = weights_region.get(region, 0)
+                combined_weight = w_flux * w_season * w_region
                 
-                if weight > 0:
+                row = [fluxname, season, region, combined_weight, bias_init, bias_final]
+                
+                if combined_weight > 0:
                     targets.append(row)
                 else:
                     diagnostics.append(row)
@@ -579,7 +583,7 @@ if __name__ == '__main__':
     logger.info("")
 
     log_optimization_results(logger, params, [optimal_changes[p] for p in params], 
-                             sensitivity, difference, weights_flux)
+                         sensitivity, difference, weights_flux, weights_season, weights_region)
 
     initial_guess_free = np.zeros(len(opt_params))
     logger.info("Total score before optimization: %s", 

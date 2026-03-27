@@ -1,5 +1,6 @@
 # --- Cartelle personali e cache ---
 mari/
 __pycache__/
+ectuner/__pycache__/
 
 ectuner/ecmean/**/figs/

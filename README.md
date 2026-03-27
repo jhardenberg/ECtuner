@@ -54,6 +54,12 @@ Once you have the sensitivity file, the global mean and the `.yml` file with the
 # Example tuning a target experiment for a 10-year period
 python ectuner/ectuner.py <exp_id> 1991 2000 -c config_tuner_<exp_id>.yaml -o tuned_parameters<exp_id>.yml -m dual_annealing > tuning<exp_id>.log 2>&1
 ```
+3. Variable Conventions and Sign Logic
+
+ECtuner operates using the ECMWF/IFS internal convention for radiative fluxes. This differs from the standard CMOR convention used in CMIP6 datasets. When preparing your reference data or interpreting results, keep the following mapping in mind:
+- rlnt = -rlut
+- rsnt = rsdt -rsut
+
 
 #### Command Line Options
 You can override configuration defaults using the following flags:
