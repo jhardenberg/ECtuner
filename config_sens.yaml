@@ -1,0 +1,37 @@
+files:
+  # OUTPUT: Where the result will be saved
+  sensitivity: /path/to/output/sensitivity_TL255_415_{year1}-{year2}.yaml
+  # INPUT: Templates for finding your ECmean and Tuning files
+  base: global_mean_k0{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml
+  params: tuning_{exp}.yml
+  # PATHS: Update these to your local machine
+  ecmean: ecmean/gm_sres_v2/
+  exps: perturb_exps/exps_sres_v2/
+  exp_temp: "??" # tag template (es. 00, 01, 02), change to "s???" if your tags are like s001
+
+ecmean:
+  ecmean_config: ecmean/config_ecmean.yml
+
+args:
+  # Default years for sensitivities
+  year1: 1991
+  year2: 2000
+  
+
+reference_parameters: # Default OIFS parameter values (used for penalty)
+  RPRCON: 0.0014
+  ENTRORG: 0.00175
+  DETRPEN: 7.5e-05
+  ENTRDD: 0.0003
+  RMFDEPS: 0.3
+  RVICE: 0.13
+  RLCRITSNOW: 2.0e-05 
+  RSNOWLIN2: 0.03
+  RCLDIFF: 0.6e-05
+  RCLDIFF_CONVI: 10.0
+  RDEPLIQREFRATE: 0.5 
+  RDEPLIQREFDEPTH: 500.0 
+  RCL_OVERLAPLIQICE: 0.65
+  RCL_INHOMOGAUT: 1.5
+  RCL_INHOMOGACC: 3
+  RMINICE: 60
