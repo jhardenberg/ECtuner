@@ -12,7 +12,7 @@ dirs:
 # global mean configuration options
 global_mean:
   variables: 
-    atm: [tas, psl, pr, evspsbl, pme, clt, cll, clm, clh,
+    atm: [tas_land, tas, psl, pr, evspsbl, pme, clt, cll, clm, clh,
           pr_oce, pme_oce, pr_land, pme_land,
           net_toa, rsnt, rlnt, rsntcs, rlntcs, swcf, lwcf,
           rsns, rlns, hfss, hfls, net_sfc_nosn, net_sfc,
@@ -21,9 +21,9 @@ global_mean:
     ice: [siconc]
     tab: [rsnt, rlnt, net_toa, rsns, rlns, hfss, hfls, swcf, lwcf, net_sfc, toamsfc, 
             tas, clt, cll, clm, clh, pr, pme, psl]
-  regions: ['Global', 'North Midlat', 'Tropical', 'South Midlat'] # for available regions, please check documentation
+  regions: ['Global', 'Tropical', 'North Midlat', 'South Midlat', 'NH', 'SH', 'Equatorial', 'North Pole', 'South Pole'] # for available regions, please check documentation
   seasons: ['ALL', 'DJF', 'JJA'] # also `MAM` and `SON` are available
-  reference: EC23
+  reference: EC26-PDAY
 
 # performance_indices configuration options
 performance_indices:
