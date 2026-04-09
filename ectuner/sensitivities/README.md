@@ -18,6 +18,7 @@ This directory contains pre-computed sensitivity matrices used by ECtuner to est
     * **namcumf:** `RPRCON`, `ENTRORG`, `DETRPEN`, `ENTRDD`, `RMFDEPS`
     * **namcldp:** `RVICE`, `RLCRITSNOW`, `RSNOWLIN2`, `RCLDIFF`, `RCLDIFF_CONVI`, `RDEPLIQREFRATE`, `RDEPLIQREFDEPTH`, `RCL_OVERLAPLIQICE`, `RCL_INHOMOGAUT`, `RCL_INHOMOGACC`
     * **naerad:** `RMINICE`
+* Please note: the value of the `RCLDIFF` parameter in the reference is different from that in the OpenIFS namelist. (In ECtuner: `RCLDIFF: 0.3E-05`; In OpenIFS: `RCLDIFF: 0.6E-05`)
 
 ### 2. TL255 1991-2001 / 1990-1997 - Version 1 (Legacy)
 * **EC-Earth Version:** Previous EC-Earth4

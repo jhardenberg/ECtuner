@@ -16,7 +16,7 @@
             RLCRITSNOW: 2E-05  # critical autoconversion threshold
             RSNOWLIN2: 0.3E-01   # Constant governing of the temperature dependence of the autoconversion
                                 # of ice crystals to snow in large-scale precipitation
-            RCLDIFF: 7.8e-06     # diffusion-coefficient for evaporation by turbulent mixing
+            RCLDIFF: 3.9e-06     # diffusion-coefficient for evaporation by turbulent mixing
             RCLDIFF_CONVI: 10.0   # enhancement factor of rcldiff for convection
             RDEPLIQREFRATE: 0.5 # (50% deposition efficiency in top layer)
             RDEPLIQREFDEPTH: 500.0 #m (recovery depth scale)

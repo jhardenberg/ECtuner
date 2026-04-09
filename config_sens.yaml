@@ -27,7 +27,7 @@ reference_parameters: # Default OIFS parameter values (used for penalty)
   RVICE: 0.13
   RLCRITSNOW: 2.0e-05 
   RSNOWLIN2: 0.03
-  RCLDIFF: 0.6e-05
+  RCLDIFF: 0.3e-05 #correct value from OpenIFS namelist : 0.6e-05 
   RCLDIFF_CONVI: 10.0
   RDEPLIQREFRATE: 0.5 
   RDEPLIQREFDEPTH: 500.0 

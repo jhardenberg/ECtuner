@@ -42,10 +42,13 @@ The script `sensitivity.py` computes sensitivities of radiative fluxes and targe
 # Basic usage (uses defaults from config)
 python ectuner/utils/sensitivity.py -c config_sens.yaml
 
-# Explicitly setting the base experiment and years
-python ectuner/utils/sensitivity.py s000 1990 1997 -c config_sens.yaml
+# Explicitly setting the base experiment, the ref tag and years
+python ectuner/utils/sensitivity.py -c config_sens.yaml s000 "s???" 1990 1997 
 ```
 The tool identifies the ensemble members, extracts the parameter changes, and builds the response file.
+
+Please note: 
+to create the sensitivities, you need a folder containing all the tuning files with the parameters perturbed one at a time, along with the corresponding global mean. For reference, look in `ectuner/perturb_exps/` for the perturbed files and `ectuner/ecmean/gm_{}` for the global averages. 
 
 2. Tuning Stage
 
