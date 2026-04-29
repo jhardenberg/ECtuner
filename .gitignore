@@ -1,7 +1,16 @@
 # --- Cartelle personali e cache ---
-mari/
+mari/ectuner/ecmean/gm_lres/
+mari/ectuner/ecmean/gm_sres/
+mari/jobs/sens*.err
+mari/jobs/sens*.out
+mari/mio_script/slurm*.out
+mari/results/tuned/
+mari/results/logs/log*.log
+
 __pycache__/
 ectuner/__pycache__/
 
 ectuner/ecmean/**/figs/
 ectuner/sensitivities/NO_sensitivity_TL255_415_1991-2000_v2.yaml
+ectuner/sensitivities/2D/NO_sensitivity_TL255_415_1991-2000_v2_2D.yaml
+ectuner/prova.py
