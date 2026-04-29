@@ -6,7 +6,8 @@ mari/jobs/sens*.out
 mari/mio_script/slurm*.out
 mari/results/tuned/
 mari/results/tuned_2d/
-mari/results/logs/log*.log
+mari/results/logs/*.log
+mari/results/plots/
 mari/results/*.nc
 mari/results/tuned_2d_LR/before_l1_l2/lwcf/
 mari/results/tuned_2d_LR/before_l1_l2/swcf/
