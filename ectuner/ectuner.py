@@ -348,6 +348,7 @@ def parse_arguments(arguments):
     parser.add_argument('exp', type=str, help='experiment to tune')
     parser.add_argument('year1', type=int, help='start year', nargs='?', default=None)
     parser.add_argument('year2', type=int, help='end year', nargs='?', default=None)
+    parser.add_argument('-a', '--alpha', type=float, help='Hybrid weight (0: spatial, 1: global)')
     
     return parser.parse_args(arguments)
 
@@ -649,7 +650,3 @@ if __name__ == '__main__':
     print("")
     head=['Parameter','New value','Old value', 'Change', 'Relative change','Min change', 'Max change', 'Rel. dist. from ref.']
     print(tabulate(outtable, headers=head, stralign='center', tablefmt='orgtbl'))
-
-
-        
- 
