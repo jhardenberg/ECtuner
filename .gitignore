@@ -5,7 +5,17 @@ mari/jobs/sens*.err
 mari/jobs/sens*.out
 mari/mio_script/slurm*.out
 mari/results/tuned/
+mari/results/tuned_2d/
 mari/results/logs/log*.log
+mari/results/*.nc
+mari/results/tuned_2d_LR/before_l1_l2/lwcf/
+mari/results/tuned_2d_LR/before_l1_l2/swcf/
+mari/results/tuned_2d_LR/before_l1_l2/ntoa_rsnt_rlnt/
+mari/results/tuned_2d_LR/before_l1_l2/rlnt/
+mari/results/tuned_2d_LR/before_l1_l2/rsnt/
+mari/results/tuned_2d_LR/before_l1_l2/so_rsnt/
+mari/results/tuned_2d_LR/before_l1_l2/trop/
+mari/results/tuned_2d_LR/before_l1_l2/trop_rlnt/
 
 __pycache__/
 ectuner/__pycache__/

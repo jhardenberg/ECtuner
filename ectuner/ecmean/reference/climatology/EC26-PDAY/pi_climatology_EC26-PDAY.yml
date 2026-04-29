@@ -1,0 +1,182 @@
+tas:
+  dataset: BERKELEY-EARTH
+  description: Berkeley Earth Surface Temperature, version without missing points
+    used in AQUA
+  longname: 2m Temperature
+  remap: remapbil
+  mask: global
+  units: celsius
+  year1: 2000
+  year2: 2024
+pr:
+  dataset: MSWEP
+  description: v2.80; PAST+NRT
+  longname: Precipitation
+  version: '2.80'
+  remap: remapcon
+  mask: global
+  units: mm/month
+  year1: 2000
+  year2: 2024
+net_sfc:
+  dataset: NOCS
+  description: NOCS Surface Flux Dataset v2.0
+  longname: Net Surface Radiation Flux (downward)
+  version: '2.0'
+  remap: remapcon
+  mask: ocean
+  units: W m-2
+  year1: 2000
+  year2: 2014
+tauu:
+  dataset: ORAS5
+  description: ECMWF Ocean Reanalysis System 5
+  longname: Eastward Wind Stress
+  remap: remapbil
+  mask: ocean
+  units: N m-2
+  year1: 2000
+  year2: 2022
+tauv:
+  dataset: ORAS5
+  description: ECMWF Ocean Reanalysis System 5
+  longname: Northward Wind Stress
+  remap: remapbil
+  mask: ocean
+  units: N m-2
+  year1: 2000
+  year2: 2022
+psl:
+  dataset: ERA5
+  description: ECMWF ERA5 reanalysis
+  longname: Mean Sea Level Pressure
+  remap: remapbil
+  mask: global
+  units: Pa
+  year1: 2000
+  year2: 2024
+ua:
+  dataset: ERA5
+  description: ECMWF ERA5 reanalysis
+  longname: Zonal Wind
+  remap: remapbil
+  mask: global
+  units: m s-1
+  year1: 2000
+  year2: 2019
+va:
+  dataset: ERA5
+  description: ECMWF ERA5 reanalysis
+  longname: Meridional Wind
+  remap: remapbil
+  mask: global
+  units: m s-1
+  year1: 2000
+  year2: 2021
+ta:
+  dataset: ERA5
+  description: ECMWF ERA5 reanalysis
+  longname: Air Temperature
+  remap: remapbil
+  mask: global
+  units: K
+  year1: 2000
+  year2: 2021
+hus:
+  dataset: ERA5
+  description: ECMWF ERA5 reanalysis
+  longname: Specific Humidity
+  remap: remapbil
+  mask: global
+  units: kg kg-1
+  year1: 2000
+  year2: 2021
+tos:
+  dataset: ESA-CCI-L4
+  description: ESA SST CCI OSTIA L4 v3.0.1
+  longname: Sea Surface Temperature
+  version: 3.0.1
+  remap: remapbil
+  mask: ocean
+  units: K
+  year1: 2000
+  year2: 2023
+sos:
+  dataset: ORAS5
+  description: ECMWF Ocean Reanalysis System 5
+  longname: Sea Surface Salinity
+  remap: remapbil
+  mask: ocean
+  units: PSU
+  year1: 2000
+  year2: 2022
+siconc:
+  dataset: ESA-CCI-L4
+  description: ESA SST CCI OSTIA L4 v3.0.1
+  longname: Sea-ice Concentration
+  version: 3.0.1
+  remap: remapbil
+  mask: ocean
+  units: fraction
+  year1: 2000
+  year2: 2023
+net_toa:
+  dataset: CERES EBAF
+  description: Edition 4.2.1; Revised data Release Date March 14, 2025
+  longname: TOA Net
+  version: 4.2.1
+  remap: remapcon
+  mask: global
+  units: W/m2
+  year1: 2000
+  year2: 2024
+rsnt:
+  dataset: CERES EBAF
+  description: Edition 4.2.1; Revised data Release Date March 14, 2025
+  longname: TOA SW Net
+  version: 4.2.1
+  remap: remapcon
+  mask: global
+  units: W/m2
+  year1: 2000
+  year2: 2024
+rlnt:
+  dataset: CERES EBAF
+  description: Edition 4.2.1; Revised data Release Date March 14, 2025
+  longname: TOA LW Net
+  version: 4.2.1
+  remap: remapcon
+  mask: global
+  units: W/m2
+  year1: 2000
+  year2: 2024
+swcf:
+  dataset: CERES EBAF
+  description: Edition 4.2.1; Revised data Release Date March 14, 2025
+  longname: SW Cloud Forcing
+  version: 4.2.1
+  remap: remapcon
+  mask: global
+  units: W/m2
+  year1: 2000
+  year2: 2024
+lwcf:
+  dataset: CERES EBAF
+  description: Edition 4.2.1; Revised data Release Date March 14, 2025
+  longname: LW Cloud Forcing
+  version: 4.2.1
+  remap: remapcon
+  mask: global
+  units: W/m2
+  year1: 2000
+  year2: 2024
+clt:
+  dataset: CERES EBAF
+  description: Edition 4.2.1; Revised data Release Date March 14, 2025
+  longname: Total Cloud Cover
+  version: 4.2.1
+  remap: remapcon
+  mask: global
+  units: '%'
+  year1: 2000
+  year2: 2024
