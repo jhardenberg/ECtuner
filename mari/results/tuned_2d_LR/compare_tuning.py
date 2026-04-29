@@ -12,8 +12,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tabulate import tabulate
 import matplotlib
-# Obbligatorio per lavorare su cluster senza display
-matplotlib.use('Agg')
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Comparison between different tuning strategies.')
@@ -28,18 +26,15 @@ def extract_alpha(filename):
     """
     Gestisce i nomi file: a0 -> 0.0, a05 -> 0.5, a09 -> 0.9, a1 -> 1.0
     """
-    match = re.search(r'_a(\d{3})', filename) # Cerca esattamente 3 cifre dopo '_a'
-    if match:
-        return float(match.group(1)) / 100.0
-    
-    # Fallback per il vecchio formato (es: _a0, _a05, _a1)
-    match_old = re.search(r'_a(\d+)', filename)
-    if not match_old: return None
-    val_str = match_old.group(1)
-    if len(val_str) > 1 and val_str.startswith('0'):
+    match = re.search(r'_a(\d+)', filename)
+    if not match: return None
+    val_str = match.group(1)
+    if val_str == "0": return 0.0
+    if val_str == "1": return 1.0
+    # Gestione formati tipo a05 (0.5) o a095 (0.95)
+    if val_str.startswith('0'):
         return float(f"0.{val_str[1:]}")
-    val = float(val_str)
-    return val / 10.0 if val > 1 else val
+    return float(val_str) / 10.0 if len(val_str) == 1 else float(val_str) / 100.0
 
 def load_results(results_dir, config_path=None, include_list=None):
     all_data = []
@@ -92,6 +87,11 @@ def load_results(results_dir, config_path=None, include_list=None):
                 # --- CONVERSIONE FISICA GLOBALE ---
                 spat_tot = float(m_spat.group(1)) if m_spat else 0
                 glob_tot = float(m_glob.group(1)) if m_glob else 0
+
+                params['Raw_Spatial_Cost'] = spat_tot
+                params['Raw_Global_Cost'] = glob_tot
+                # somma pesata che l'ottimizzatore cerca di minimizzare (no penalità sui parametri)
+                params['Total_Objective_Score'] = spat_tot + glob_tot
                 
                 # Creiamo metriche fisiche globali (per il Grafico 2)
                 if metric == 'l2':
@@ -106,13 +106,12 @@ def load_results(results_dir, config_path=None, include_list=None):
                 # Creiamo metriche fisiche per singola variabile (per il Grafico 3)
                 for var in ['net_toa', 'rsnt', 'rlnt', 'swcf', 'lwcf']:
                     bias_m = re.search(fr'# {var}_global_bias_final: ([\d\.-]+)', raw_text)
-                    cost_m = re.search(fr'# {var}_(?:spatial_cost_final|rmse_spat_final): ([\d\.-]+)', raw_text)
+                    cost_m = re.search(fr'# {var}_spatial_cost_(?:\w+): ([\d\.-]+)', raw_text)
                     
                     if bias_m and cost_m:
                         b_val = float(bias_m.group(1))
                         c_val = float(cost_m.group(1))
                         params[f'{var}_AbsBias'] = abs(b_val)
-                        # Se L2, convertiamo il costo spaziale in RMSE (radice)
                         params[f'{var}_PhysSpatial'] = np.sqrt(c_val) if metric == 'l2' else c_val
                 
                 all_data.append(params)
@@ -121,111 +120,189 @@ def load_results(results_dir, config_path=None, include_list=None):
     df = pd.DataFrame(all_data).set_index('Experiment')
     return df, param_names
 
+def plot_parameter_evolution(df, param_names, metric_filter=None):
+    """% parameter evolution"""
+    if metric_filter:
+        df = df[df['Metric_Type'] == metric_filter]
+    
+    plt.figure(figsize=(12, 7))
+    exp_df = df[df.index != 'REFERENCE_OIFS'].dropna(subset=['Alpha']).sort_values('Alpha')
+    # Prendi solo la prima riga di reference per evitare duplicati L1/L2
+    ref_values = df[df.index == 'REFERENCE_OIFS'].iloc[0]
+    
+    colormap = plt.get_cmap('tab20')
+    for i, p in enumerate(param_names):
+        if p in exp_df.columns:
+            denom = ref_values[p] if ref_values[p] != 0 else 1e-15
+            rel_change = ((exp_df[p] - ref_values[p]) / denom) * 100
+            plt.plot(exp_df['Alpha'], rel_change, label=p, marker='o', color=colormap(i/len(param_names)))
+
+    plt.axhline(0, color='black', linestyle='--', alpha=0.5)
+    plt.title(f"Parameter Evolution (%) {'- ' + metric_filter if metric_filter else ''}")
+    plt.xlabel("Alpha")
+    plt.ylabel("Variation (%) relative to OIFS")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize='small', ncol=2)
+    plt.grid(True, alpha=0.2)
+    plt.tight_layout()
+
+def plot_tradeoff_comparison(df):
+    """Grafico Pareto Front Globale: L1 vs L2 con simboli diversi e scala Viridis"""
+    plt.figure(figsize=(12, 8))
+    
+    # Mappa dei simboli per distinguere le metriche
+    marker_map = {
+        'L1 (Linear)': 'o',      # Cerchio
+        'L2 (Quadratic)': 's'    # Quadrato
+    }
+    
+    # Per gestire la colorbar unica
+    last_sc = None
+
+    # Ciclo sulle metriche presenti (L1, L2)
+    for m_type in df['Metric_Type'].unique():
+        # Filtriamo i dati validi per la metrica corrente
+        subset = df[df['Metric_Type'] == m_type].dropna(subset=['Phys_Spatial_Total', 'Phys_Global_Total']).sort_values('Alpha')
+        
+        if subset.empty:
+            continue
+            
+        mkr = marker_map.get(m_type, 'p') # 'p' come fallback
+        
+        # Disegniamo i punti colorati in base ad Alpha
+        last_sc = plt.scatter(subset['Phys_Spatial_Total'], subset['Phys_Global_Total'], 
+                              c=subset['Alpha'], cmap='viridis', 
+                              marker=mkr, s=180, edgecolors='black', 
+                              zorder=3, vmin=0, vmax=1)
+        
+        # Disegniamo la linea di trend tratteggiata
+        plt.plot(subset['Phys_Spatial_Total'], subset['Phys_Global_Total'], 
+                 linestyle='--', alpha=0.3, zorder=2)
+
+        # Annotazioni Alpha con simbolo LaTeX
+        for _, row in subset.iterrows():
+            plt.annotate(fr'$\alpha$={row["Alpha"]:.2f}', 
+                         (row['Phys_Spatial_Total'], row['Phys_Global_Total']),
+                         xytext=(7, 7), textcoords='offset points', 
+                         fontsize=8, alpha=0.8)
+
+    # --- LEGENDA MANUALE PER I SIMBOLI ---
+    from matplotlib.lines import Line2D
+    legend_elements = [
+        Line2D([0], [0], marker='o', color='w', label='L1 (Linear)',
+               markerfacecolor='gray', markersize=12, markeredgecolor='black'),
+        Line2D([0], [0], marker='s', color='w', label='L2 (Quadratic)',
+               markerfacecolor='gray', markersize=12, markeredgecolor='black')
+    ]
+    plt.legend(handles=legend_elements, loc='upper right', title="Metrica Obiettivo")
+
+    # --- CONFIGURAZIONE ESTETICA ---
+    plt.title("Pareto Front: Total Spatial Error vs Total Global Bias (all_fluxes)", fontsize=14)
+    plt.xlabel("Total Spatial Error (Physical Units)", fontsize=12)
+    plt.ylabel("Total Global Bias (Physical Units)", fontsize=12)
+    
+    # Aggiunta della Colorbar per Alpha
+    if last_sc:
+        cbar = plt.colorbar(last_sc)
+        cbar.set_label(r'Alpha Value ($\alpha$)', fontsize=12)
+    
+    plt.grid(True, which='both', linestyle='-', alpha=0.2)
+    plt.tight_layout()
+
+def plot_variable_pareto(df, var):
+    """Grafico Pareto Front: L1 vs L2 con simboli diversi e scala Viridis"""
+    plt.figure(figsize=(12, 8))
+    
+    marker_map = {
+        'L1 (Linear)': 'o',      # Cerchio
+        'L2 (Quadratic)': 's'    # Quadrato
+    }
+    
+    col_spat = f'{var}_PhysSpatial'
+    col_bias = f'{var}_AbsBias'
+    
+    # Per gestire la colorbar unica, memorizziamo l'ultimo scatter creato
+    last_sc = None
+
+    # Ciclo sulle metriche presenti nel DataFrame
+    for m_type in df['Metric_Type'].unique():
+        subset = df[df['Metric_Type'] == m_type].dropna(subset=[col_spat, col_bias]).sort_values('Alpha')
+        
+        if subset.empty:
+            continue
+            
+        # Simbolo specifico per questa metrica
+        mkr = marker_map.get(m_type, 'p') # 'p' come fallback
+        
+        # Disegniamo i punti
+        last_sc = plt.scatter(subset[col_spat], subset[col_bias], 
+                              c=subset['Alpha'], cmap='viridis', 
+                              marker=mkr, s=180, edgecolors='black', 
+                              label=mkr, # Temporaneo per la legenda dei simboli
+                              zorder=3, vmin=0, vmax=1)
+        
+        # Disegniamo la linea di trend (opzionale, molto sottile)
+        plt.plot(subset[col_spat], subset[col_bias], 
+                 linestyle='--', alpha=0.3, zorder=2)
+
+        # Annotazioni Alpha con simbolo LaTeX
+        for _, row in subset.iterrows():
+            plt.annotate(fr'$\alpha$={row["Alpha"]:.2f}', 
+                         (row[col_spat], row[col_bias]),
+                         xytext=(7, 7), textcoords='offset points', 
+                         fontsize=8, alpha=0.8)
+
+    # --- LEGENDA MANUALE PER I SIMBOLI ---
+    from matplotlib.lines import Line2D
+    legend_elements = [
+        Line2D([0], [0], marker='o', color='w', label='L1 (Linear)',
+               markerfacecolor='gray', markersize=12, markeredgecolor='black'),
+        Line2D([0], [0], marker='s', color='w', label='L2 (Quadratic)',
+               markerfacecolor='gray', markersize=12, markeredgecolor='black')
+    ]
+    plt.legend(handles=legend_elements, loc='upper right', title="Metrics Type")
+
+    # --- CONFIGURAZIONE ESTETICA ---
+    plt.title(f"Pareto Front Comparison: Spatial Error vs Global Bias (all_fluxes, {var})", fontsize=14)
+    plt.xlabel(f"Spatial Error (Physical Units)", fontsize=12)
+    plt.ylabel(f"Absolute Global Bias (Physical Units)", fontsize=12)
+    
+    # Colorbar per Alpha
+    if last_sc:
+        cbar = plt.colorbar(last_sc)
+        cbar.set_label(r'Alpha Value ($\alpha$)', fontsize=12)
+    
+    plt.grid(True, which='both', linestyle='-', alpha=0.2)
+    plt.tight_layout()
+
+# --- FLUSSO TERMINALE ---
+
 def main():
+    # Se lanciato da terminale, usa backend Agg per non crashare sui cluster
+    matplotlib.use('Agg')
     args = parse_args()
     df, param_names = load_results(args.dir, args.config, args.include)
 
-    if df is None or df.empty:
-        print("Error: no data found in specified paths")
-        return
+    if df is None or df.empty: return
+
+    # Aggiungi colonna fittizia se non caricata dal notebook
+    if 'Metric_Type' not in df.columns:
+        df['Metric_Type'] = df['Metric'].map({'l1': 'L1 (Linear)', 'l2': 'L2 (Quadratic)'})
 
     df = df.sort_values(by='Alpha')
 
-    # --- SALVATAGGIO TABELLA ---
-    suffix = "_filtered" if args.include else ""
-    table_path = os.path.join(args.dir, f'summary_table_comparison{suffix}.txt')
-    df_display = df.dropna(axis=1, how='all').drop(columns=['Alpha'], errors='ignore')
-    table_output = tabulate(df_display, headers='keys', tablefmt='psql', floatfmt=".3e")
-    
-    with open(table_path, 'w') as f:
-        f.write(table_output)
-        f.write("\n\nNote: All spatial errors are converted to physical units (RMSE for L2, MAE for L1).\n")
-    
-    print(f"Done! Table saved in: {table_path}")
-
     if args.plot:
-        # Prepariamo i percorsi per i grafici
-        plot_param_path = os.path.join(args.dir, 'parameter_evolution_sweep.png')
-        plot_perf_path = os.path.join(args.dir, 'performance_tradeoff_sweep.png')
-
-        # --- GRAFICO 1: EVOLUZIONE PARAMETRI ---
-        if 'REFERENCE_OIFS' in df.index:
-            plt.figure(figsize=(12, 7))
-            exp_df = df.drop('REFERENCE_OIFS').dropna(subset=['Alpha'])
-            ref_values = df.loc['REFERENCE_OIFS', param_names]
-            
-            colormap = plt.get_cmap('tab20') 
-            num_params = len(param_names)
-
-            for i, p in enumerate(param_names):
-                if p in exp_df.columns:
-                    denom = ref_values[p] if ref_values[p] != 0 else 1e-15
-                    rel_change = ((exp_df[p] - ref_values[p]) / denom) * 100
-                    
-                    # Assegniamo un colore unico basato sull'indice i
-                    color = colormap(i / num_params) if num_params > 10 else None 
-                    
-                    plt.plot(exp_df['Alpha'], rel_change, label=p, marker='o', alpha=0.8, color=color)
-
-            plt.axhline(0, color='black', linestyle='--', linewidth=1.5)
-            plt.title("Parameter evolution (%) across Alpha sweep")
-            plt.xlabel("Alpha (0=Spatial, 1=Global)")
-            plt.ylabel("Variation (%) relative to OIFS")
-            plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize='small', ncol=2)
-            plt.grid(True, alpha=0.2)
-            plt.tight_layout()
-            plt.savefig(plot_param_path, dpi=150)
-
-            # --- GRAFICO 2: TRADE-OFF DEI COSTI TOTALI (TUTTE LE VARIABILI) ---
-        if 'Phys_Spatial_Total' in df.columns:
-            plt.figure(figsize=(10, 7))
-            perf_df = df.dropna(subset=['Phys_Spatial_Total', 'Phys_Global_Total'])
-            metric_label = perf_df['Phys_Label'].iloc[0]
-
-            sc = plt.scatter(perf_df['Phys_Spatial_Total'], perf_df['Phys_Global_Total'], 
-                             c=perf_df['Alpha'], cmap='coolwarm', s=200, edgecolors='black', zorder=3)
-            
-            plt.plot(perf_df['Phys_Spatial_Total'], perf_df['Phys_Global_Total'], linestyle='--', color='gray', alpha=0.5)
-
-            for idx, row in perf_df.iterrows():
-                plt.annotate(f"a={row['Alpha']:.2f}", (row['Phys_Spatial_Total'], row['Phys_Global_Total']), 
-                             xytext=(8,8), textcoords='offset points', fontsize=9)
-
-            plt.title(f"Global Physical Trade-off ({metric_label})")
-            plt.xlabel("Weighted Spatial Error ($W/m^2$)")
-            plt.ylabel("Weighted Global Bias ($W/m^2$)")
-            plt.colorbar(sc, label='Alpha')
-            plt.grid(True, alpha=0.2)
-            plt.savefig(os.path.join(args.dir, 'total_physical_tradeoff.png'), dpi=150)
-            plt.close()
+        # Salvataggio automatico file PNG
+        plot_parameter_evolution(df, param_names)
+        plt.savefig(os.path.join(args.dir, 'parameter_evolution_sweep.png'))
         
-        # --- GRAFICO 3: PERFORMANCE ---
-        for var in args.vars:
-            phys_spat_col = f'{var}_PhysSpatial'
-            abs_bias_col = f'{var}_AbsBias'
-
-            if phys_spat_col in df.columns and abs_bias_col in df.columns:
-                plt.figure(figsize=(10, 6))
-                metric_used = df['Metric'].dropna().iloc[0].upper()
-                x_label = "RMSE" if metric_used == 'L2' else "MAE"
-
-                sc = plt.scatter(df[phys_spat_col], df[abs_bias_col], 
-                                 c=df['Alpha'], cmap='viridis', s=150, edgecolors='black')
-                
-                for idx, row in df.iterrows():
-                    if not np.isnan(row[phys_spat_col]):
-                        plt.annotate(f"a={row['Alpha']:.2f}", (row[phys_spat_col], row[abs_bias_col]), 
-                                     xytext=(5,5), textcoords='offset points', fontsize=8)
-
-                plt.colorbar(sc, label='Alpha')
-                plt.title(f"Physical Pareto Front: {var} ({metric_used})")
-                plt.xlabel(f"Spatial {x_label} ($W/m^2$)")
-                plt.ylabel(f"Absolute Global Bias ($W/m^2$)")
-                plt.grid(True, alpha=0.3)
-                plt.savefig(os.path.join(args.dir, f'physical_tradeoff_{var}.png'), dpi=150)
-                plt.close()
-
+        plot_tradeoff_comparison(df)
+        plt.savefig(os.path.join(args.dir, 'performance_tradeoff_sweep.png'))
+        
+        for v in args.vars:
+            plot_variable_pareto(df, v)
+            plt.savefig(os.path.join(args.dir, f'physical_tradeoff_{v}.png'))
+        
         print(f"Plots saved in: {args.dir}")
 
 if __name__ == "__main__":
-    main() 
+    main()

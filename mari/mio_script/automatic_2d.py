@@ -7,12 +7,12 @@ import shutil
 exp_name = "phis"
 metric_to_test = "l2"
 # alfa list
-#alphas = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99, 1.0] 
-alphas = [0.0]
+alphas = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99, 1.0] 
+#alphas = [0.0]
 base_config_path = "../ectuner/myconfigs/myconfig_415_2d_LR.yaml"
-results_root = f"../results/tuned_2d_LR/{metric_to_test}/net_toa_tol/"
+results_root = f"../results/tuned_2d_LR/{metric_to_test}/all_flux_tol/"
 central_yaml_dir = os.path.join(results_root, "yaml_files")
-log_dir = f"../results/logs/logs_2d_LR/{metric_to_test}/net_toa_tol/"
+log_dir = f"../results/logs/logs_2d_LR/{metric_to_test}/all_flux_tol/"
 
 def run_experiment(alpha_val, metric):
     # 1. base config
