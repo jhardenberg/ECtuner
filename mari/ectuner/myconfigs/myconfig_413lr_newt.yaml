@@ -1,0 +1,93 @@
+files:
+  reference: gm_reference_EC23.yml  # Reference file based on obs (our target)
+  sensitivity: sensitivity_TL63_413_1991-1999.yaml  # sensitivity file template
+  base: global_mean_n000_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml  # template for ecmean output filenames, name of the file to tune
+  params: tuning_{exp}.yml  # template for parameter files
+  ecmean: ./ecmean_413lr  # directory for ecmean output files
+  exps: ./exps_413lr # directory for parameter files for each experiment
+  exp_temp: ?? # template name for sensitivity runs (can include ?, *)
+  #slope_file: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/slopes.yaml # file with slopes for temperature correction
+
+ecmean:
+  ecmean_config: config_ecmean.yml
+
+args:
+  # Default years for sensitivities
+  year1: 1991
+  year2: 1999
+  penalty: 5  # Penalty for deviation from reference parameter values
+  inc: 0.6 # Maximum acceptable parameter change
+  method: 'dual_annealing' # Optimization method (dual_annealing (recommended), differential_evolution, shgo (not recommended))
+  model_imbalance: -0.6 # Model imbalance to be corrected: - (netTOA-netSFC) + (oce_imbalance)
+  #deltaT: -0.39 # Temperature step for the reference correction
+
+reference_parameters: # Default OIFS parameter values (used for penalty)
+  RPRCON: 0.0014
+  ENTRORG: 0.00175
+  DETRPEN: 7.5e-05
+  ENTRDD: 0.0003
+  RMFDEPS: 0.3
+  RVICE: 0.13
+  RLCRITSNOW: 2.0e-05 
+  RSNOWLIN2: 0.03
+  RCLDIFF: 6.0e-06
+  RCLDIFF_CONVI: 10.0
+  RDEPLIQREFRATE: 0.5 
+  RDEPLIQREFDEPTH: 500.0 
+  RCL_OVERLAPLIQICE: 0.65
+  RCL_INHOMOGAUT: 1.5
+  RCL_INHOMOGACC: 3.0
+
+parameter_group: # Parameter grouping for SE output
+  namcumf: 
+    - RPRCON
+    - ENTRORG
+    - DETRPEN
+    - ENTRDD
+    - RMFDEPS
+  namcldp:
+    - RVICE
+    - RLCRITSNOW
+    - RSNOWLIN2
+    - RCLDIFF
+    - RCLDIFF_CONVI
+    - RDEPLIQREFRATE
+    - RDEPLIQREFDEPTH
+    - RCL_OVERLAPLIQICE
+    - RCL_INHOMOGAUT
+    - RCL_INHOMOGACC
+  
+weights_season:  # Weights for different seasons
+  ALL: 1.0
+  DJF: 0.
+  JJA: 0.
+
+weights_region:  # Weights for different regions
+  Global: 1.0
+  North Midlat: 0.9
+  South Midlat: 0.9
+  Tropical: 0.3
+
+weights:  # Weights for different target variables
+  net_toa: 3.0
+  rsnt: 1.
+  rlnt: 1.
+  swcf: 0.
+  lwcf: 0.
+  rsns: 0.
+  rlns: 0.
+  hfss: 0.
+  hfls: 0.
+  net_sfc: 0.
+  toamsfc: 0.
+
+  # rsnt: 0.5
+  # rlnt: 0.5
+  # swcf: 0.3
+  # lwcf: 0.3
+  # rsns: 0.1
+  # rlns: 0.1
+  # hfss: 0.1
+  # hfls: 0.1
+  # net_sfc: 0.3
+  # toamsfc: 0.1

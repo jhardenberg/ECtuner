@@ -1,0 +1,87 @@
+files:
+  # INPUT DATA 2D
+  # reference
+  ref_2d_dir: "../../ectuner/ecmean/reference/climatology/EC26-PDAY/r180x90/"
+  # sensitivities slope and r2 maps
+  sensitivity_nc: "../../ectuner/sensitivities/2D/sensitivity_TL63_415_1991-2000_2D.nc"
+  
+  # TEMPLATES & DIRS
+  raw_dir: "/ec/res4/scratch/ecme3038/ece4/" 
+  base_2d_dir: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/ecmean/maps_lres/"
+  params: "tuning_{exp}.yml"
+  exps: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/perturb_exps/exps_lres/"
+  output_dir: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/net_TOA/new_alfa_05/"
+
+spatial_tuning:
+  target_grid: "r180x90"
+  r2_threshold: 0.3 # Ignore pixels where the linear relationship between parameter and response is weak
+  alpha: 0.5 # Hybrid weight (0: spatial, 1: global)
+  metric: "l1" # Metric for spatial tuning (e.g., l1, l2, rmse)
+  area_weighting: True
+
+args:
+  year1: 2000
+  year2: 2017
+  penalty: 0 # In 2D penalty should be higher because spatial error is numerically larger
+  inc: 0.6
+  method: 'dual_annealing'
+
+frozen_parameters:
+
+reference_parameters: # Default OIFS parameter values (used for penalty)
+  RPRCON: 0.14E-02
+  ENTRORG: 0.175E-02     
+  DETRPEN: 0.75E-04    
+  ENTRDD: 0.3E-03      
+  RMFDEPS: 0.3         
+  RVICE: 0.13          
+  RLCRITSNOW: 2.0E-05  
+  RSNOWLIN2: 0.3E-01   
+  RCLDIFF: 0.6E-05     
+  RCLDIFF_CONVI: 10.0   
+  RDEPLIQREFRATE: 0.5 
+  RDEPLIQREFDEPTH: 500.0 
+  RCL_OVERLAPLIQICE: 0.65
+  RCL_INHOMOGAUT: 1.5
+  RCL_INHOMOGACC: 3
+  RMINICE: 60  
+
+
+parameter_group: # Parameter grouping for SE output
+  namcumf: 
+    - RPRCON
+    - ENTRORG
+    - DETRPEN
+    - ENTRDD
+    - RMFDEPS
+  namcldp:
+    - RVICE
+    - RLCRITSNOW
+    - RSNOWLIN2
+    - RCLDIFF
+    - RCLDIFF_CONVI
+    - RDEPLIQREFRATE
+    - RDEPLIQREFDEPTH
+    - RCL_OVERLAPLIQICE
+    - RCL_INHOMOGAUT
+    - RCL_INHOMOGACC
+  naerad:
+    - RMINICE
+
+weights: 
+  # spatial weights for tuning (relative importance of each variable in the spatial optimization)
+  net_toa: 1.0
+  rsnt: 0.0 
+  rlnt: 0.0
+  swcf: 0.0
+  lwcf: 0.0
+  net_sfc: 0.0
+
+weights_region:
+  Global: 1.0
+  Tropical: 0.0      
+  North Midlat: 0.0
+  South Midlat: 0.0
+  Equatorial: 0.0
+  North Pole: 0.0
+  South Pole: 0.0

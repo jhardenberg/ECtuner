@@ -1,0 +1,43 @@
+2026-04-24 07:52:25 | ectuner |     INFO -> Loading 2D Data (Sensitivity, Reference, Base)...
+   > Loading reference for net_toa from: climate_average_net_toa_CERES EBAF_r180x90_2000-2024.nc
+   > Loading reference for swcf from: climate_average_swcf_CERES EBAF_r180x90_2000-2024.nc
+--- Loading cached base maps for phis ---
+2026-04-24 07:52:27 | ectuner |     INFO -> Generating spatial weights (Area * Region)...
+2026-04-24 07:52:27 | ectuner |     INFO -> Variable net_toa: Initial Spatial RMSE (Weighted) = 11.3965
+2026-04-24 07:52:27 | ectuner |     INFO -> Variable swcf: Initial Spatial RMSE (Weighted) = 11.0812
+2026-04-24 07:52:27 | ectuner |     INFO -> Flattening data for fast optimization...
+2026-04-24 07:52:27 | ectuner |     INFO -> DEBUG: Global Bias for net_toa in optimizer: 5.6259
+2026-04-24 07:52:27 | ectuner |     INFO -> DEBUG: Global Bias for swcf in optimizer: 0.5056
+2026-04-24 07:52:27 | ectuner |     INFO -> Starting 2D Optimization (dual_annealing)...
+2026-04-24 07:54:10 | ectuner |     INFO -> 
+==================== GLOBAL MEAN & ZONAL SUMMARY FROM 2D OPTIMIZATION ====================
+2026-04-24 07:54:10 | ectuner |     INFO -> Variable     | Metric       |            Initial ->              Final | Status
+2026-04-24 07:54:10 | ectuner |     INFO -> ------------------------------------------------------------------------------------------
+2026-04-24 07:54:10 | ectuner |     INFO -> net_toa      | Global Bias |             5.6259 ->             1.2794 | IMPROVED
+2026-04-24 07:54:10 | ectuner |     INFO ->              | Spatial RMSE  |            11.3965 ->             9.4669 | IMPROVED
+2026-04-24 07:54:10 | ectuner |     INFO -> ------------------------------------------------------------------------------------------
+2026-04-24 07:54:10 | ectuner |     INFO -> swcf         | Global Bias |             0.5056 ->            -0.0000 | IMPROVED
+2026-04-24 07:54:10 | ectuner |     INFO ->              | Spatial RMSE  |            11.0812 ->            11.2922 | WORSENED
+2026-04-24 07:54:10 | ectuner |     INFO -> ------------------------------------------------------------------------------------------
+2026-04-24 07:54:10 | ectuner |     INFO -> Structured tuning YAML written to ../results/tuned_2d_LR/swcf/tol_alfa_017/tuned_phis_a017.yml
+
+| Parameter         |   New Value |   Old Value |      Change |   Rel. Change |   Dist. from Ref. |
+|-------------------+-------------+-------------+-------------+---------------+-------------------|
+| RPRCON            |  1.3893e-03 |  1.4000e-03 | -1.0732e-05 |   -7.6654e-03 |       -7.6654e-03 |
+| ENTRORG           |  1.4427e-03 |  1.7500e-03 | -3.0726e-04 |   -1.7557e-01 |       -1.7557e-01 |
+| DETRPEN           |  1.0918e-04 |  7.5000e-05 |  3.4180e-05 |    4.5573e-01 |        4.5573e-01 |
+| ENTRDD            |  2.3876e-04 |  3.0000e-04 | -6.1236e-05 |   -2.0412e-01 |       -2.0412e-01 |
+| RMFDEPS           |  4.1490e-01 |  3.0000e-01 |  1.1490e-01 |    3.8298e-01 |        3.8298e-01 |
+| RVICE             |  2.0784e-01 |  1.3000e-01 |  7.7844e-02 |    5.9880e-01 |        5.9880e-01 |
+| RLCRITSNOW        |  8.2296e-06 |  2.0000e-05 | -1.1770e-05 |   -5.8852e-01 |       -5.8852e-01 |
+| RSNOWLIN2         |  2.5384e-02 |  3.0000e-02 | -4.6158e-03 |   -1.5386e-01 |       -1.5386e-01 |
+| RCLDIFF           |  2.6652e-06 |  6.0000e-06 | -3.3348e-06 |   -5.5580e-01 |       -5.5580e-01 |
+| RCLDIFF_CONVI     |  9.7676e+00 |  1.0000e+01 | -2.3240e-01 |   -2.3240e-02 |       -2.3240e-02 |
+| RDEPLIQREFRATE    |  6.6143e-01 |  5.0000e-01 |  1.6143e-01 |    3.2286e-01 |        3.2286e-01 |
+| RDEPLIQREFDEPTH   |  4.4216e+02 |  5.0000e+02 | -5.7839e+01 |   -1.1568e-01 |       -1.1568e-01 |
+| RCL_OVERLAPLIQICE |  2.6019e-01 |  6.5000e-01 | -3.8981e-01 |   -5.9971e-01 |       -5.9971e-01 |
+| RCL_INHOMOGAUT    |  1.7451e+00 |  1.5000e+00 |  2.4509e-01 |    1.6340e-01 |        1.6340e-01 |
+| RCL_INHOMOGACC    |  1.9491e+00 |  3.0000e+00 | -1.0509e+00 |   -3.5031e-01 |       -3.5031e-01 |
+| RMINICE           |  7.4736e+01 |  6.0000e+01 |  1.4736e+01 |    2.4560e-01 |        2.4560e-01 |
+2026-04-24 07:54:10 | ectuner |     INFO -> Diagnostic maps saved to ../results/tuned_2d_LR/swcf/tol_alfa_017/diagnostics_2d_phis_Global_a017.nc
+Copia del file YAML inviata a ../results/tuned_2d_LR/swcf/tol_yaml_files

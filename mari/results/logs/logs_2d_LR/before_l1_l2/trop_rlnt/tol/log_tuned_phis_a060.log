@@ -1,0 +1,44 @@
+2026-04-27 08:15:16 | ectuner |     INFO -> Loading 2D Data (Sensitivity, Reference, Base)...
+   > Loading reference for net_toa from: climate_average_net_toa_CERES EBAF_r180x90_2000-2024.nc
+   > Loading reference for rlnt from: climate_average_rlnt_CERES EBAF_r180x90_2000-2024.nc
+   > Flipping sign for rlnt (Obs is UP, Model is DOWN)
+--- Loading cached base maps for phis ---
+2026-04-27 08:15:17 | ectuner |     INFO -> Generating spatial weights (Area * Region)...
+2026-04-27 08:15:17 | ectuner |     INFO -> Variable net_toa: Initial Spatial RMSE (Weighted) = 11.3247
+2026-04-27 08:15:17 | ectuner |     INFO -> Variable rlnt: Initial Spatial RMSE (Weighted) = 11.5415
+2026-04-27 08:15:17 | ectuner |     INFO -> Flattening data for fast optimization...
+2026-04-27 08:15:17 | ectuner |     INFO -> DEBUG: Global Bias for net_toa in optimizer: 4.6463
+2026-04-27 08:15:17 | ectuner |     INFO -> DEBUG: Global Bias for rlnt in optimizer: 5.9022
+2026-04-27 08:15:17 | ectuner |     INFO -> Starting 2D Optimization (dual_annealing)...
+2026-04-27 08:16:22 | ectuner |     INFO -> 
+==================== GLOBAL MEAN & ZONAL SUMMARY FROM 2D OPTIMIZATION ====================
+2026-04-27 08:16:22 | ectuner |     INFO -> Variable     | Metric       |            Initial ->              Final | Status
+2026-04-27 08:16:22 | ectuner |     INFO -> ------------------------------------------------------------------------------------------
+2026-04-27 08:16:22 | ectuner |     INFO -> net_toa      | Global Bias |             4.6463 ->            -0.0000 | IMPROVED
+2026-04-27 08:16:22 | ectuner |     INFO ->              | Spatial RMSE  |            11.3247 ->            10.2021 | IMPROVED
+2026-04-27 08:16:22 | ectuner |     INFO -> ------------------------------------------------------------------------------------------
+2026-04-27 08:16:22 | ectuner |     INFO -> rlnt         | Global Bias |             5.9022 ->            -0.0000 | IMPROVED
+2026-04-27 08:16:22 | ectuner |     INFO ->              | Spatial RMSE  |            11.5415 ->             9.1922 | IMPROVED
+2026-04-27 08:16:22 | ectuner |     INFO -> ------------------------------------------------------------------------------------------
+2026-04-27 08:16:22 | ectuner |     INFO -> Structured tuning YAML written to ../results/tuned_2d_LR/trop_rlnt/tol_alfa_060/tuned_phis_a060.yml
+
+| Parameter         |   New Value |   Old Value |      Change |   Rel. Change |   Dist. from Ref. |
+|-------------------+-------------+-------------+-------------+---------------+-------------------|
+| RPRCON            |  1.7229e-03 |  1.4000e-03 |  3.2294e-04 |    2.3067e-01 |        2.3067e-01 |
+| ENTRORG           |  1.6610e-03 |  1.7500e-03 | -8.8951e-05 |   -5.0829e-02 |       -5.0829e-02 |
+| DETRPEN           |  1.0457e-04 |  7.5000e-05 |  2.9565e-05 |    3.9421e-01 |        3.9421e-01 |
+| ENTRDD            |  3.1392e-04 |  3.0000e-04 |  1.3919e-05 |    4.6395e-02 |        4.6395e-02 |
+| RMFDEPS           |  4.4706e-01 |  3.0000e-01 |  1.4706e-01 |    4.9020e-01 |        4.9020e-01 |
+| RVICE             |  2.0479e-01 |  1.3000e-01 |  7.4788e-02 |    5.7529e-01 |        5.7529e-01 |
+| RLCRITSNOW        |  9.3599e-06 |  2.0000e-05 | -1.0640e-05 |   -5.3200e-01 |       -5.3200e-01 |
+| RSNOWLIN2         |  2.8655e-02 |  3.0000e-02 | -1.3445e-03 |   -4.4818e-02 |       -4.4818e-02 |
+| RCLDIFF           |  8.3188e-06 |  6.0000e-06 |  2.3188e-06 |    3.8647e-01 |        3.8647e-01 |
+| RCLDIFF_CONVI     |  1.0708e+01 |  1.0000e+01 |  7.0763e-01 |    7.0763e-02 |        7.0763e-02 |
+| RDEPLIQREFRATE    |  6.0769e-01 |  5.0000e-01 |  1.0769e-01 |    2.1539e-01 |        2.1539e-01 |
+| RDEPLIQREFDEPTH   |  5.4010e+02 |  5.0000e+02 |  4.0104e+01 |    8.0208e-02 |        8.0208e-02 |
+| RCL_OVERLAPLIQICE |  4.9733e-01 |  6.5000e-01 | -1.5267e-01 |   -2.3488e-01 |       -2.3488e-01 |
+| RCL_INHOMOGAUT    |  1.9830e+00 |  1.5000e+00 |  4.8296e-01 |    3.2198e-01 |        3.2198e-01 |
+| RCL_INHOMOGACC    |  1.3549e+00 |  3.0000e+00 | -1.6451e+00 |   -5.4836e-01 |       -5.4836e-01 |
+| RMINICE           |  7.8859e+01 |  6.0000e+01 |  1.8859e+01 |    3.1432e-01 |        3.1432e-01 |
+2026-04-27 08:16:22 | ectuner |     INFO -> Diagnostic maps saved to ../results/tuned_2d_LR/trop_rlnt/tol_alfa_060/diagnostics_2d_phis_Global-Tropical_a06.nc
+Copia del file YAML inviata a ../results/tuned_2d_LR/trop_rlnt/tol_yaml_files

@@ -1,0 +1,38 @@
+2026-04-29 08:13:22 | ectuner |     INFO -> Loading 2D Data (Sensitivity, Reference, Base)...
+   > Loading reference for net_toa from: climate_average_net_toa_CERES EBAF_r180x90_2000-2024.nc
+--- Loading cached base maps for phis ---
+2026-04-29 08:13:23 | ectuner |     INFO -> Generating spatial weights (Area * Region)...
+2026-04-29 08:13:23 | ectuner |     INFO -> Variable net_toa: Initial Spatial Squared Cost (L2) (Weighted) = 129.8791
+2026-04-29 08:13:23 | ectuner |     INFO -> Flattening data for fast optimization...
+2026-04-29 08:13:23 | ectuner |     INFO -> DEBUG: Global Bias for net_toa in optimizer: 5.6259
+2026-04-29 08:13:23 | ectuner |     INFO -> Starting 2D Optimization (dual_annealing)...
+2026-04-29 08:16:03 | ectuner |     INFO -> Optimization finished. Final Weighted Cost (L2): Spatial=83.9238, Global=0.3403
+2026-04-29 08:16:03 | ectuner |     INFO -> 
+============================== GLOBAL & SPATIAL COSTS (L2) ===============================
+2026-04-29 08:16:03 | ectuner |     INFO -> Variable     | Metric           |            Initial ->              Final | Status
+2026-04-29 08:16:03 | ectuner |     INFO -> ------------------------------------------------------------------------------------------
+2026-04-29 08:16:03 | ectuner |     INFO -> net_toa      | Global Cost|            31.6503 ->             0.3403 | IMPROVED
+2026-04-29 08:16:03 | ectuner |     INFO ->              | Spatial Cost  |           129.8791 ->            83.9238 | IMPROVED
+2026-04-29 08:16:03 | ectuner |     INFO -> ------------------------------------------------------------------------------------------
+2026-04-29 08:16:03 | ectuner |     INFO -> Structured tuning YAML written to ../results/tuned_2d_LR/l2/net_toa_tol/alfa_070/tuned_phis_l2_a070.yml
+
+| Parameter         |   New Value |   Old Value |      Change |   Rel. Change |   Dist. from Ref. |
+|-------------------+-------------+-------------+-------------+---------------+-------------------|
+| RPRCON            |  5.6430e-04 |  1.4000e-03 | -8.3570e-04 |   -5.9693e-01 |       -5.9693e-01 |
+| ENTRORG           |  1.5220e-03 |  1.7500e-03 | -2.2801e-04 |   -1.3029e-01 |       -1.3029e-01 |
+| DETRPEN           |  9.8689e-05 |  7.5000e-05 |  2.3689e-05 |    3.1586e-01 |        3.1586e-01 |
+| ENTRDD            |  1.5947e-04 |  3.0000e-04 | -1.4053e-04 |   -4.6842e-01 |       -4.6842e-01 |
+| RMFDEPS           |  4.7952e-01 |  3.0000e-01 |  1.7952e-01 |    5.9839e-01 |        5.9839e-01 |
+| RVICE             |  2.0799e-01 |  1.3000e-01 |  7.7986e-02 |    5.9989e-01 |        5.9989e-01 |
+| RLCRITSNOW        |  8.0205e-06 |  2.0000e-05 | -1.1980e-05 |   -5.9898e-01 |       -5.9898e-01 |
+| RSNOWLIN2         |  1.2002e-02 |  3.0000e-02 | -1.7998e-02 |   -5.9993e-01 |       -5.9993e-01 |
+| RCLDIFF           |  3.0251e-06 |  6.0000e-06 | -2.9749e-06 |   -4.9582e-01 |       -4.9582e-01 |
+| RCLDIFF_CONVI     |  7.2707e+00 |  1.0000e+01 | -2.7293e+00 |   -2.7293e-01 |       -2.7293e-01 |
+| RDEPLIQREFRATE    |  5.6740e-01 |  5.0000e-01 |  6.7397e-02 |    1.3479e-01 |        1.3479e-01 |
+| RDEPLIQREFDEPTH   |  4.4148e+02 |  5.0000e+02 | -5.8520e+01 |   -1.1704e-01 |       -1.1704e-01 |
+| RCL_OVERLAPLIQICE |  2.6034e-01 |  6.5000e-01 | -3.8966e-01 |   -5.9948e-01 |       -5.9948e-01 |
+| RCL_INHOMOGAUT    |  7.0883e-01 |  1.5000e+00 | -7.9117e-01 |   -5.2744e-01 |       -5.2744e-01 |
+| RCL_INHOMOGACC    |  2.9544e+00 |  3.0000e+00 | -4.5615e-02 |   -1.5205e-02 |       -1.5205e-02 |
+| RMINICE           |  9.1205e+01 |  6.0000e+01 |  3.1205e+01 |    5.2009e-01 |        5.2009e-01 |
+2026-04-29 08:16:03 | ectuner |     INFO -> Diagnostic maps saved to ../results/tuned_2d_LR/l2/net_toa_tol/alfa_070/diagnostics_2d_phis_Global_a07.nc
+Copia del file YAML inviata a ../results/tuned_2d_LR/l2/net_toa_tol/yaml_files
