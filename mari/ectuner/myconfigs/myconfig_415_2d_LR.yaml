@@ -71,10 +71,10 @@ parameter_group: # Parameter grouping for SE output
 weights: 
   # spatial weights for tuning (relative importance of each variable in the spatial optimization)
   net_toa: 1.0
-  rsnt: 1.0 
-  rlnt: 1.0
-  swcf: 1.0
-  lwcf: 1.0
+  rsnt: 0.0 
+  rlnt: 0.0
+  swcf: 0.0
+  lwcf: 0.0
   net_sfc: 0.0
 
 weights_region:

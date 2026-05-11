@@ -10,7 +10,7 @@ files:
   #DIRECTORIES
   ecmean: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/ecmean/gm_lres/" # Directory for 'base' ECmean files
   exps: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/perturb_exps/exps_lres/" # Directory for 'params' tuning files
-  output_dir: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/tuner_1d/" # Directory for tuning output
+  output_dir: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/prova_1d_SO/" # Directory for tuning output
 
 args:
   # Default years for sensitivities
@@ -75,16 +75,16 @@ weights_region:  # Weights for different regions
   Global: 1.0
   Tropical: 0.
   North Midlat: 0
-  South Midlat: 0.
+  South Midlat: 1.
   NH: 0.
-  SH: 0.
+  SH: 1.
   Equatorial: 0.
   North Pole: 0.
-  South Pole: 0.
+  South Pole: 1.
 
 weights:  # Weights for different target variables
   net_toa: 1.0
-  rsnt: 0.
+  rsnt: 1.
   rlnt: 0.
   swcf: 0.
   lwcf: 0.
