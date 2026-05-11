@@ -1,7 +1,7 @@
 """Module to implement logging configurations"""
 import logging
 
-def setup_logger(level=None, name='ectuner'):
+def setup_logger(level=None, name='ectuner', log_file = None):
     """Define a logger to be used extensively within smmregrid"""
 
     loglev = convert_logger(level)
@@ -28,6 +28,11 @@ def setup_logger(level=None, name='ectuner'):
     #handler.setLevel(loglev)  # Set the desired log level for the handler
     handler.setFormatter(formatter)  # Assign the formatter to the handler
     logger.addHandler(handler)  # Add the handler to the logger
+
+    if log_file:
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        logger.addHandler(file_handler)
 
     return logger
 

@@ -492,6 +492,10 @@ if __name__ == '__main__':
     sensitivity = {}
 
     for parnam in parnames:
+        if parnam not in pardict: 
+            print(f'{parnam} not found in tuning files, skipping...')
+            continue
+        
         sensitivity[parnam] = {}
         st0 = res_all[ref_tag]
         st1 = res_all[pardict[parnam]['min_tag']]
