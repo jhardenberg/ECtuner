@@ -1,6 +1,8 @@
 # --- Cartelle personali e cache ---
 mari/ectuner/ecmean/gm_lres/
 mari/ectuner/ecmean/gm_sres/
+mari/ectuner/myconfigs/myconfig_415_2d_LR.yaml
+mari/ectuner/myconfigs/myconfig_415_LR.yaml
 mari/jobs/sens*.err
 mari/jobs/sens*.out
 mari/mio_script/slurm*.out
