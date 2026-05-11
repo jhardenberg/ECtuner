@@ -48,6 +48,7 @@ from scipy import optimize
 import math
 from tabulate import tabulate
 import copy
+import shutil
 
 from logger import setup_logger
 
@@ -344,6 +345,8 @@ def parse_arguments(arguments):
                         help='Temperature adjustment for reference correction')
     parser.add_argument('-mi', '--model_imbalance', type=float, 
                         help='Intrinsic model imbalance to correct net_toa')
+    parser.add_argument('-t', '--output_tag', type=str, 
+                        help='Tag to be added to output file')
     # positional
     parser.add_argument('exp', type=str, help='experiment to tune')
     parser.add_argument('year1', type=int, help='start year', nargs='?', default=None)
@@ -384,16 +387,15 @@ if __name__ == '__main__':
     inc = get_arg(args, 'inc', None)
     out = get_arg(args, 'output', None)
     method = get_arg(args, 'method', None)
-
-    logger = setup_logger(level=loglevel)
+    tag = get_arg(args, 'output_tag', '')
+    if len(tag) > 0:
+        tag = '_'+tag
 
     if not exp:
         print("Error:  experiment not specified")
         sys.exit(1)
 
     config = load_config(config_file)
-    logger.info("==== ECtuner configuration ====")
-    logger.info("\n" + yaml.safe_dump(config, sort_keys=False))
 
     if not year1:
         year1 = config['args']['year1']
@@ -405,6 +407,30 @@ if __name__ == '__main__':
         inc = config['args']['inc']
     if not method:
         method = config['args']['method']
+
+    # Save in results directory
+    if not out:
+        config_files = config.get('files', {})
+        out_dir = config_files.get('output_dir')
+        out_temp = config_files.get('output_template')
+        if out_dir and out_temp:
+            filename = out_temp.format(exp=exp, year1=year1, year2=year2)
+            out = os.path.join(out_dir, filename)
+            os.makedirs(out_dir, exist_ok=True)
+        else:
+            filename = f'tuned_{exp}_{year1}-{year2}_inc{int(inc*100):03d}_p{int(penalty):02d}{tag}.yml'
+            if not out_dir: 
+                out_dir = './'
+            else:
+                os.makedirs(out_dir, exist_ok=True)
+            out = os.path.join(out_dir, filename)
+
+    logname = os.path.join(out_dir, f'log_{exp}_{year1}-{year2}_inc{int(inc*100):03d}_p{int(penalty):02d}{tag}.yml')
+    logger = setup_logger(level=loglevel, log_file=logname)
+    shutil.copy(config_file, out_dir + f'config_{exp}_{year1}-{year2}_inc{int(inc*100):03d}_p{int(penalty):02d}{tag}.yml')
+
+    logger.info("==== ECtuner configuration ====")
+    logger.info("\n" + yaml.safe_dump(config, sort_keys=False))
 
     # logger.debug("year1: %s", year1)
     # logger.debug("year2: %s", year2)
@@ -438,16 +464,6 @@ if __name__ == '__main__':
     ref_file = config['files']['reference']
     reference = load_reference(ref_file)
     original_reference = copy.deepcopy(reference)
-
-    # Save in results directory
-    if not out:
-        config_files = config.get('files', {})
-        out_dir = config_files.get('output_dir')
-        out_temp = config_files.get('output_template')
-        if out_dir and out_temp:
-            filename = out_temp.format(exp=exp, year1=year1, year2=year2)
-            out = os.path.join(out_dir, filename)
-            os.makedirs(out_dir, exist_ok=True)
     
     logger.debug("year1: %s", year1)
     logger.debug("year2: %s", year2)
