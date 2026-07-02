@@ -12,7 +12,7 @@ OUTPUT=$2   # Riceve il percorso nella cartella alfa_X
 LOG=$3      # Riceve il percorso del log
 
 # central dir 
-CENTRAL_DIR="../results/tuned_2d_LR/l1/ntoa_rsnt_tol/yaml_files"
+CENTRAL_DIR="../results/tuned_2d_LR/hybrid_test/l2/r2/net_toa_inc02/yaml_files"
 
 source /home/ecme3038/miniforge3/etc/profile.d/conda.sh
 conda activate ectuner

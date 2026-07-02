@@ -1,0 +1,23 @@
+- base.context:
+    model_config:
+      oifs:
+        tuning:
+          naerad:
+            RMINICE: 85.46989
+          namcldp:
+            RCLDIFF: 8.301345e-06
+            RCLDIFF_CONVI: 14.58305
+            RCL_INHOMOGACC: 2.580326
+            RCL_INHOMOGAUT: 1.835514
+            RCL_OVERLAPLIQICE: 0.4948691
+            RDEPLIQREFDEPTH: 339.4017
+            RDEPLIQREFRATE: 0.2913015
+            RLCRITSNOW: 2.577184e-05
+            RSNOWLIN2: 0.02157615
+            RVICE: 0.1027317
+          namcumf:
+            DETRPEN: 4.606985e-05
+            ENTRDD: 0.0002909102
+            ENTRORG: 0.001541716
+            RMFDEPS: 0.3172806
+            RPRCON: 0.001311144

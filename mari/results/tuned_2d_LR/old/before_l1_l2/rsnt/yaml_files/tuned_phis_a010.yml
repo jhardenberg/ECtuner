@@ -1,0 +1,41 @@
+- base.context:
+    model_config:
+      oifs:
+        tuning:
+          naerad:
+            RMINICE: 67.841
+          namcldp:
+            RVICE: 0.20798
+            RLCRITSNOW: 8.1646e-06
+            RSNOWLIN2: 0.012001
+            RCLDIFF: 2.8008e-06
+            RCLDIFF_CONVI: 8.9711
+            RDEPLIQREFRATE: 0.67944
+            RDEPLIQREFDEPTH: 450.79
+            RCL_OVERLAPLIQICE: 0.26031
+            RCL_INHOMOGAUT: 1.2297
+            RCL_INHOMOGACC: 2.8582
+          namcumf:
+            RPRCON: 0.0011298
+            ENTRORG: 0.001427
+            DETRPEN: 0.00011088
+            ENTRDD: 0.00022854
+            RMFDEPS: 0.38939
+
+# --- ECtuner 2D meta-parameters ---
+# penalty: 0 | inc: 0.6
+# weights (flux):
+#   net_toa: 1.0
+#   rsnt: 1.0
+# weights (region):
+#   Equatorial: 0.0
+#   Global: 1.0
+#   North Midlat: 0.0
+#   North Pole: 0.0
+#   South Midlat: 0.0
+#   South Pole: 0.0
+#   Tropical: 0.0
+# net_toa_global_bias_final: 2.201451
+# net_toa_rmse_spat_final: 9.288491
+# rsnt_global_bias_final: -0.001527
+# rsnt_rmse_spat_final: 10.466891

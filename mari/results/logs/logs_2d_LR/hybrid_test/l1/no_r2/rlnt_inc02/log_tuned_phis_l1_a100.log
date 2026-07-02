@@ -1,0 +1,118 @@
+2026-06-24 12:04:45 | ectuner |     INFO -> Loading 2D Data (Sensitivity, Reference, Base)...
+   > Loading reference for lwcf from: climate_average_lwcf_CERES EBAF_r180x90_2000-2024.nc
+   > Loading reference for net_toa from: climate_average_net_toa_CERES EBAF_r180x90_2000-2024.nc
+   > Loading reference for rlnt from: climate_average_rlnt_CERES EBAF_r180x90_2000-2024.nc
+   > Flipping sign for rlnt (Obs is UP, Model is DOWN)
+   > Loading reference for rsnt from: climate_average_rsnt_CERES EBAF_r180x90_2000-2024.nc
+   > Loading reference for swcf from: climate_average_swcf_CERES EBAF_r180x90_2000-2024.nc
+--- Loading cached base maps for phis ---
+2026-06-24 12:04:46 | ectuner |     INFO -> Generating spatial weights (Area * Region)...
+2026-06-24 12:04:46 | ectuner |     INFO -> Variable lwcf: Initial Spatial Absolute Cost (L1) (Weighted) = 5.9092
+2026-06-24 12:04:46 | ectuner |     INFO -> Variable net_toa: Initial Spatial Absolute Cost (L1) (Weighted) = 8.7339
+2026-06-24 12:04:46 | ectuner |     INFO -> Variable rlnt: Initial Spatial Absolute Cost (L1) (Weighted) = 9.4438
+2026-06-24 12:04:46 | ectuner |     INFO -> Variable rsnt: Initial Spatial Absolute Cost (L1) (Weighted) = 7.8074
+2026-06-24 12:04:46 | ectuner |     INFO -> Variable swcf: Initial Spatial Absolute Cost (L1) (Weighted) = 8.2304
+2026-06-24 12:04:46 | ectuner |     INFO -> Flattening data for fast optimization...
+2026-06-24 12:04:46 | ectuner |     INFO -> DEBUG: Global Bias for lwcf in optimizer: -2.7092
+2026-06-24 12:04:46 | ectuner |     INFO -> DEBUG: Global Bias for net_toa in optimizer: 5.6259
+2026-06-24 12:04:46 | ectuner |     INFO -> DEBUG: Global Bias for rlnt in optimizer: 6.9311
+2026-06-24 12:04:46 | ectuner |     INFO -> DEBUG: Global Bias for rsnt in optimizer: -1.3053
+2026-06-24 12:04:47 | ectuner |     INFO -> DEBUG: Global Bias for swcf in optimizer: 0.5056
+2026-06-24 12:04:47 | ectuner |     INFO -> Starting 2D Optimization (dual_annealing)...
+2026-06-24 12:06:41 | ectuner |     INFO -> Optimization finished. Final Weighted Cost (L1): Spatial=8.2290, Global=1.0262
+2026-06-24 12:06:42 | ectuner |     INFO -> 
+====================== OPTIMIZATION SUMMARY 2D (Biases & Costs: L1) ======================
+2026-06-24 12:06:42 | ectuner |     INFO -> Goal: Bring Biases to 0.0
+2026-06-24 12:06:42 | ectuner |     INFO -> 
+--------------------------------- PRIMARY TUNING TARGETS ---------------------------------
+2026-06-24 12:06:42 | ectuner |     INFO -> Variable     | Region         | Weight |  Bias Init -> Bias Final | Status
+2026-06-24 12:06:42 | ectuner |     INFO -> --------------------------------------------------------------------------
+2026-06-24 12:06:42 | ectuner |     INFO -> rlnt         | Global         | 1.0    |      6.931 -> [92m     1.026[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO ->              | [Global Cost]    | -      |       6.9311 -> [92m      1.0262[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO ->              | [Spatial Cost]   | -      |       9.4438 -> [92m      8.2290[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> 
+-------------------------------- DIAGNOSTIC SIDE-EFFECTS ---------------------------------
+2026-06-24 12:06:42 | ectuner |     INFO -> Variable     | Region         | Weight |  Bias Init -> Bias Final | Status
+2026-06-24 12:06:42 | ectuner |     INFO -> --------------------------------------------------------------------------
+2026-06-24 12:06:42 | ectuner |     INFO -> lwcf         | Global         | 0.0    |     -2.709 -> [91m    -7.926[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> lwcf         | Tropical       | 0.0    |     -5.038 -> [91m   -11.533[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> lwcf         | North Midlat   | 0.0    |     -0.397 -> [91m    -4.467[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> lwcf         | South Midlat   | 0.0    |     -0.364 -> [91m    -4.170[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> lwcf         | North Pole     | 0.0    |      5.081 -> [92m     1.073[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> lwcf         | South Pole     | 0.0    |      3.737 -> [92m     0.475[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> lwcf         | Equatorial     | 0.0    |     -5.041 -> [91m   -12.649[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> lwcf         | NH             | 0.0    |     -1.670 -> [91m    -5.823[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> lwcf         | SH             | 0.0    |     -1.325 -> [91m    -5.119[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO ->              | [Global Cost]    | -      |       2.7092 -> [91m      7.9258[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO ->              | [Spatial Cost]   | -      |       5.9092 -> [91m      8.5783[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> --------------------------------------------------------------------------
+2026-06-24 12:06:42 | ectuner |     INFO -> net_toa      | Global         | 0.0    |      5.626 -> [92m     5.624[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> net_toa      | Tropical       | 0.0    |      2.687 -> [92m     1.986[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> net_toa      | North Midlat   | 0.0    |      6.164 -> [91m     6.779[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> net_toa      | South Midlat   | 0.0    |     10.965 -> [91m    11.747[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> net_toa      | North Pole     | 0.0    |      8.072 -> [92m     7.953[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> net_toa      | South Pole     | 0.0    |     19.615 -> [92m    19.073[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> net_toa      | Equatorial     | 0.0    |      2.367 -> [92m     1.252[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> net_toa      | NH             | 0.0    |      4.927 -> [91m     5.290[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> net_toa      | SH             | 0.0    |      9.713 -> [91m    10.504[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO ->              | [Global Cost]    | -      |       5.6259 -> [92m      5.6245[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO ->              | [Spatial Cost]   | -      |       8.7339 -> [91m      9.2946[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> --------------------------------------------------------------------------
+2026-06-24 12:06:42 | ectuner |     INFO -> rlnt         | Tropical       | 0.0    |      3.844 -> [91m    -4.304[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> rlnt         | North Midlat   | 0.0    |      9.147 -> [92m     5.494[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> rlnt         | South Midlat   | 0.0    |     10.889 -> [92m     7.219[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> rlnt         | North Pole     | 0.0    |     13.651 -> [92m    10.787[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> rlnt         | South Pole     | 0.0    |     14.589 -> [92m    12.202[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> rlnt         | Equatorial     | 0.0    |      2.792 -> [91m    -6.804[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> rlnt         | NH             | 0.0    |      7.869 -> [92m     3.754[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> rlnt         | SH             | 0.0    |     10.297 -> [92m     6.438[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO ->              | [Global Cost]    | -      |       6.9311 -> [92m      1.0262[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO ->              | [Spatial Cost]   | -      |       9.4438 -> [92m      8.2290[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> --------------------------------------------------------------------------
+2026-06-24 12:06:42 | ectuner |     INFO -> rsnt         | Global         | 0.0    |     -1.305 -> [91m     4.598[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> rsnt         | Tropical       | 0.0    |     -1.157 -> [91m     6.290[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> rsnt         | North Midlat   | 0.0    |     -2.983 -> [92m     1.284[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> rsnt         | South Midlat   | 0.0    |      0.076 -> [91m     4.528[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> rsnt         | North Pole     | 0.0    |     -5.579 -> [92m    -2.834[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> rsnt         | South Pole     | 0.0    |      5.026 -> [91m     6.871[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> rsnt         | Equatorial     | 0.0    |     -0.425 -> [91m     8.056[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> rsnt         | NH             | 0.0    |     -2.942 -> [92m     1.536[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> rsnt         | SH             | 0.0    |     -0.584 -> [91m     4.066[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO ->              | [Global Cost]    | -      |       1.3053 -> [91m      4.5983[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO ->              | [Spatial Cost]   | -      |       7.8074 -> [91m      8.9165[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> --------------------------------------------------------------------------
+2026-06-24 12:06:42 | ectuner |     INFO -> swcf         | Global         | 0.0    |      0.506 -> [91m     6.498[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> swcf         | Tropical       | 0.0    |      0.248 -> [91m     7.764[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> swcf         | North Midlat   | 0.0    |     -0.103 -> [91m     4.382[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> swcf         | South Midlat   | 0.0    |      1.630 -> [91m     6.084[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> swcf         | North Pole     | 0.0    |     -6.228 -> [92m    -3.186[0m | IMPROVED
+2026-06-24 12:06:42 | ectuner |     INFO -> swcf         | South Pole     | 0.0    |      6.683 -> [91m     8.579[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> swcf         | Equatorial     | 0.0    |      0.569 -> [91m     9.096[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> swcf         | NH             | 0.0    |      0.218 -> [91m     4.913[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> swcf         | SH             | 0.0    |      0.727 -> [91m     5.383[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO ->              | [Global Cost]    | -      |       0.5056 -> [91m      6.4984[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO ->              | [Spatial Cost]   | -      |       8.2304 -> [91m     10.0620[0m | WORSENED
+2026-06-24 12:06:42 | ectuner |     INFO -> ==========================================================================================
+
+2026-06-24 12:06:42 | ectuner |     INFO -> Structured tuning YAML written to ../results/tuned_2d_LR/hybrid_test/l1/no_r2/rlnt_inc02/alfa_100/tuned_phis_l1_a100.yml
+
+| Parameter         |   New Value |   Old Value |      Change |   Rel. Change |   Dist. from Ref. |
+|-------------------+-------------+-------------+-------------+---------------+-------------------|
+| RPRCON            |  1.6794e-03 |  1.4000e-03 |  2.7944e-04 |    1.9960e-01 |        1.9960e-01 |
+| ENTRORG           |  2.0998e-03 |  1.7500e-03 |  3.4982e-04 |    1.9990e-01 |        1.9990e-01 |
+| DETRPEN           |  6.0021e-05 |  7.5000e-05 | -1.4979e-05 |   -1.9971e-01 |       -1.9971e-01 |
+| ENTRDD            |  3.5971e-04 |  3.0000e-04 |  5.9713e-05 |    1.9904e-01 |        1.9904e-01 |
+| RMFDEPS           |  2.4001e-01 |  3.0000e-01 | -5.9990e-02 |   -1.9997e-01 |       -1.9997e-01 |
+| RVICE             |  1.5592e-01 |  1.3000e-01 |  2.5923e-02 |    1.9940e-01 |        1.9940e-01 |
+| RLCRITSNOW        |  1.6005e-05 |  2.0000e-05 | -3.9950e-06 |   -1.9975e-01 |       -1.9975e-01 |
+| RSNOWLIN2         |  2.4005e-02 |  3.0000e-02 | -5.9954e-03 |   -1.9985e-01 |       -1.9985e-01 |
+| RCLDIFF           |  7.1984e-06 |  6.0000e-06 |  1.1984e-06 |    1.9974e-01 |        1.9974e-01 |
+| RCLDIFF_CONVI     |  8.0294e+00 |  1.0000e+01 | -1.9706e+00 |   -1.9706e-01 |       -1.9706e-01 |
+| RDEPLIQREFRATE    |  5.9950e-01 |  5.0000e-01 |  9.9499e-02 |    1.9900e-01 |        1.9900e-01 |
+| RDEPLIQREFDEPTH   |  4.0008e+02 |  5.0000e+02 | -9.9918e+01 |   -1.9984e-01 |       -1.9984e-01 |
+| RCL_OVERLAPLIQICE |  7.7998e-01 |  6.5000e-01 |  1.2998e-01 |    1.9996e-01 |        1.9996e-01 |
+| RCL_INHOMOGAUT    |  1.7992e+00 |  1.5000e+00 |  2.9918e-01 |    1.9945e-01 |        1.9945e-01 |
+| RCL_INHOMOGACC    |  3.5997e+00 |  3.0000e+00 |  5.9972e-01 |    1.9991e-01 |        1.9991e-01 |
+| RMINICE           |  7.2000e+01 |  6.0000e+01 |  1.2000e+01 |    2.0000e-01 |        2.0000e-01 |
+2026-06-24 12:06:42 | ectuner |     INFO -> Diagnostic maps saved to ../results/tuned_2d_LR/hybrid_test/l1/no_r2/rlnt_inc02/alfa_100/diagnostics_2d_phis_Global_a10.nc
+Copia del file YAML inviata a ../results/tuned_2d_LR/hybrid_test/l1/no_r2/rlnt_inc02/yaml_files

@@ -1,0 +1,36 @@
+--- ANALYSIS OF THE 7 RUNS WITH MAXIMUM LINEAR ERROR (|Residual| > 1.0 W/m²) ---
+Sobol Run i=000 -> Realized-Predicted Residual: -1.055 W/m²
+  Status of the top 3 dominant parameters in this run:
+    - ENTRORG           : +46.2%
+    - RCL_INHOMOGACC    : -44.2%
+    - RVICE             : +8.1%
+Sobol Run i=001 -> Realized-Predicted Residual: -1.028 W/m²
+  Status of the top 3 dominant parameters in this run:
+    - ENTRORG           : -44.9%
+    - RCL_INHOMOGACC    : +20.6%
+    - RVICE             : -6.6%
+Sobol Run i=019 -> Realized-Predicted Residual: -1.329 W/m²
+  Status of the top 3 dominant parameters in this run:
+    - ENTRORG           : -31.6%
+    - RCL_INHOMOGACC    : -38.3%
+    - RVICE             : -21.4%
+Sobol Run i=060 -> Realized-Predicted Residual: -1.260 W/m²
+  Status of the top 3 dominant parameters in this run:
+    - ENTRORG           : +47.1%
+    - RCL_INHOMOGACC    : -42.5%
+    - RVICE             : +45.2%
+Sobol Run i=087 -> Realized-Predicted Residual: +1.015 W/m²
+  Status of the top 3 dominant parameters in this run:
+    - ENTRORG           : -32.9%
+    - RCL_INHOMOGACC    : +8.5%
+    - RVICE             : -48.0%
+Sobol Run i=091 -> Realized-Predicted Residual: -1.656 W/m²
+  Status of the top 3 dominant parameters in this run:
+    - ENTRORG           : -49.9%
+    - RCL_INHOMOGACC    : -46.5%
+    - RVICE             : -2.1%
+Sobol Run i=109 -> Realized-Predicted Residual: +1.196 W/m²
+  Status of the top 3 dominant parameters in this run:
+    - ENTRORG           : -41.9%
+    - RCL_INHOMOGACC    : -44.8%
+    - RVICE             : +48.3%

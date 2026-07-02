@@ -173,7 +173,7 @@ def extract_2d_base(config, exp, year1, year2, variables):
 #     return total_error + param_penalty * penalty
 
 def objective_function_2d_hybrid(changes, opt_params, target_vars, bias_flat, sens_matrices_spatial, sens_matrices_global, 
-                                weights_vector, weights_flux, ref_params, current_values, 
+                                weights_vector_var, weights_flux, ref_params, current_values, 
                                 penalty, alpha=1, metric ='l2'):
     """
     alpha = 0: Ottimizzazione puramente spaziale (Pattern matching).
@@ -185,22 +185,25 @@ def objective_function_2d_hybrid(changes, opt_params, target_vars, bias_flat, se
     total_error = 0
     
     for var in target_vars:
+        if weights_flux.get(var, 0) <= 0:
+            continue
+        w_v = weights_vector_var[var]
         # --- TERMINE SPAZIALE (Pattern) ---
         delta_pred_spatial = np.dot(sens_matrices_spatial[var], changes)
         residual_spatial = bias_flat[var] + delta_pred_spatial
         
         # --- TERMINE GLOBALE (Accordo 1D) ---
-        sens_global_mean = np.average(sens_matrices_global[var], axis=0, weights=weights_vector)
-        bias_global_init = np.average(bias_flat[var], weights=weights_vector)
+        sens_global_mean = np.average(sens_matrices_global[var], axis=0, weights=w_v)
+        bias_global_init = np.average(bias_flat[var], weights=w_v)
         bias_global_final = bias_global_init + np.dot(sens_global_mean, changes)
 
         if metric.lower() == 'l2':
             # Metrica quadrata
-            cost_spatial = np.average(residual_spatial**2, weights=weights_vector)
+            cost_spatial = np.average(residual_spatial**2, weights=w_v)
             cost_global = bias_global_final**2
         else: 
             # Metrica lineare
-            cost_spatial = np.average(np.abs(residual_spatial), weights=weights_vector)
+            cost_spatial = np.average(np.abs(residual_spatial), weights=w_v)
             cost_global = np.abs(bias_global_final)
         
         # Mix ibrido
@@ -276,58 +279,206 @@ def save_diagnostic_maps(output_path, target_vars, bias_maps, ds_sens, params, o
     ds_diag = xr.merge(diagnostics, compat='override')
     ds_diag.to_netcdf(output_path)
 
-def print_global_summary_from_2d(logger, target_vars, bias_maps, ds_sens, params, optimal_changes, mask_2d, r2_threshold, alpha, metric='l2'):
+# def print_global_summary_from_2d(logger, target_vars, bias_maps, ds_sens, params, optimal_changes, mask_2d, r2_threshold, alpha, metric='l2'):
     
-    logger.info("\n" + f" GLOBAL & SPATIAL COSTS ({metric.upper()}) ".center(90, "="))
-    header = f"{'Variable':<12} | {'Metric':<16} | {'Initial':>18} -> {'Final':>18} | {'Status'}"
-    logger.info(header)
-    logger.info("-" * 90)
+#     logger.info("\n" + f" GLOBAL & SPATIAL COSTS ({metric.upper()}) ".center(90, "="))
+#     header = f"{'Variable':<12} | {'Metric':<16} | {'Initial':>18} -> {'Final':>18} | {'Status'}"
+#     logger.info(header)
+#     logger.info("-" * 90)
     
+#     summary_results = {}
+#     for var in target_vars:
+#         b_init_map = bias_maps[var]
+        
+#         delta_pred_raw = xr.zeros_like(b_init_map)    # Per il Global Mean (alpha=1)
+#         delta_pred_filt = xr.zeros_like(b_init_map)   # Per lo Spatial RMSE (alpha=0)
+        
+#         for i, p in enumerate(params):
+#             slope = ds_sens.sel(variable=var, parameter=p).slope
+#             r2 = ds_sens.sel(variable=var, parameter=p).r2
+#             # 1. Versione senza filtro R2
+#             delta_pred_raw += slope * optimal_changes[i]
+#             # 2. Versione con filtro R2
+#             delta_pred_filt += slope.where(r2 > r2_threshold, 0) * optimal_changes[i]
+
+#         # --- 1. GLOBAL COST ---
+#         # Calcolo bias medio (lineare)
+#         glob_bias_init = b_init_map.weighted(mask_2d).mean().values
+#         glob_bias_final = (b_init_map + delta_pred_raw).weighted(mask_2d).mean().values
+        
+#         # Calcolo del costo globale in base alla metrica scelta
+#         if metric.lower() == 'l2':
+#             g_cost_init, g_cost_final = glob_bias_init**2, glob_bias_final**2
+#         else:
+#             g_cost_init, g_cost_final = np.abs(glob_bias_init), np.abs(glob_bias_final)
+
+#         status_glob = "IMPROVED" if g_cost_final < g_cost_init else "WORSENED"
+#         logger.info(f"{var:<12} | Global Cost| {g_cost_init:>18.4f} -> {g_cost_final:>18.4f} | {status_glob}")
+
+#         # --- 2. SPATIAL COST ---
+#         b_final_map = b_init_map + delta_pred_filt
+#         if metric.lower() == 'l2':
+#             s_cost_init = (b_init_map**2).weighted(mask_2d).mean().values
+#             s_cost_final = (b_final_map**2).weighted(mask_2d).mean().values
+#         else:
+#             s_cost_init = np.abs(b_init_map).weighted(mask_2d).mean().values
+#             s_cost_final = np.abs(b_final_map).weighted(mask_2d).mean().values
+        
+#         status_spat = "IMPROVED" if s_cost_final < s_cost_init else "WORSENED"
+#         logger.info(f"{'':<12} | Spatial Cost  | {s_cost_init:>18.4f} -> {s_cost_final:>18.4f} | {status_spat}")
+
+#         logger.info("-" * 90)
+#         summary_results[var] = {'bias': glob_bias_final,'global_cost': g_cost_final, 'spatial_cost': s_cost_final}
+    
+#     return summary_results
+
+def print_global_summary_from_2d(logger, all_vars, bias_maps, ds_sens, params, optimal_changes, mask_2d, weights_flux, weights_region, r2_threshold, alpha, metric='l2'):
+    
+    region_bounds = {
+        'Global': (-90, 90),
+        'Tropical': (-30, 30),
+        'North Midlat': (30.0, 90.0),
+        'South Midlat': (-90.0, -30.0),
+        'North Pole': (60.0, 90.0),
+        'South Pole': (-90.0, -60.0),
+        'Equatorial': (-20.0, 20.0),
+        'NH': (20.0, 90.0),
+        'SH': (-90.0, -20.0),
+    }
+
     summary_results = {}
-    for var in target_vars:
+    targets_data = []
+    diagnostics_data = []
+
+    for var in all_vars:
         b_init_map = bias_maps[var]
+        delta_pred_raw = xr.zeros_like(b_init_map)
+        delta_pred_filt = xr.zeros_like(b_init_map)
         
-        delta_pred_raw = xr.zeros_like(b_init_map)    # Per il Global Mean (alpha=1)
-        delta_pred_filt = xr.zeros_like(b_init_map)   # Per lo Spatial RMSE (alpha=0)
-        
+        # Calcolo dei delta preteddi su tutta la mappa
         for i, p in enumerate(params):
             slope = ds_sens.sel(variable=var, parameter=p).slope
             r2 = ds_sens.sel(variable=var, parameter=p).r2
-            # 1. Versione senza filtro R2
             delta_pred_raw += slope * optimal_changes[i]
-            # 2. Versione con filtro R2
             delta_pred_filt += slope.where(r2 > r2_threshold, 0) * optimal_changes[i]
+            
+        b_final_map_raw = b_init_map + delta_pred_raw
+        b_final_map_filt = b_init_map + delta_pred_filt
 
-        # --- 1. GLOBAL COST ---
-        # Calcolo bias medio (lineare)
+        # --- 1. Calcoli per l'output YAML (Mantiene la tua metrica spaziale complessiva) ---
         glob_bias_init = b_init_map.weighted(mask_2d).mean().values
-        glob_bias_final = (b_init_map + delta_pred_raw).weighted(mask_2d).mean().values
+        glob_bias_final = b_final_map_raw.weighted(mask_2d).mean().values
         
-        # Calcolo del costo globale in base alla metrica scelta
         if metric.lower() == 'l2':
-            g_cost_init, g_cost_final = glob_bias_init**2, glob_bias_final**2
+            g_cost_final = glob_bias_final**2
+            s_cost_final = (b_final_map_filt**2).weighted(mask_2d).mean().values
         else:
-            g_cost_init, g_cost_final = np.abs(glob_bias_init), np.abs(glob_bias_final)
+            g_cost_final = np.abs(glob_bias_final)
+            s_cost_final = np.abs(b_final_map_filt).weighted(mask_2d).mean().values
+            
+        summary_results[var] = {'bias': glob_bias_final, 'global_cost': g_cost_final, 'spatial_cost': s_cost_final}
 
-        status_glob = "IMPROVED" if g_cost_final < g_cost_init else "WORSENED"
-        logger.info(f"{var:<12} | Global Cost| {g_cost_init:>18.4f} -> {g_cost_final:>18.4f} | {status_glob}")
+        # --- 2. Estrazione Regionale per il LOG (stile 1D) ---
+        var_w = weights_flux.get(var, 0)
+        
+        for region, bounds in region_bounds.items():
+            reg_w = weights_region.get(region, 0)
+            combined_w = var_w * reg_w
+            
+            low, high = bounds
+            lat = b_init_map.lat
+            
+            # Creiamo una maschera per la regione specifica pesata per l'area
+            cos_lat = np.cos(np.deg2rad(lat))
+            reg_mask = cos_lat.where((lat >= low) & (lat <= high), 0.0)
+            
+            # Calcolo del bias medio regionale (lineare, come in 1D)
+            init_val = b_init_map.weighted(reg_mask).mean().values
+            final_val = b_final_map_raw.weighted(reg_mask).mean().values
+            
+            row = [var, region, combined_w, init_val, final_val]
+            
+            if combined_w > 0:
+                targets_data.append(row)
+            else:
+                diagnostics_data.append(row)
 
-        # --- 2. SPATIAL COST ---
-        b_final_map = b_init_map + delta_pred_filt
+    # --- 3. Funzione di formattazione della tabella ---
+    def print_table(data_rows):
+        header = f"{'Variable':<12} | {'Region':<14} | {'Weight':<6} | {'Bias Init':>10} -> {'Bias Final':>10} | {'Status'}"
+        logger.info(header)
+        logger.info("-" * len(header))
+        current_var = None
+        for r in data_rows:
+            var_name, region, weight, b_init, b_final = r
+
+            if current_var is not None and current_var != var_name:
+                print_cost_summary(current_var)
+                logger.info("-" * len(header)) # Separatore tra variabili
+            current_var = var_name
+            
+            # Logica: è "Migliorato" se il valore assoluto si avvicina a 0
+            is_improved = abs(b_final) < abs(b_init)
+            status = "IMPROVED" if is_improved else "WORSENED"
+            color = "\033[92m" if is_improved else "\033[91m"
+            reset = "\033[0m"
+            
+            w_str = f"{weight:.1f}"
+            init_str = f"{float(b_init):10.3f}"
+            final_str = f"{float(b_final):10.3f}"
+            
+            logger.info(f"{var_name:<12} | {region:<14} | {w_str:<6} | {init_str} -> {color}{final_str}{reset} | {status}")
+
+        if current_var is not None:
+            print_cost_summary(current_var)
+    
+    def print_cost_summary(var_name):
+        """Funzione helper per stampare i Costi L1/L2 calcolati per una specifica variabile"""
+        data = summary_results[var_name]
+        g_init = abs(data['bias']) if metric.lower() == 'l1' else data['bias']**2 # Approssimazione per l'Init log (usa il final se vuoi, o ricalcola l'init vero)
+        
+        # Recuperiamo il vero costo iniziale (ricalcolato per il log)
+        b_init_map = bias_maps[var_name]
+        g_bias_init_val = b_init_map.weighted(mask_2d).mean().values
         if metric.lower() == 'l2':
+            g_cost_init = g_bias_init_val**2
             s_cost_init = (b_init_map**2).weighted(mask_2d).mean().values
-            s_cost_final = (b_final_map**2).weighted(mask_2d).mean().values
         else:
+            g_cost_init = np.abs(g_bias_init_val)
             s_cost_init = np.abs(b_init_map).weighted(mask_2d).mean().values
-            s_cost_final = np.abs(b_final_map).weighted(mask_2d).mean().values
-        
-        status_spat = "IMPROVED" if s_cost_final < s_cost_init else "WORSENED"
-        logger.info(f"{'':<12} | Spatial Cost  | {s_cost_init:>18.4f} -> {s_cost_final:>18.4f} | {status_spat}")
 
-        logger.info("-" * 90)
-        summary_results[var] = {'bias': glob_bias_final,'global_cost': g_cost_final, 'spatial_cost': s_cost_final}
+        g_cost_final = data['global_cost']
+        s_cost_final = data['spatial_cost']
+        
+        # Colori e Status per Global Cost
+        g_imp = g_cost_final < g_cost_init
+        g_stat = "IMPROVED" if g_imp else "WORSENED"
+        g_col = "\033[92m" if g_imp else "\033[91m"
+        
+        # Colori e Status per Spatial Cost
+        s_imp = s_cost_final < s_cost_init
+        s_stat = "IMPROVED" if s_imp else "WORSENED"
+        s_col = "\033[92m" if s_imp else "\033[91m"
+        reset = "\033[0m"
+
+        logger.info(f"{'':<12} | {'[Global Cost]':<16} | {'-':<6} | {g_cost_init:12.4f} -> {g_col}{g_cost_final:12.4f}{reset} | {g_stat}")
+        logger.info(f"{'':<12} | {'[Spatial Cost]':<16} | {'-':<6} | {s_cost_init:12.4f} -> {s_col}{s_cost_final:12.4f}{reset} | {s_stat}")
+
+    logger.info("\n" + f" OPTIMIZATION SUMMARY 2D (Biases & Costs: {metric.upper()}) ".center(90, "="))
+    logger.info("Goal: Bring Biases to 0.0")
+    
+    if targets_data:
+        logger.info("\n" + " PRIMARY TUNING TARGETS ".center(90, "-"))
+        print_table(targets_data)
+        
+    if diagnostics_data:
+        logger.info("\n" + " DIAGNOSTIC SIDE-EFFECTS ".center(90, "-"))
+        print_table(diagnostics_data)
+        
+    logger.info("=" * 90 + "\n")
     
     return summary_results
+
 
 #plot
 import matplotlib.pyplot as plt
@@ -420,9 +571,9 @@ def main():
         else:
             logger.warning("Output path not specified and 'output_dir' missing in config. YAML will NOT be saved.")
 
-    weights_flux = {v: float(w) for v, w in config['weights'].items() if float(w) > 0}
+    weights_flux = {v: float(w) for v, w in config['weights'].items()}
     weights_region = {r: float(w) for r, w in config.get('weights_region', {}).items()}
-    target_vars = list(weights_flux.keys())
+    all_vars = list(weights_flux.keys())
    
     param_file = os.path.join(config['files']['exps'], config['files']['params'].format(exp=exp))
     params_names, vals = load_params(param_file)
@@ -449,8 +600,8 @@ def main():
     # 3. Data loading and spatial mask generation
     logger.info("Loading 2D Data (Sensitivity, Reference, Base)...")
     ds_sens = load_sensitivity_2d(config['files']['sensitivity_nc'])
-    ref_maps = load_reference_2d(config, target_vars)
-    base_maps = load_base_2d(config, exp, y1, y2, target_vars)
+    ref_maps = load_reference_2d(config, all_vars)
+    base_maps = load_base_2d(config, exp, y1, y2, all_vars)
 
     logger.info("Generating spatial weights (Area * Region)...")
     mask_2d = get_region_mask(ds_sens, weights_region)
@@ -458,7 +609,7 @@ def main():
     # 4. Initial bias calculation
     metric_choice = config['spatial_tuning'].get('metric', 'l2')
     bias_maps = {}
-    for var in target_vars:
+    for var in all_vars:
         mod_resampled = base_maps[var].reindex_like(ref_maps[var], method='nearest')
         bias_maps[var] = mod_resampled - ref_maps[var]
         # initial bias calculation based on the chosen metric
@@ -479,28 +630,32 @@ def main():
 
     active_regions = [r for r, w in weights_region.items() if w > 0]
     region_tag = "-".join(active_regions) if active_regions else "NoRegion"
-
     run_tag = f"{region_tag}_a{alpha}".replace('.', '')
 
     #allineamento per ordinare i dati come la maschera (lat, lon ordinati) e poi flatten perchè diventi un vettore
-    mask_ordered = mask_2d.transpose('lat', 'lon').sortby(['lat', 'lon'])
-    mask_flat_raw = mask_ordered.values.flatten()
-    valid_pix = ~np.isnan(mask_flat_raw)
-    weights_vector = mask_flat_raw[valid_pix]
+    # mask_ordered = mask_2d.transpose('lat', 'lon').sortby(['lat', 'lon'])
+    # mask_flat_raw = mask_ordered.values.flatten()
+    # valid_pix = ~np.isnan(mask_flat_raw)
+    # weights_vector = mask_flat_raw[valid_pix]
     
     bias_flat = {}
     sens_matrices_spatial = {}
     sens_matrices_global = {} 
+    weights_vector_var = {}
 
-    for var in target_vars:
+    for var in all_vars:
         # ALLINEA E ORDINA il bias e la sensibilità come la maschera
         b_ordered = bias_maps[var].transpose('lat', 'lon').sortby(['lat', 'lon'])
+        mask_ordered = mask_2d.transpose('lat', 'lon').sortby(['lat', 'lon'])
+        actual_valid_mask = (~np.isnan(mask_ordered)) & (~np.isnan(b_ordered))
+        valid_pix = actual_valid_mask.values.flatten()
+        weights_vector_var[var] = mask_ordered.values.flatten()[valid_pix]
+        
         bias_flat[var] = b_ordered.values.flatten()[valid_pix]
         
         slopes_raw = []
         slopes_filtered = []
         for p in opt_params:
-            # ALLINEA E ORDINA anche la sensibilità
             s_ds = ds_sens.sel(variable=var, parameter=p).sortby(['lat', 'lon'])
             s_val = s_ds.slope.values.flatten()[valid_pix]
             r2_val = s_ds.r2.values.flatten()[valid_pix]
@@ -514,9 +669,37 @@ def main():
         sens_matrices_global[var] = np.column_stack(slopes_raw)
         sens_matrices_spatial[var] = np.column_stack(slopes_filtered)
 
-        check_bias = np.average(bias_flat[var], weights=weights_vector)
+        check_bias = np.average(bias_flat[var], weights=weights_vector_var[var])
         logger.info(f"DEBUG: Global Bias for {var} in optimizer: {check_bias:.4f}")
     
+    # === CHECK: CONFRONTO DOMINIO E REGRIDDING ===
+    # logger.info("=== DEBUG: DOMAIN & REGRIDDING CHECK ===")
+    
+    # # Inserisci i valori di osservazione (CERES) che usi nel tuo script di plot per il calcolo del bias realizzato
+    # obs_global_means = {
+    #     'rsnt': 241.5,   
+    #     'rlnt': -240.54,  
+    #     'net_toa': 1.02   
+    # }
+    
+    # # Inserisci i valori di ECmean per la simulazione "phis" (la tua baseline)
+    # ecmean_global_means = {
+    #     'rsnt': 240.31,
+    #     'rlnt': -233.63,
+    #     'net_toa': 6.68
+    # }
+
+    # for var in ['rsnt', 'rlnt', 'net_toa']:
+    #     if var in target_vars:
+    #         # 1. Calcolo del bias aggregato 2D del tuner (su griglia r180x90 con mask)
+    #         tuner_bias = np.average(bias_flat[var], weights=weights_vector_var[var])
+            
+    #         # 2. Calcolo del bias reale (Nativo - CERES)
+    #         realized_bias = ecmean_global_means[var] - obs_global_means[var]
+            
+    #         diff = abs(tuner_bias - realized_bias)
+    #         logger.info(f"[{var.upper()}] Tuner 2D Bias: {tuner_bias:.4f} | Native 1D Bias: {realized_bias:.4f} | Delta: {diff:.4f}")
+    # logger.info("=========================================")
 
     # 5. Optimization (FAST)
     logger.info(f"Starting 2D Optimization ({get_arg(args, 'method', 'dual_annealing')})...")
@@ -534,8 +717,8 @@ def main():
         bounds=bounds,
         minimizer_kwargs=m_kwargs,
         maxiter=1000,
-        args=(opt_params, target_vars, bias_flat, sens_matrices_spatial, sens_matrices_global,
-              weights_vector, weights_flux, ref_params, current_values, penalty, alpha, metric_choice), 
+        args=(opt_params, all_vars, bias_flat, sens_matrices_spatial, sens_matrices_global,
+              weights_vector_var, weights_flux, ref_params, current_values, penalty, alpha, metric_choice), 
     )
     
     # 5. Output 
@@ -545,21 +728,22 @@ def main():
     total_glob_cost = 0
     metric_name = config.get('spatial_tuning', {}).get('metric', 'l2').lower()
 
-    for var in target_vars:
+    for var in all_vars:
+        w_v = weights_vector_var[var]
         # Delta spaziale predetto (filtrato R2)
         d_spat = np.dot(sens_matrices_spatial[var], free_changes)
         res_spat = bias_flat[var] + d_spat
         
         # Delta globale predetto (senza filtro R2)
-        sens_glob_v = np.average(sens_matrices_global[var], axis=0, weights=weights_vector)
-        res_glob = np.average(bias_flat[var], weights=weights_vector) + np.dot(sens_glob_v, free_changes)
+        sens_glob_v = np.average(sens_matrices_global[var], axis=0, weights=w_v)
+        res_glob = np.average(bias_flat[var], weights=w_v) + np.dot(sens_glob_v, free_changes)
 
         # Calcolo del costo finale con stessa logica della funzione obiettivo
         if metric_name == 'l2':
-            v_spat = np.average(res_spat**2, weights=weights_vector)
+            v_spat = np.average(res_spat**2, weights=w_v)
             v_glob = res_glob**2
         else:
-            v_spat = np.average(np.abs(res_spat), weights=weights_vector)
+            v_spat = np.average(np.abs(res_spat), weights=w_v)
             v_glob = np.abs(res_glob)
         
         total_spat_cost += weights_flux[var] * v_spat
@@ -574,8 +758,8 @@ def main():
         opt_changes_dict[p] = free_changes[i]
 
     all_optimal_changes = [opt_changes_dict[p] for p in params_names]
-    results_meta =print_global_summary_from_2d(logger, target_vars, bias_maps, ds_sens, 
-                               params_names, all_optimal_changes, mask_2d, config['spatial_tuning']['r2_threshold'], alpha, metric=metric_choice)
+    results_meta =print_global_summary_from_2d(logger, all_vars, bias_maps, ds_sens, 
+                               params_names, all_optimal_changes, mask_2d, weights_flux, weights_region, config['spatial_tuning']['r2_threshold'], alpha, metric=metric_choice)
 
     if out:
         from ruamel.yaml import YAML
@@ -598,7 +782,7 @@ def main():
             f.write(f"# metric_used: {metric_name}\n") # <--- Aggiunto
             f.write(f"# total_spatial_cost: {total_spat_cost:.8f}\n") # <--- Aggiunto
             f.write(f"# total_global_cost: {total_glob_cost:.8f}\n") # <--- Aggiunto
-            f.write(f"# alpha: {alpha} | penalty: {penalty} | inc: {inc}\n")
+            f.write(f"# alpha: {alpha} | penalty: {penalty} | inc: {inc} | r2: {r2_thr} \n")
             f.write("# weights (flux):\n")
             for k, v in weights_flux.items():
                 f.write(f"#   {k}: {v}\n")
@@ -626,7 +810,7 @@ def main():
 
     # 8. Diagnostic maps output
     diag_file = os.path.join(config['files']['output_dir'], f"diagnostics_2d_{exp}_{run_tag}.nc")
-    save_diagnostic_maps(diag_file, target_vars, bias_maps, ds_sens, params_names, 
+    save_diagnostic_maps(diag_file, all_vars, bias_maps, ds_sens, params_names, 
                          all_optimal_changes, r2_thr)
     
     logger.info(f"Diagnostic maps saved to {diag_file}")

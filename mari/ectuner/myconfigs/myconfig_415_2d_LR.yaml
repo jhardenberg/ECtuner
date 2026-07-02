@@ -10,20 +10,20 @@ files:
   base_2d_dir: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/ecmean/maps_lres/"
   params: "tuning_{exp}.yml"
   exps: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/perturb_exps/exps_lres/"
-  output_dir: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/net_TOA/new_alfa_05/"
+  output_dir: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/hybrid_test/l1/r2/net_toa/"
 
 spatial_tuning:
   target_grid: "r180x90"
-  r2_threshold: 0.3 # Ignore pixels where the linear relationship between parameter and response is weak
-  alpha: 0.5 # Hybrid weight (0: spatial, 1: global)
-  metric: "l1" # Metric for spatial tuning (e.g., l1, l2, rmse)
+  r2_threshold: 0.15 # Ignore pixels where the linear relationship between parameter and response is weak
+  alpha: 0 # Hybrid weight (0: spatial, 1: global)
+  metric: "l2" # Metric for spatial tuning (e.g., l1, l2, rmse)
   area_weighting: True
 
 args:
   year1: 2000
   year2: 2017
-  penalty: 0 # In 2D penalty should be higher because spatial error is numerically larger
-  inc: 0.6
+  penalty: 0 # penalty low because there is the normalization of the cost function, values between 0 and 1 are recommended
+  inc: 0.2
   method: 'dual_annealing'
 
 frozen_parameters:
@@ -75,7 +75,7 @@ weights:
   rlnt: 0.0
   swcf: 0.0
   lwcf: 0.0
-  net_sfc: 0.0
+  #net_sfc: 0.0
 
 weights_region:
   Global: 1.0

@@ -1,0 +1,58 @@
+- base.context:
+    model_config:
+      oifs:
+        tuning:
+          naerad:
+            RMINICE: 71.999
+          namcldp:
+            RVICE: 0.15596
+            RLCRITSNOW: 1.6004e-05
+            RSNOWLIN2: 0.024007
+            RCLDIFF: 4.8e-06
+            RCLDIFF_CONVI: 8.1381
+            RDEPLIQREFRATE: 0.59973
+            RDEPLIQREFDEPTH: 459.32
+            RCL_OVERLAPLIQICE: 0.63888
+            RCL_INHOMOGAUT: 1.2003
+            RCL_INHOMOGACC: 2.4001
+          namcumf:
+            RPRCON: 0.0016795
+            ENTRORG: 0.0016806
+            DETRPEN: 8.9744e-05
+            ENTRDD: 0.00024031
+            RMFDEPS: 0.3599
+
+# --- ECtuner 2D meta-parameters ---
+# metric_used: l1
+# total_spatial_cost: 15.08181955
+# total_global_cost: 2.78090674
+# alpha: 0.3 | penalty: 0 | inc: 0.2 | r2: 0.0 
+# weights (flux):
+#   lwcf: 0.0
+#   net_toa: 0.0
+#   rlnt: 1.0
+#   rsnt: 1.0
+#   swcf: 0.0
+# weights (region):
+#   Equatorial: 0.0
+#   Global: 1.0
+#   North Midlat: 0.0
+#   North Pole: 0.0
+#   South Midlat: 0.0
+#   South Pole: 0.0
+#   Tropical: 0.0
+# lwcf_global_bias_final: -6.873957
+# lwcf_global_cost_l1: 6.873957
+# lwcf_spatial_cost_l1: 7.576455
+# net_toa_global_bias_final: 2.780912
+# net_toa_global_cost_l1: 2.780912
+# net_toa_spatial_cost_l1: 7.687282
+# rlnt_global_bias_final: 2.780714
+# rlnt_global_cost_l1: 2.780714
+# rlnt_spatial_cost_l1: 7.295394
+# rsnt_global_bias_final: 0.000192
+# rsnt_global_cost_l1: 0.000192
+# rsnt_spatial_cost_l1: 7.786426
+# swcf_global_bias_final: 1.923055
+# swcf_global_cost_l1: 1.923055
+# swcf_spatial_cost_l1: 8.465822

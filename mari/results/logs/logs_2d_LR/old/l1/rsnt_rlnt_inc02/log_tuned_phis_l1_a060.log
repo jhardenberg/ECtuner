@@ -1,0 +1,45 @@
+2026-06-05 08:18:13 | ectuner |     INFO -> Loading 2D Data (Sensitivity, Reference, Base)...
+   > Loading reference for rlnt from: climate_average_rlnt_CERES EBAF_r180x90_2000-2024.nc
+   > Flipping sign for rlnt (Obs is UP, Model is DOWN)
+   > Loading reference for rsnt from: climate_average_rsnt_CERES EBAF_r180x90_2000-2024.nc
+--- Loading cached base maps for phis ---
+2026-06-05 08:18:14 | ectuner |     INFO -> Generating spatial weights (Area * Region)...
+2026-06-05 08:18:14 | ectuner |     INFO -> Variable rlnt: Initial Spatial Absolute Cost (L1) (Weighted) = 9.4438
+2026-06-05 08:18:14 | ectuner |     INFO -> Variable rsnt: Initial Spatial Absolute Cost (L1) (Weighted) = 7.8074
+2026-06-05 08:18:14 | ectuner |     INFO -> Flattening data for fast optimization...
+2026-06-05 08:18:14 | ectuner |     INFO -> DEBUG: Global Bias for rlnt in optimizer: 6.9311
+2026-06-05 08:18:14 | ectuner |     INFO -> DEBUG: Global Bias for rsnt in optimizer: -1.3053
+2026-06-05 08:18:14 | ectuner |     INFO -> Starting 2D Optimization (dual_annealing)...
+2026-06-05 08:21:00 | ectuner |     INFO -> Optimization finished. Final Weighted Cost (L1): Spatial=15.5831, Global=2.3207
+2026-06-05 08:21:00 | ectuner |     INFO -> 
+============================== GLOBAL & SPATIAL COSTS (L1) ===============================
+2026-06-05 08:21:00 | ectuner |     INFO -> Variable     | Metric           |            Initial ->              Final | Status
+2026-06-05 08:21:00 | ectuner |     INFO -> ------------------------------------------------------------------------------------------
+2026-06-05 08:21:00 | ectuner |     INFO -> rlnt         | Global Cost|             6.9311 ->             2.3207 | IMPROVED
+2026-06-05 08:21:00 | ectuner |     INFO ->              | Spatial Cost  |             9.4438 ->             7.6700 | IMPROVED
+2026-06-05 08:21:00 | ectuner |     INFO -> ------------------------------------------------------------------------------------------
+2026-06-05 08:21:00 | ectuner |     INFO -> rsnt         | Global Cost|             1.3053 ->             0.0000 | IMPROVED
+2026-06-05 08:21:00 | ectuner |     INFO ->              | Spatial Cost  |             7.8074 ->             7.9131 | WORSENED
+2026-06-05 08:21:00 | ectuner |     INFO -> ------------------------------------------------------------------------------------------
+2026-06-05 08:21:00 | ectuner |     INFO -> Structured tuning YAML written to ../results/tuned_2d_LR/l1/rsnt_l/alfa_060/tuned_phis_l1_a060.yml
+
+| Parameter         |   New Value |   Old Value |      Change |   Rel. Change |   Dist. from Ref. |
+|-------------------+-------------+-------------+-------------+---------------+-------------------|
+| RPRCON            |  1.6748e-03 |  1.4000e-03 |  2.7481e-04 |    1.9629e-01 |        1.9629e-01 |
+| ENTRORG           |  2.0326e-03 |  1.7500e-03 |  2.8256e-04 |    1.6146e-01 |        1.6146e-01 |
+| DETRPEN           |  8.8164e-05 |  7.5000e-05 |  1.3164e-05 |    1.7552e-01 |        1.7552e-01 |
+| ENTRDD            |  2.4257e-04 |  3.0000e-04 | -5.7432e-05 |   -1.9144e-01 |       -1.9144e-01 |
+| RMFDEPS           |  3.4481e-01 |  3.0000e-01 |  4.4811e-02 |    1.4937e-01 |        1.4937e-01 |
+| RVICE             |  1.5597e-01 |  1.3000e-01 |  2.5973e-02 |    1.9979e-01 |        1.9979e-01 |
+| RLCRITSNOW        |  1.6001e-05 |  2.0000e-05 | -3.9993e-06 |   -1.9996e-01 |       -1.9996e-01 |
+| RSNOWLIN2         |  2.4014e-02 |  3.0000e-02 | -5.9859e-03 |   -1.9953e-01 |       -1.9953e-01 |
+| RCLDIFF           |  4.8000e-06 |  6.0000e-06 | -1.2000e-06 |   -1.9999e-01 |       -1.9999e-01 |
+| RCLDIFF_CONVI     |  8.2723e+00 |  1.0000e+01 | -1.7277e+00 |   -1.7277e-01 |       -1.7277e-01 |
+| RDEPLIQREFRATE    |  5.6134e-01 |  5.0000e-01 |  6.1341e-02 |    1.2268e-01 |        1.2268e-01 |
+| RDEPLIQREFDEPTH   |  4.5128e+02 |  5.0000e+02 | -4.8719e+01 |   -9.7438e-02 |       -9.7438e-02 |
+| RCL_OVERLAPLIQICE |  5.2066e-01 |  6.5000e-01 | -1.2934e-01 |   -1.9898e-01 |       -1.9898e-01 |
+| RCL_INHOMOGAUT    |  1.2346e+00 |  1.5000e+00 | -2.6539e-01 |   -1.7692e-01 |       -1.7692e-01 |
+| RCL_INHOMOGACC    |  2.9870e+00 |  3.0000e+00 | -1.2950e-02 |   -4.3167e-03 |       -4.3167e-03 |
+| RMINICE           |  7.2000e+01 |  6.0000e+01 |  1.2000e+01 |    1.9999e-01 |        1.9999e-01 |
+2026-06-05 08:21:00 | ectuner |     INFO -> Diagnostic maps saved to ../results/tuned_2d_LR/l1/rsnt_l/alfa_060/diagnostics_2d_phis_Global_a06.nc
+Copia del file YAML inviata a ../results/tuned_2d_LR/l1/rsnt_l/yaml_files

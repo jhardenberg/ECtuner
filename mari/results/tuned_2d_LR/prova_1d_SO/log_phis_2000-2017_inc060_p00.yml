@@ -1,0 +1,605 @@
+2026-05-11 13:41:33,592 - INFO - ==== ECtuner configuration ====
+2026-05-11 13:41:33,595 - INFO - 
+files:
+  reference: ecmean/reference/gm_reference_EC26-PDAY.yml
+  sensitivity: sensitivities/sensitivity_TL63_415_1991-2000.yaml
+  slope_file: utils/slopes.yaml
+  base: GM_EC26-PDAY_{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml
+  params: tuning_{exp}.yml
+  output_template: tuned_{exp}_{year1}_{year2}.yml
+  ecmean: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/ecmean/gm_lres/
+  exps: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/perturb_exps/exps_lres/
+  output_dir: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/prova_1d_SO/
+args:
+  year1: 2000
+  year2: 2017
+  penalty: 0
+  inc: 0.6
+  method: dual_annealing
+  model_imbalance: null
+  deltaT: null
+reference_parameters:
+  RPRCON: 0.0014
+  ENTRORG: 0.00175
+  DETRPEN: 7.5e-05
+  ENTRDD: 0.0003
+  RMFDEPS: 0.3
+  RVICE: 0.13
+  RLCRITSNOW: 2E-05
+  RSNOWLIN2: 0.03
+  RCLDIFF: 6.0e-06
+  RCLDIFF_CONVI: 10.0
+  RDEPLIQREFRATE: 0.5
+  RDEPLIQREFDEPTH: 500.0
+  RCL_OVERLAPLIQICE: 0.65
+  RCL_INHOMOGAUT: 1.5
+  RCL_INHOMOGACC: 3
+  RMINICE: 60
+parameter_group:
+  namcumf:
+  - RPRCON
+  - ENTRORG
+  - DETRPEN
+  - ENTRDD
+  - RMFDEPS
+  namcldp:
+  - RVICE
+  - RLCRITSNOW
+  - RSNOWLIN2
+  - RCLDIFF
+  - RCLDIFF_CONVI
+  - RDEPLIQREFRATE
+  - RDEPLIQREFDEPTH
+  - RCL_OVERLAPLIQICE
+  - RCL_INHOMOGAUT
+  - RCL_INHOMOGACC
+  naerad:
+  - RMINICE
+weights_season:
+  ALL: 1.0
+  DJF: 0.0
+  JJA: 0.0
+weights_region:
+  Global: 1.0
+  Tropical: 0.0
+  North Midlat: 0
+  South Midlat: 1.0
+  NH: 0.0
+  SH: 1.0
+  Equatorial: 0.0
+  North Pole: 0.0
+  South Pole: 1.0
+weights:
+  net_toa: 1.0
+  rsnt: 1.0
+  rlnt: 0.0
+  swcf: 0.0
+  lwcf: 0.0
+  rsns: 0.0
+  rlns: 0.0
+  hfss: 0.0
+  hfls: 0.0
+  net_sfc: 0.0
+  toamsfc: 0.0
+
+2026-05-11 13:41:34,648 - INFO - [CONFIG] Output will be saved to: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/prova_1d_SO/tuned_phis_2000_2017.yml
+2026-05-11 13:41:34,648 - INFO - 
+---------------- PHYSICS-BASED REFERENCE ADJUSTMENTS (Target Shifts) ----------------
+2026-05-11 13:41:34,648 - INFO - Variable     | Region       |   Original |  Corrected |  Total Shift
+2026-05-11 13:41:34,648 - INFO - -------------------------------------------------------------------------------------
+2026-05-11 13:41:34,649 - INFO - net_toa      | Global       |     1.0160 |     1.0160 |      +0.0000 W/m2
+2026-05-11 13:41:34,649 - INFO - rsnt         | Global       |   241.5560 |   241.5560 |      +0.0000 W/m2
+2026-05-11 13:41:34,649 - INFO - rlnt         | Global       |  -240.5400 |  -240.5400 |      +0.0000 W/m2
+2026-05-11 13:41:34,649 - INFO - -------------------------------------------------------------------------------------
+2026-05-11 13:41:34,649 - INFO - -------------------------------------------------------------------------------------
+
+2026-05-11 13:43:37,700 - INFO - ==== ECtuner configuration ====
+2026-05-11 13:43:37,775 - INFO - 
+files:
+  reference: ecmean/reference/gm_reference_EC26-PDAY.yml
+  sensitivity: sensitivities/sensitivity_TL63_415_1991-2000.yaml
+  slope_file: utils/slopes.yaml
+  base: GM_EC26-PDAY_{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml
+  params: tuning_{exp}.yml
+  output_template: tuned_{exp}_{year1}_{year2}.yml
+  ecmean: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/ecmean/gm_lres/
+  exps: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/perturb_exps/exps_lres/
+  output_dir: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/prova_1d_SO/
+args:
+  year1: 2000
+  year2: 2017
+  penalty: 0
+  inc: 0.6
+  method: dual_annealing
+  model_imbalance: null
+  deltaT: null
+reference_parameters:
+  RPRCON: 0.0014
+  ENTRORG: 0.00175
+  DETRPEN: 7.5e-05
+  ENTRDD: 0.0003
+  RMFDEPS: 0.3
+  RVICE: 0.13
+  RLCRITSNOW: 2E-05
+  RSNOWLIN2: 0.03
+  RCLDIFF: 6.0e-06
+  RCLDIFF_CONVI: 10.0
+  RDEPLIQREFRATE: 0.5
+  RDEPLIQREFDEPTH: 500.0
+  RCL_OVERLAPLIQICE: 0.65
+  RCL_INHOMOGAUT: 1.5
+  RCL_INHOMOGACC: 3
+  RMINICE: 60
+parameter_group:
+  namcumf:
+  - RPRCON
+  - ENTRORG
+  - DETRPEN
+  - ENTRDD
+  - RMFDEPS
+  namcldp:
+  - RVICE
+  - RLCRITSNOW
+  - RSNOWLIN2
+  - RCLDIFF
+  - RCLDIFF_CONVI
+  - RDEPLIQREFRATE
+  - RDEPLIQREFDEPTH
+  - RCL_OVERLAPLIQICE
+  - RCL_INHOMOGAUT
+  - RCL_INHOMOGACC
+  naerad:
+  - RMINICE
+weights_season:
+  ALL: 1.0
+  DJF: 0.0
+  JJA: 0.0
+weights_region:
+  Global: 1.0
+  Tropical: 0.0
+  North Midlat: 0
+  South Midlat: 1.0
+  NH: 0.0
+  SH: 1.0
+  Equatorial: 0.0
+  North Pole: 0.0
+  South Pole: 1.0
+weights:
+  net_toa: 1.0
+  rsnt: 1.0
+  rlnt: 0.0
+  swcf: 0.0
+  lwcf: 0.0
+  rsns: 0.0
+  rlns: 0.0
+  hfss: 0.0
+  hfls: 0.0
+  net_sfc: 0.0
+  toamsfc: 0.0
+
+2026-05-11 13:43:38,633 - INFO - [CONFIG] Output will be saved to: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/prova_1d_SO/tuned_phis_2000_2017.yml
+2026-05-11 13:43:38,633 - INFO - 
+---------------- PHYSICS-BASED REFERENCE ADJUSTMENTS (Target Shifts) ----------------
+2026-05-11 13:43:38,633 - INFO - Variable     | Region       |   Original |  Corrected |  Total Shift
+2026-05-11 13:43:38,633 - INFO - -------------------------------------------------------------------------------------
+2026-05-11 13:43:38,633 - INFO - net_toa      | Global       |     1.0160 |     1.0160 |      +0.0000 W/m2
+2026-05-11 13:43:38,633 - INFO - rsnt         | Global       |   241.5560 |   241.5560 |      +0.0000 W/m2
+2026-05-11 13:43:38,633 - INFO - rlnt         | Global       |  -240.5400 |  -240.5400 |      +0.0000 W/m2
+2026-05-11 13:43:38,633 - INFO - -------------------------------------------------------------------------------------
+2026-05-11 13:43:38,633 - INFO - -------------------------------------------------------------------------------------
+
+2026-05-11 13:43:38,694 - INFO - No frozen parameters specified.
+2026-05-11 13:43:38,694 - INFO - Optimizing parameters using dual_annealing ...
+2026-05-11 13:44:13,676 - INFO - 
+2026-05-11 13:44:13,678 - INFO - 
+===================== OPTIMIZATION SUMMARY (Biases: Model - Target) ======================
+2026-05-11 13:44:13,678 - INFO - Goal: Bring Biases to 0.0
+2026-05-11 13:44:13,678 - INFO - 
+--------------------------------- PRIMARY TUNING TARGETS ---------------------------------
+2026-05-11 13:44:13,678 - INFO - Variable     | Season | Region       | Weight |  Bias Init -> Bias Final | Status
+2026-05-11 13:44:13,678 - INFO - ---------------------------------------------------------------------------------
+2026-05-11 13:44:13,678 - INFO - net_toa      | ALL    | Global       | 1.0    |      5.660 -> [92m    -3.959[0m | IMPROVED
+2026-05-11 13:44:13,678 - INFO - net_toa      | ALL    | South Midlat | 1.0    |      9.842 -> [92m     2.647[0m | IMPROVED
+2026-05-11 13:44:13,678 - INFO - net_toa      | ALL    | SH           | 1.0    |     10.376 -> [92m     2.933[0m | IMPROVED
+2026-05-11 13:44:13,678 - INFO - net_toa      | ALL    | South Pole   | 1.0    |     17.312 -> [92m    10.900[0m | IMPROVED
+2026-05-11 13:44:13,678 - INFO - rsnt         | ALL    | Global       | 1.0    |     -1.247 -> [92m    -1.083[0m | IMPROVED
+2026-05-11 13:44:13,678 - INFO - rsnt         | ALL    | South Midlat | 1.0    |     -2.011 -> [92m    -1.428[0m | IMPROVED
+2026-05-11 13:44:13,678 - INFO - rsnt         | ALL    | SH           | 1.0    |      0.609 -> [92m     0.496[0m | IMPROVED
+2026-05-11 13:44:13,678 - INFO - rsnt         | ALL    | South Pole   | 1.0    |      0.472 -> [91m     1.445[0m | WORSENED
+2026-05-11 13:44:13,678 - INFO - 
+-------------------------------- DIAGNOSTIC SIDE-EFFECTS ---------------------------------
+2026-05-11 13:44:13,678 - INFO - Variable     | Season | Region       | Weight |  Bias Init -> Bias Final | Status
+2026-05-11 13:44:13,678 - INFO - ---------------------------------------------------------------------------------
+2026-05-11 13:44:13,678 - INFO - net_toa      | ALL    | Tropical     | 0.0    |      2.030 -> [91m   -10.634[0m | WORSENED
+2026-05-11 13:44:13,678 - INFO - net_toa      | ALL    | North Midlat | 0.0    |      5.195 -> [92m    -0.492[0m | IMPROVED
+2026-05-11 13:44:13,678 - INFO - net_toa      | ALL    | NH           | 0.0    |      5.545 -> [92m    -0.236[0m | IMPROVED
+2026-05-11 13:44:13,678 - INFO - net_toa      | ALL    | Equatorial   | 0.0    |      2.963 -> [91m   -12.640[0m | WORSENED
+2026-05-11 13:44:13,678 - INFO - net_toa      | ALL    | North Pole   | 0.0    |      5.331 -> [92m     0.497[0m | IMPROVED
+2026-05-11 13:44:13,678 - INFO - net_toa      | DJF    | Global       | 0.0    |      5.967 -> [92m    -3.529[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - net_toa      | DJF    | Tropical     | 0.0    |      1.469 -> [91m   -12.070[0m | WORSENED
+2026-05-11 13:44:13,679 - INFO - net_toa      | DJF    | North Midlat | 0.0    |      8.103 -> [92m     1.497[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - net_toa      | DJF    | South Midlat | 0.0    |      9.503 -> [92m     5.557[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - net_toa      | DJF    | NH           | 0.0    |      8.163 -> [92m     2.361[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - net_toa      | DJF    | SH           | 0.0    |      9.605 -> [92m     3.531[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - net_toa      | DJF    | Equatorial   | 0.0    |      1.964 -> [91m   -14.611[0m | WORSENED
+2026-05-11 13:44:13,679 - INFO - net_toa      | DJF    | North Pole   | 0.0    |     15.297 -> [92m     8.623[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - net_toa      | DJF    | South Pole   | 0.0    |     20.318 -> [92m    15.309[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - net_toa      | JJA    | Global       | 0.0    |      4.671 -> [91m    -4.818[0m | WORSENED
+2026-05-11 13:44:13,679 - INFO - net_toa      | JJA    | Tropical     | 0.0    |      1.733 -> [91m    -9.588[0m | WORSENED
+2026-05-11 13:44:13,679 - INFO - net_toa      | JJA    | North Midlat | 0.0    |      2.437 -> [91m    -2.702[0m | WORSENED
+2026-05-11 13:44:13,679 - INFO - net_toa      | JJA    | South Midlat | 0.0    |      9.949 -> [92m    -0.066[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - net_toa      | JJA    | NH           | 0.0    |      1.940 -> [91m    -3.126[0m | WORSENED
+2026-05-11 13:44:13,679 - INFO - net_toa      | JJA    | SH           | 0.0    |     10.276 -> [92m     1.487[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - net_toa      | JJA    | Equatorial   | 0.0    |      3.357 -> [91m   -11.228[0m | WORSENED
+2026-05-11 13:44:13,679 - INFO - net_toa      | JJA    | North Pole   | 0.0    |     -6.535 -> [91m   -11.768[0m | WORSENED
+2026-05-11 13:44:13,679 - INFO - net_toa      | JJA    | South Pole   | 0.0    |     16.673 -> [92m    10.070[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - rsnt         | ALL    | Tropical     | 0.0    |     -1.878 -> [92m    -1.789[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - rsnt         | ALL    | North Midlat | 0.0    |     -4.785 -> [91m    -4.883[0m | WORSENED
+2026-05-11 13:44:13,679 - INFO - rsnt         | ALL    | NH           | 0.0    |     -1.807 -> [92m    -1.778[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - rsnt         | ALL    | Equatorial   | 0.0    |     -0.084 -> [91m     0.490[0m | WORSENED
+2026-05-11 13:44:13,679 - INFO - rsnt         | ALL    | North Pole   | 0.0    |     -9.117 -> [92m    -7.307[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - rsnt         | DJF    | Global       | 0.0    |     -0.707 -> [92m    -0.569[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - rsnt         | DJF    | Tropical     | 0.0    |     -2.796 -> [91m    -3.096[0m | WORSENED
+2026-05-11 13:44:13,679 - INFO - rsnt         | DJF    | North Midlat | 0.0    |     -2.326 -> [92m    -1.989[0m | IMPROVED
+2026-05-11 13:44:13,679 - INFO - rsnt         | DJF    | South Midlat | 0.0    |     -0.310 -> [91m     0.545[0m | WORSENED
+2026-05-11 13:44:13,679 - INFO - rsnt         | DJF    | NH           | 0.0    |      0.571 -> [92m     0.111[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rsnt         | DJF    | SH           | 0.0    |      0.457 -> [91m     1.117[0m | WORSENED
+2026-05-11 13:44:13,680 - INFO - rsnt         | DJF    | Equatorial   | 0.0    |     -0.712 -> [92m    -0.498[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rsnt         | DJF    | North Pole   | 0.0    |     -0.962 -> [92m    -0.485[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rsnt         | DJF    | South Pole   | 0.0    |      6.380 -> [91m     7.617[0m | WORSENED
+2026-05-11 13:44:13,680 - INFO - rsnt         | JJA    | Global       | 0.0    |     -2.455 -> [92m    -2.070[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rsnt         | JJA    | Tropical     | 0.0    |     -2.156 -> [92m    -0.772[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rsnt         | JJA    | North Midlat | 0.0    |     -6.436 -> [91m    -7.788[0m | WORSENED
+2026-05-11 13:44:13,680 - INFO - rsnt         | JJA    | South Midlat | 0.0    |     -3.732 -> [92m    -3.695[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rsnt         | JJA    | NH           | 0.0    |     -4.475 -> [92m    -3.233[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rsnt         | JJA    | SH           | 0.0    |     -0.490 -> [91m    -1.847[0m | WORSENED
+2026-05-11 13:44:13,680 - INFO - rsnt         | JJA    | Equatorial   | 0.0    |     -0.366 -> [91m     0.898[0m | WORSENED
+2026-05-11 13:44:13,680 - INFO - rsnt         | JJA    | North Pole   | 0.0    |    -21.943 -> [92m   -18.674[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rsnt         | JJA    | South Pole   | 0.0    |     -0.894 -> [92m    -0.689[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rlnt         | ALL    | Global       | 0.0    |      6.907 -> [92m    -2.876[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rlnt         | ALL    | Tropical     | 0.0    |      3.910 -> [91m    -8.844[0m | WORSENED
+2026-05-11 13:44:13,680 - INFO - rlnt         | ALL    | North Midlat | 0.0    |      9.978 -> [92m     4.390[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rlnt         | ALL    | South Midlat | 0.0    |     11.854 -> [92m     4.075[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rlnt         | ALL    | NH           | 0.0    |      7.352 -> [92m     1.542[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rlnt         | ALL    | SH           | 0.0    |      9.768 -> [92m     2.438[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rlnt         | ALL    | Equatorial   | 0.0    |      3.047 -> [91m   -13.130[0m | WORSENED
+2026-05-11 13:44:13,680 - INFO - rlnt         | ALL    | North Pole   | 0.0    |     14.448 -> [92m     7.803[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rlnt         | ALL    | South Pole   | 0.0    |     16.839 -> [92m     9.453[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rlnt         | DJF    | Global       | 0.0    |      6.675 -> [92m    -2.960[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rlnt         | DJF    | Tropical     | 0.0    |      4.267 -> [91m    -8.973[0m | WORSENED
+2026-05-11 13:44:13,680 - INFO - rlnt         | DJF    | North Midlat | 0.0    |     10.429 -> [92m     3.486[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rlnt         | DJF    | South Midlat | 0.0    |      9.813 -> [92m     5.011[0m | IMPROVED
+2026-05-11 13:44:13,680 - INFO - rlnt         | DJF    | NH           | 0.0    |      7.591 -> [92m     2.249[0m | IMPROVED
+2026-05-11 13:44:13,681 - INFO - rlnt         | DJF    | SH           | 0.0    |      9.148 -> [92m     2.414[0m | IMPROVED
+2026-05-11 13:44:13,681 - INFO - rlnt         | DJF    | Equatorial   | 0.0    |      2.676 -> [91m   -14.113[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - rlnt         | DJF    | North Pole   | 0.0    |     16.259 -> [92m     9.107[0m | IMPROVED
+2026-05-11 13:44:13,681 - INFO - rlnt         | DJF    | South Pole   | 0.0    |     13.936 -> [92m     7.692[0m | IMPROVED
+2026-05-11 13:44:13,681 - INFO - rlnt         | JJA    | Global       | 0.0    |      7.126 -> [92m    -2.749[0m | IMPROVED
+2026-05-11 13:44:13,681 - INFO - rlnt         | JJA    | Tropical     | 0.0    |      3.888 -> [91m    -8.816[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - rlnt         | JJA    | North Midlat | 0.0    |      8.874 -> [92m     5.086[0m | IMPROVED
+2026-05-11 13:44:13,681 - INFO - rlnt         | JJA    | South Midlat | 0.0    |     13.681 -> [92m     3.630[0m | IMPROVED
+2026-05-11 13:44:13,681 - INFO - rlnt         | JJA    | NH           | 0.0    |      6.415 -> [92m     0.107[0m | IMPROVED
+2026-05-11 13:44:13,681 - INFO - rlnt         | JJA    | SH           | 0.0    |     10.765 -> [92m     3.333[0m | IMPROVED
+2026-05-11 13:44:13,681 - INFO - rlnt         | JJA    | Equatorial   | 0.0    |      3.722 -> [91m   -12.128[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - rlnt         | JJA    | North Pole   | 0.0    |     15.407 -> [92m     6.906[0m | IMPROVED
+2026-05-11 13:44:13,681 - INFO - rlnt         | JJA    | South Pole   | 0.0    |     17.567 -> [92m    10.760[0m | IMPROVED
+2026-05-11 13:44:13,681 - INFO - swcf         | ALL    | Global       | 0.0    |      0.499 -> [91m     1.028[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - swcf         | ALL    | Tropical     | 0.0    |      0.247 -> [91m     0.637[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - swcf         | ALL    | North Midlat | 0.0    |     -0.213 -> [91m     0.496[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - swcf         | ALL    | South Midlat | 0.0    |      1.497 -> [91m     2.139[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - swcf         | ALL    | NH           | 0.0    |      0.332 -> [91m     1.105[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - swcf         | ALL    | SH           | 0.0    |      0.790 -> [91m     0.790[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - swcf         | ALL    | Equatorial   | 0.0    |      0.394 -> [91m     1.208[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - swcf         | ALL    | North Pole   | 0.0    |     -5.146 -> [92m    -3.645[0m | IMPROVED
+2026-05-11 13:44:13,681 - INFO - swcf         | ALL    | South Pole   | 0.0    |      9.890 -> [91m    10.796[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - swcf         | DJF    | Global       | 0.0    |      1.205 -> [91m     1.726[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - swcf         | DJF    | Tropical     | 0.0    |     -0.552 -> [91m    -0.572[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - swcf         | DJF    | North Midlat | 0.0    |      2.061 -> [91m     3.428[0m | WORSENED
+2026-05-11 13:44:13,681 - INFO - swcf         | DJF    | South Midlat | 0.0    |      3.575 -> [91m     4.381[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - swcf         | DJF    | NH           | 0.0    |      1.511 -> [91m     1.901[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - swcf         | DJF    | SH           | 0.0    |      2.192 -> [91m     2.916[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - swcf         | DJF    | Equatorial   | 0.0    |      0.028 -> [91m     0.478[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - swcf         | DJF    | North Pole   | 0.0    |      0.647 -> [91m     0.995[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - swcf         | DJF    | South Pole   | 0.0    |     22.741 -> [91m    23.647[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - swcf         | JJA    | Global       | 0.0    |     -1.263 -> [92m    -0.725[0m | IMPROVED
+2026-05-11 13:44:13,682 - INFO - swcf         | JJA    | Tropical     | 0.0    |      0.475 -> [91m     2.104[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - swcf         | JJA    | North Midlat | 0.0    |     -5.721 -> [91m    -7.060[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - swcf         | JJA    | South Midlat | 0.0    |     -0.585 -> [92m    -0.445[0m | IMPROVED
+2026-05-11 13:44:13,682 - INFO - swcf         | JJA    | NH           | 0.0    |     -3.721 -> [92m    -2.355[0m | IMPROVED
+2026-05-11 13:44:13,682 - INFO - swcf         | JJA    | SH           | 0.0    |     -0.884 -> [91m    -2.124[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - swcf         | JJA    | Equatorial   | 0.0    |      0.776 -> [91m     2.262[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - swcf         | JJA    | North Pole   | 0.0    |    -20.212 -> [92m   -18.277[0m | IMPROVED
+2026-05-11 13:44:13,682 - INFO - swcf         | JJA    | South Pole   | 0.0    |      0.222 -> [91m     0.450[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - lwcf         | ALL    | Global       | 0.0    |     -2.706 -> [91m   -12.601[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - lwcf         | ALL    | Tropical     | 0.0    |     -5.135 -> [91m   -16.805[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - lwcf         | ALL    | North Midlat | 0.0    |     -0.301 -> [91m    -8.353[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - lwcf         | ALL    | South Midlat | 0.0    |     -0.230 -> [91m    -8.261[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - lwcf         | ALL    | NH           | 0.0    |     -1.749 -> [91m    -9.382[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - lwcf         | ALL    | SH           | 0.0    |     -1.379 -> [91m    -8.835[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - lwcf         | ALL    | Equatorial   | 0.0    |     -4.798 -> [91m   -19.366[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - lwcf         | ALL    | North Pole   | 0.0    |      4.483 -> [92m    -4.244[0m | IMPROVED
+2026-05-11 13:44:13,682 - INFO - lwcf         | ALL    | South Pole   | 0.0    |      2.337 -> [91m    -5.485[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - lwcf         | DJF    | Global       | 0.0    |     -3.251 -> [91m   -13.127[0m | WORSENED
+2026-05-11 13:44:13,682 - INFO - lwcf         | DJF    | Tropical     | 0.0    |     -5.371 -> [91m   -17.521[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | DJF    | North Midlat | 0.0    |     -0.523 -> [91m   -10.200[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | DJF    | South Midlat | 0.0    |     -1.844 -> [91m    -7.173[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | DJF    | NH           | 0.0    |     -2.034 -> [91m    -9.679[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | DJF    | SH           | 0.0    |     -1.948 -> [91m    -8.721[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | DJF    | Equatorial   | 0.0    |     -5.528 -> [91m   -20.711[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | DJF    | North Pole   | 0.0    |      4.004 -> [91m    -6.409[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | DJF    | South Pole   | 0.0    |      1.327 -> [91m    -4.769[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | JJA    | Global       | 0.0    |     -2.143 -> [91m   -12.116[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | JJA    | Tropical     | 0.0    |     -4.637 -> [91m   -16.268[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | JJA    | North Midlat | 0.0    |     -0.720 -> [91m    -6.672[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | JJA    | South Midlat | 0.0    |      1.538 -> [91m    -8.993[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | JJA    | NH           | 0.0    |     -1.992 -> [91m    -9.511[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | JJA    | SH           | 0.0    |     -0.328 -> [91m    -8.310[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | JJA    | Equatorial   | 0.0    |     -3.966 -> [91m   -18.360[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - lwcf         | JJA    | North Pole   | 0.0    |      4.629 -> [92m    -3.676[0m | IMPROVED
+2026-05-11 13:44:13,683 - INFO - lwcf         | JJA    | South Pole   | 0.0    |      3.246 -> [91m    -6.410[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - rsns         | ALL    | Global       | 0.0    |      2.418 -> [92m     2.372[0m | IMPROVED
+2026-05-11 13:44:13,683 - INFO - rlns         | ALL    | Global       | 0.0    |     -2.684 -> [91m    -4.395[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - hfss         | ALL    | Global       | 0.0    |      3.336 -> [92m     1.384[0m | IMPROVED
+2026-05-11 13:44:13,683 - INFO - hfls         | ALL    | Global       | 0.0    |      2.914 -> [91m    -3.374[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - net_sfc      | ALL    | Global       | 0.0    |      5.615 -> [92m    -4.410[0m | IMPROVED
+2026-05-11 13:44:13,683 - INFO - toamsfc      | ALL    | Global       | 0.0    |      0.461 -> [91m     0.867[0m | WORSENED
+2026-05-11 13:44:13,683 - INFO - ==========================================================================================
+
+2026-05-11 13:44:13,684 - INFO - Total score before optimization: 542.4577922321687
+2026-05-11 13:44:13,685 - INFO - Total score after optimization: 155.63414124961082
+2026-05-11 13:44:14,187 - INFO - Structured tuning YAML written to /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/prova_1d_SO/tuned_phis_2000_2017.yml
+2026-05-11 15:15:46,268 - INFO - ==== ECtuner configuration ====
+2026-05-11 15:15:46,290 - INFO - 
+files:
+  reference: ecmean/reference/gm_reference_EC26-PDAY.yml
+  sensitivity: sensitivities/sensitivity_TL63_415_1991-2000.yaml
+  slope_file: utils/slopes.yaml
+  base: GM_EC26-PDAY_{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml
+  params: tuning_{exp}.yml
+  output_template: tuned_{exp}_{year1}_{year2}.yml
+  ecmean: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/ecmean/gm_lres/
+  exps: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/perturb_exps/exps_lres/
+  output_dir: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/prova_1d_SO/
+args:
+  year1: 2000
+  year2: 2017
+  penalty: 0
+  inc: 0.6
+  method: dual_annealing
+  model_imbalance: null
+  deltaT: null
+reference_parameters:
+  RPRCON: 0.0014
+  ENTRORG: 0.00175
+  DETRPEN: 7.5e-05
+  ENTRDD: 0.0003
+  RMFDEPS: 0.3
+  RVICE: 0.13
+  RLCRITSNOW: 2E-05
+  RSNOWLIN2: 0.03
+  RCLDIFF: 6.0e-06
+  RCLDIFF_CONVI: 10.0
+  RDEPLIQREFRATE: 0.5
+  RDEPLIQREFDEPTH: 500.0
+  RCL_OVERLAPLIQICE: 0.65
+  RCL_INHOMOGAUT: 1.5
+  RCL_INHOMOGACC: 3
+  RMINICE: 60
+parameter_group:
+  namcumf:
+  - RPRCON
+  - ENTRORG
+  - DETRPEN
+  - ENTRDD
+  - RMFDEPS
+  namcldp:
+  - RVICE
+  - RLCRITSNOW
+  - RSNOWLIN2
+  - RCLDIFF
+  - RCLDIFF_CONVI
+  - RDEPLIQREFRATE
+  - RDEPLIQREFDEPTH
+  - RCL_OVERLAPLIQICE
+  - RCL_INHOMOGAUT
+  - RCL_INHOMOGACC
+  naerad:
+  - RMINICE
+weights_season:
+  ALL: 1.0
+  DJF: 0.0
+  JJA: 0.0
+weights_region:
+  Global: 1.0
+  Tropical: 0.0
+  North Midlat: 0
+  South Midlat: 1.0
+  NH: 0.0
+  SH: 1.0
+  Equatorial: 0.0
+  North Pole: 0.0
+  South Pole: 1.0
+weights:
+  net_toa: 1.0
+  rsnt: 1.0
+  rlnt: 0.0
+  swcf: 0.0
+  lwcf: 0.0
+  rsns: 0.0
+  rlns: 0.0
+  hfss: 0.0
+  hfls: 0.0
+  net_sfc: 0.0
+  toamsfc: 0.0
+
+2026-05-11 15:15:47,239 - INFO - [CONFIG] Output will be saved to: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/prova_1d_SO/tuned_phis_2000_2017.yml
+2026-05-11 15:15:47,239 - INFO - 
+---------------- PHYSICS-BASED REFERENCE ADJUSTMENTS (Target Shifts) ----------------
+2026-05-11 15:15:47,239 - INFO - Variable     | Region       |   Original |  Corrected |  Total Shift
+2026-05-11 15:15:47,239 - INFO - -------------------------------------------------------------------------------------
+2026-05-11 15:15:47,239 - INFO - net_toa      | Global       |     1.0160 |     1.0160 |      +0.0000 W/m2
+2026-05-11 15:15:47,239 - INFO - rsnt         | Global       |   241.5560 |   241.5560 |      +0.0000 W/m2
+2026-05-11 15:15:47,239 - INFO - rlnt         | Global       |  -240.5400 |  -240.5400 |      +0.0000 W/m2
+2026-05-11 15:15:47,239 - INFO - -------------------------------------------------------------------------------------
+2026-05-11 15:15:47,239 - INFO - -------------------------------------------------------------------------------------
+
+2026-05-11 15:15:47,378 - INFO - No frozen parameters specified.
+2026-05-11 15:15:47,378 - INFO - Optimizing parameters using dual_annealing ...
+2026-05-11 15:16:23,214 - INFO - 
+2026-05-11 15:16:23,216 - INFO - 
+===================== OPTIMIZATION SUMMARY (Biases: Model - Target) ======================
+2026-05-11 15:16:23,216 - INFO - Goal: Bring Biases to 0.0
+2026-05-11 15:16:23,216 - INFO - 
+--------------------------------- PRIMARY TUNING TARGETS ---------------------------------
+2026-05-11 15:16:23,216 - INFO - Variable     | Season | Region       | Weight |  Bias Init -> Bias Final | Status
+2026-05-11 15:16:23,216 - INFO - ---------------------------------------------------------------------------------
+2026-05-11 15:16:23,216 - INFO - net_toa      | ALL    | Global       | 1.0    |      5.660 -> [92m    -3.960[0m | IMPROVED
+2026-05-11 15:16:23,216 - INFO - net_toa      | ALL    | South Midlat | 1.0    |      9.842 -> [92m     2.647[0m | IMPROVED
+2026-05-11 15:16:23,216 - INFO - net_toa      | ALL    | SH           | 1.0    |     10.376 -> [92m     2.933[0m | IMPROVED
+2026-05-11 15:16:23,216 - INFO - net_toa      | ALL    | South Pole   | 1.0    |     17.312 -> [92m    10.900[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - rsnt         | ALL    | Global       | 1.0    |     -1.247 -> [92m    -1.083[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - rsnt         | ALL    | South Midlat | 1.0    |     -2.011 -> [92m    -1.428[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - rsnt         | ALL    | SH           | 1.0    |      0.609 -> [92m     0.496[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - rsnt         | ALL    | South Pole   | 1.0    |      0.472 -> [91m     1.446[0m | WORSENED
+2026-05-11 15:16:23,217 - INFO - 
+-------------------------------- DIAGNOSTIC SIDE-EFFECTS ---------------------------------
+2026-05-11 15:16:23,217 - INFO - Variable     | Season | Region       | Weight |  Bias Init -> Bias Final | Status
+2026-05-11 15:16:23,217 - INFO - ---------------------------------------------------------------------------------
+2026-05-11 15:16:23,217 - INFO - net_toa      | ALL    | Tropical     | 0.0    |      2.030 -> [91m   -10.635[0m | WORSENED
+2026-05-11 15:16:23,217 - INFO - net_toa      | ALL    | North Midlat | 0.0    |      5.195 -> [92m    -0.492[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - net_toa      | ALL    | NH           | 0.0    |      5.545 -> [92m    -0.236[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - net_toa      | ALL    | Equatorial   | 0.0    |      2.963 -> [91m   -12.641[0m | WORSENED
+2026-05-11 15:16:23,217 - INFO - net_toa      | ALL    | North Pole   | 0.0    |      5.331 -> [92m     0.496[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - net_toa      | DJF    | Global       | 0.0    |      5.967 -> [92m    -3.530[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - net_toa      | DJF    | Tropical     | 0.0    |      1.469 -> [91m   -12.071[0m | WORSENED
+2026-05-11 15:16:23,217 - INFO - net_toa      | DJF    | North Midlat | 0.0    |      8.103 -> [92m     1.497[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - net_toa      | DJF    | South Midlat | 0.0    |      9.503 -> [92m     5.557[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - net_toa      | DJF    | NH           | 0.0    |      8.163 -> [92m     2.361[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - net_toa      | DJF    | SH           | 0.0    |      9.605 -> [92m     3.530[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - net_toa      | DJF    | Equatorial   | 0.0    |      1.964 -> [91m   -14.612[0m | WORSENED
+2026-05-11 15:16:23,217 - INFO - net_toa      | DJF    | North Pole   | 0.0    |     15.297 -> [92m     8.622[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - net_toa      | DJF    | South Pole   | 0.0    |     20.318 -> [92m    15.309[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - net_toa      | JJA    | Global       | 0.0    |      4.671 -> [91m    -4.819[0m | WORSENED
+2026-05-11 15:16:23,217 - INFO - net_toa      | JJA    | Tropical     | 0.0    |      1.733 -> [91m    -9.589[0m | WORSENED
+2026-05-11 15:16:23,217 - INFO - net_toa      | JJA    | North Midlat | 0.0    |      2.437 -> [91m    -2.702[0m | WORSENED
+2026-05-11 15:16:23,217 - INFO - net_toa      | JJA    | South Midlat | 0.0    |      9.949 -> [92m    -0.066[0m | IMPROVED
+2026-05-11 15:16:23,217 - INFO - net_toa      | JJA    | NH           | 0.0    |      1.940 -> [91m    -3.126[0m | WORSENED
+2026-05-11 15:16:23,217 - INFO - net_toa      | JJA    | SH           | 0.0    |     10.276 -> [92m     1.487[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - net_toa      | JJA    | Equatorial   | 0.0    |      3.357 -> [91m   -11.229[0m | WORSENED
+2026-05-11 15:16:23,218 - INFO - net_toa      | JJA    | North Pole   | 0.0    |     -6.535 -> [91m   -11.768[0m | WORSENED
+2026-05-11 15:16:23,218 - INFO - net_toa      | JJA    | South Pole   | 0.0    |     16.673 -> [92m    10.070[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | ALL    | Tropical     | 0.0    |     -1.878 -> [92m    -1.789[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | ALL    | North Midlat | 0.0    |     -4.785 -> [91m    -4.883[0m | WORSENED
+2026-05-11 15:16:23,218 - INFO - rsnt         | ALL    | NH           | 0.0    |     -1.807 -> [92m    -1.778[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | ALL    | Equatorial   | 0.0    |     -0.084 -> [91m     0.491[0m | WORSENED
+2026-05-11 15:16:23,218 - INFO - rsnt         | ALL    | North Pole   | 0.0    |     -9.117 -> [92m    -7.307[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | DJF    | Global       | 0.0    |     -0.707 -> [92m    -0.569[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | DJF    | Tropical     | 0.0    |     -2.796 -> [91m    -3.096[0m | WORSENED
+2026-05-11 15:16:23,218 - INFO - rsnt         | DJF    | North Midlat | 0.0    |     -2.326 -> [92m    -1.989[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | DJF    | South Midlat | 0.0    |     -0.310 -> [91m     0.545[0m | WORSENED
+2026-05-11 15:16:23,218 - INFO - rsnt         | DJF    | NH           | 0.0    |      0.571 -> [92m     0.111[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | DJF    | SH           | 0.0    |      0.457 -> [91m     1.117[0m | WORSENED
+2026-05-11 15:16:23,218 - INFO - rsnt         | DJF    | Equatorial   | 0.0    |     -0.712 -> [92m    -0.497[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | DJF    | North Pole   | 0.0    |     -0.962 -> [92m    -0.485[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | DJF    | South Pole   | 0.0    |      6.380 -> [91m     7.617[0m | WORSENED
+2026-05-11 15:16:23,218 - INFO - rsnt         | JJA    | Global       | 0.0    |     -2.455 -> [92m    -2.069[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | JJA    | Tropical     | 0.0    |     -2.156 -> [92m    -0.772[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | JJA    | North Midlat | 0.0    |     -6.436 -> [91m    -7.788[0m | WORSENED
+2026-05-11 15:16:23,218 - INFO - rsnt         | JJA    | South Midlat | 0.0    |     -3.732 -> [92m    -3.695[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | JJA    | NH           | 0.0    |     -4.475 -> [92m    -3.233[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | JJA    | SH           | 0.0    |     -0.490 -> [91m    -1.847[0m | WORSENED
+2026-05-11 15:16:23,218 - INFO - rsnt         | JJA    | Equatorial   | 0.0    |     -0.366 -> [91m     0.899[0m | WORSENED
+2026-05-11 15:16:23,218 - INFO - rsnt         | JJA    | North Pole   | 0.0    |    -21.943 -> [92m   -18.674[0m | IMPROVED
+2026-05-11 15:16:23,218 - INFO - rsnt         | JJA    | South Pole   | 0.0    |     -0.894 -> [92m    -0.689[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | ALL    | Global       | 0.0    |      6.907 -> [92m    -2.877[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | ALL    | Tropical     | 0.0    |      3.910 -> [91m    -8.845[0m | WORSENED
+2026-05-11 15:16:23,219 - INFO - rlnt         | ALL    | North Midlat | 0.0    |      9.978 -> [92m     4.389[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | ALL    | South Midlat | 0.0    |     11.854 -> [92m     4.075[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | ALL    | NH           | 0.0    |      7.352 -> [92m     1.542[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | ALL    | SH           | 0.0    |      9.768 -> [92m     2.438[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | ALL    | Equatorial   | 0.0    |      3.047 -> [91m   -13.131[0m | WORSENED
+2026-05-11 15:16:23,219 - INFO - rlnt         | ALL    | North Pole   | 0.0    |     14.448 -> [92m     7.803[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | ALL    | South Pole   | 0.0    |     16.839 -> [92m     9.453[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | DJF    | Global       | 0.0    |      6.675 -> [92m    -2.960[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | DJF    | Tropical     | 0.0    |      4.267 -> [91m    -8.974[0m | WORSENED
+2026-05-11 15:16:23,219 - INFO - rlnt         | DJF    | North Midlat | 0.0    |     10.429 -> [92m     3.486[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | DJF    | South Midlat | 0.0    |      9.813 -> [92m     5.011[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | DJF    | NH           | 0.0    |      7.591 -> [92m     2.249[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | DJF    | SH           | 0.0    |      9.148 -> [92m     2.413[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | DJF    | Equatorial   | 0.0    |      2.676 -> [91m   -14.114[0m | WORSENED
+2026-05-11 15:16:23,219 - INFO - rlnt         | DJF    | North Pole   | 0.0    |     16.259 -> [92m     9.106[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | DJF    | South Pole   | 0.0    |     13.936 -> [92m     7.691[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | JJA    | Global       | 0.0    |      7.126 -> [92m    -2.750[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | JJA    | Tropical     | 0.0    |      3.888 -> [91m    -8.818[0m | WORSENED
+2026-05-11 15:16:23,219 - INFO - rlnt         | JJA    | North Midlat | 0.0    |      8.874 -> [92m     5.086[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | JJA    | South Midlat | 0.0    |     13.681 -> [92m     3.630[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | JJA    | NH           | 0.0    |      6.415 -> [92m     0.106[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | JJA    | SH           | 0.0    |     10.765 -> [92m     3.332[0m | IMPROVED
+2026-05-11 15:16:23,219 - INFO - rlnt         | JJA    | Equatorial   | 0.0    |      3.722 -> [91m   -12.129[0m | WORSENED
+2026-05-11 15:16:23,219 - INFO - rlnt         | JJA    | North Pole   | 0.0    |     15.407 -> [92m     6.905[0m | IMPROVED
+2026-05-11 15:16:23,220 - INFO - rlnt         | JJA    | South Pole   | 0.0    |     17.567 -> [92m    10.760[0m | IMPROVED
+2026-05-11 15:16:23,220 - INFO - swcf         | ALL    | Global       | 0.0    |      0.499 -> [91m     1.028[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | ALL    | Tropical     | 0.0    |      0.247 -> [91m     0.637[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | ALL    | North Midlat | 0.0    |     -0.213 -> [91m     0.496[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | ALL    | South Midlat | 0.0    |      1.497 -> [91m     2.139[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | ALL    | NH           | 0.0    |      0.332 -> [91m     1.105[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | ALL    | SH           | 0.0    |      0.790 -> [91m     0.790[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | ALL    | Equatorial   | 0.0    |      0.394 -> [91m     1.209[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | ALL    | North Pole   | 0.0    |     -5.146 -> [92m    -3.644[0m | IMPROVED
+2026-05-11 15:16:23,220 - INFO - swcf         | ALL    | South Pole   | 0.0    |      9.890 -> [91m    10.796[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | DJF    | Global       | 0.0    |      1.205 -> [91m     1.726[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | DJF    | Tropical     | 0.0    |     -0.552 -> [91m    -0.572[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | DJF    | North Midlat | 0.0    |      2.061 -> [91m     3.428[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | DJF    | South Midlat | 0.0    |      3.575 -> [91m     4.381[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | DJF    | NH           | 0.0    |      1.511 -> [91m     1.901[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | DJF    | SH           | 0.0    |      2.192 -> [91m     2.916[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | DJF    | Equatorial   | 0.0    |      0.028 -> [91m     0.479[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | DJF    | North Pole   | 0.0    |      0.647 -> [91m     0.995[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | DJF    | South Pole   | 0.0    |     22.741 -> [91m    23.647[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | JJA    | Global       | 0.0    |     -1.263 -> [92m    -0.724[0m | IMPROVED
+2026-05-11 15:16:23,220 - INFO - swcf         | JJA    | Tropical     | 0.0    |      0.475 -> [91m     2.104[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | JJA    | North Midlat | 0.0    |     -5.721 -> [91m    -7.060[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | JJA    | South Midlat | 0.0    |     -0.585 -> [92m    -0.445[0m | IMPROVED
+2026-05-11 15:16:23,220 - INFO - swcf         | JJA    | NH           | 0.0    |     -3.721 -> [92m    -2.355[0m | IMPROVED
+2026-05-11 15:16:23,220 - INFO - swcf         | JJA    | SH           | 0.0    |     -0.884 -> [91m    -2.124[0m | WORSENED
+2026-05-11 15:16:23,220 - INFO - swcf         | JJA    | Equatorial   | 0.0    |      0.776 -> [91m     2.263[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - swcf         | JJA    | North Pole   | 0.0    |    -20.212 -> [92m   -18.277[0m | IMPROVED
+2026-05-11 15:16:23,221 - INFO - swcf         | JJA    | South Pole   | 0.0    |      0.222 -> [91m     0.450[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | ALL    | Global       | 0.0    |     -2.706 -> [91m   -12.602[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | ALL    | Tropical     | 0.0    |     -5.135 -> [91m   -16.806[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | ALL    | North Midlat | 0.0    |     -0.301 -> [91m    -8.353[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | ALL    | South Midlat | 0.0    |     -0.230 -> [91m    -8.262[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | ALL    | NH           | 0.0    |     -1.749 -> [91m    -9.383[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | ALL    | SH           | 0.0    |     -1.379 -> [91m    -8.836[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | ALL    | Equatorial   | 0.0    |     -4.798 -> [91m   -19.368[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | ALL    | North Pole   | 0.0    |      4.483 -> [92m    -4.244[0m | IMPROVED
+2026-05-11 15:16:23,221 - INFO - lwcf         | ALL    | South Pole   | 0.0    |      2.337 -> [91m    -5.486[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | DJF    | Global       | 0.0    |     -3.251 -> [91m   -13.128[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | DJF    | Tropical     | 0.0    |     -5.371 -> [91m   -17.522[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | DJF    | North Midlat | 0.0    |     -0.523 -> [91m   -10.201[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | DJF    | South Midlat | 0.0    |     -1.844 -> [91m    -7.173[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | DJF    | NH           | 0.0    |     -2.034 -> [91m    -9.680[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | DJF    | SH           | 0.0    |     -1.948 -> [91m    -8.721[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | DJF    | Equatorial   | 0.0    |     -5.528 -> [91m   -20.712[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | DJF    | North Pole   | 0.0    |      4.004 -> [91m    -6.410[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | DJF    | South Pole   | 0.0    |      1.327 -> [91m    -4.769[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | JJA    | Global       | 0.0    |     -2.143 -> [91m   -12.116[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | JJA    | Tropical     | 0.0    |     -4.637 -> [91m   -16.269[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | JJA    | North Midlat | 0.0    |     -0.720 -> [91m    -6.673[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | JJA    | South Midlat | 0.0    |      1.538 -> [91m    -8.993[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | JJA    | NH           | 0.0    |     -1.992 -> [91m    -9.512[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | JJA    | SH           | 0.0    |     -0.328 -> [91m    -8.310[0m | WORSENED
+2026-05-11 15:16:23,221 - INFO - lwcf         | JJA    | Equatorial   | 0.0    |     -3.966 -> [91m   -18.361[0m | WORSENED
+2026-05-11 15:16:23,222 - INFO - lwcf         | JJA    | North Pole   | 0.0    |      4.629 -> [92m    -3.677[0m | IMPROVED
+2026-05-11 15:16:23,222 - INFO - lwcf         | JJA    | South Pole   | 0.0    |      3.246 -> [91m    -6.410[0m | WORSENED
+2026-05-11 15:16:23,222 - INFO - rsns         | ALL    | Global       | 0.0    |      2.418 -> [92m     2.372[0m | IMPROVED
+2026-05-11 15:16:23,222 - INFO - rlns         | ALL    | Global       | 0.0    |     -2.684 -> [91m    -4.395[0m | WORSENED
+2026-05-11 15:16:23,222 - INFO - hfss         | ALL    | Global       | 0.0    |      3.336 -> [92m     1.384[0m | IMPROVED
+2026-05-11 15:16:23,222 - INFO - hfls         | ALL    | Global       | 0.0    |      2.914 -> [91m    -3.374[0m | WORSENED
+2026-05-11 15:16:23,222 - INFO - net_sfc      | ALL    | Global       | 0.0    |      5.615 -> [92m    -4.410[0m | IMPROVED
+2026-05-11 15:16:23,222 - INFO - toamsfc      | ALL    | Global       | 0.0    |      0.461 -> [91m     0.867[0m | WORSENED
+2026-05-11 15:16:23,222 - INFO - ==========================================================================================
+
+2026-05-11 15:16:23,223 - INFO - Total score before optimization: 542.4577922321687
+2026-05-11 15:16:23,224 - INFO - Total score after optimization: 155.63413475538167
+2026-05-11 15:16:23,792 - INFO - Structured tuning YAML written to /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/prova_1d_SO/tuned_phis_2000_2017.yml
