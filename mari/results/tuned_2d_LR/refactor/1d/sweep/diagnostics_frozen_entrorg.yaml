@@ -1,0 +1,1519 @@
+metrics:
+  metric_name: 1D_scalars
+  score_init: 88.86583403627178
+  total_global_cost: 34.55020071543207
+  total_spatial_cost: 0.0
+  alpha:
+  penalty: 0.0
+  inc: 0.2
+  score_final: 34.55020071543207
+parameters:
+- name: RPRCON
+  old_value: 0.0014
+  new_value: 0.0016782345866507068
+  change_abs: 0.0002782345866507068
+  change_rel: 0.19873899046479057
+  ref_value: 0.0014
+- name: ENTRORG
+  old_value: 0.00175
+  new_value: 0.005
+  change_abs: 0.0032500000000000003
+  change_rel: 1.8571428571428572
+  ref_value: 0.00175
+- name: DETRPEN
+  old_value: 7.5e-05
+  new_value: 6.006814849714951e-05
+  change_abs: -1.4931851502850485e-05
+  change_rel: -0.19909135337133982
+  ref_value: 7.5e-05
+- name: ENTRDD
+  old_value: 0.0003
+  new_value: 0.00035972432463941546
+  change_abs: 5.972432463941549e-05
+  change_rel: 0.19908108213138498
+  ref_value: 0.0003
+- name: RMFDEPS
+  old_value: 0.3
+  new_value: 0.24001525197950338
+  change_abs: -0.05998474802049661
+  change_rel: -0.19994916006832203
+  ref_value: 0.3
+- name: RVICE
+  old_value: 0.13
+  new_value: 0.10400008409165953
+  change_abs: -0.02599991590834047
+  change_rel: -0.19999935314108053
+  ref_value: 0.13
+- name: RLCRITSNOW
+  old_value: 2e-05
+  new_value: 2.39947884387364e-05
+  change_abs: 3.994788438736397e-06
+  change_rel: 0.19973942193681984
+  ref_value: 2e-05
+- name: RSNOWLIN2
+  old_value: 0.03
+  new_value: 0.0359897529909066
+  change_abs: 0.005989752990906601
+  change_rel: 0.19965843303022004
+  ref_value: 0.03
+- name: RCLDIFF
+  old_value: 6e-06
+  new_value: 7.199936328805296e-06
+  change_abs: 1.199936328805296e-06
+  change_rel: 0.199989388134216
+  ref_value: 6e-06
+- name: RCLDIFF_CONVI
+  old_value: 10.0
+  new_value: 11.999925164666763
+  change_abs: 1.999925164666763
+  change_rel: 0.19999251646667632
+  ref_value: 10.0
+- name: RDEPLIQREFRATE
+  old_value: 0.5
+  new_value: 0.599813492210064
+  change_abs: 0.09981349221006397
+  change_rel: 0.19962698442012794
+  ref_value: 0.5
+- name: RDEPLIQREFDEPTH
+  old_value: 500.0
+  new_value: 599.9953526126542
+  change_abs: 99.99535261265419
+  change_rel: 0.19999070522530837
+  ref_value: 500.0
+- name: RCL_OVERLAPLIQICE
+  old_value: 0.65
+  new_value: 0.7799941770557939
+  change_abs: 0.12999417705579386
+  change_rel: 0.19999104162429823
+  ref_value: 0.65
+- name: RCL_INHOMOGAUT
+  old_value: 1.5
+  new_value: 1.799950926124643
+  change_abs: 0.2999509261246429
+  change_rel: 0.19996728408309528
+  ref_value: 1.5
+- name: RCL_INHOMOGACC
+  old_value: 3.0
+  new_value: 3.5999928083150428
+  change_abs: 0.5999928083150428
+  change_rel: 0.1999976027716809
+  ref_value: 3.0
+- name: RMINICE
+  old_value: 60.0
+  new_value: 48.000690326194814
+  change_abs: -11.999309673805186
+  change_rel: -0.19998849456341977
+  ref_value: 60.0
+biases:
+  targets:
+  - variable: net_toa
+    season: ALL
+    region: Global
+    weight: 1.0
+    ref_val: 1.016
+    model_init: -8.410867668333516
+    model_final: -4.861941877513937
+    bias_init: -9.426867668333516
+    bias_final: -5.877941877513937
+    status: IMPROVED
+  diagnostics:
+  - variable: net_toa
+    season: ALL
+    region: Tropical
+    weight: 0.0
+    ref_val: 45.152
+    model_init: 23.274750845772836
+    model_final: 27.254709687637465
+    bias_init: -21.877249154227165
+    bias_final: -17.897290312362536
+    status: IMPROVED
+  - variable: net_toa
+    season: ALL
+    region: North Midlat
+    weight: 0.0
+    ref_val: -43.367
+    model_init: -42.54715910412011
+    model_final: -39.84535546675133
+    bias_init: 0.819840895879886
+    bias_final: 3.5216445332486717
+    status: WORSENED
+  - variable: net_toa
+    season: ALL
+    region: South Midlat
+    weight: 0.0
+    ref_val: -42.876
+    model_init: -40.41973341078982
+    model_final: -36.92347718167422
+    bias_init: 2.4562665892101823
+    bias_final: 5.952522818325774
+    status: WORSENED
+  - variable: net_toa
+    season: ALL
+    region: NH
+    weight: 0.0
+    ref_val: -28.686
+    model_init: -29.525376274472148
+    model_final: -26.923253248757298
+    bias_init: -0.8393762744721469
+    bias_final: 1.7627467512427026
+    status: WORSENED
+  - variable: net_toa
+    season: ALL
+    region: SH
+    weight: 0.0
+    ref_val: -26.57
+    model_init: -26.732724734715035
+    model_final: -23.29996166285509
+    bias_init: -0.16272473471503268
+    bias_final: 3.27003833714491
+    status: WORSENED
+  - variable: net_toa
+    season: ALL
+    region: Equatorial
+    weight: 0.0
+    ref_val: 56.12
+    model_init: 30.81523041498084
+    model_final: 35.421454570344174
+    bias_init: -25.30476958501916
+    bias_final: -20.698545429655823
+    status: IMPROVED
+  - variable: net_toa
+    season: ALL
+    region: North Pole
+    weight: 0.0
+    ref_val: -97.732
+    model_init: -96.4056403750464
+    model_final: -94.83645100467712
+    bias_init: 1.3263596249536027
+    bias_final: 2.895548995322877
+    status: WORSENED
+  - variable: net_toa
+    season: ALL
+    region: South Pole
+    weight: 0.0
+    ref_val: -98.888
+    model_init: -84.59950002034499
+    model_final: -82.6172763977081
+    bias_init: 14.288499979655013
+    bias_final: 16.27072360229191
+    status: WORSENED
+  - variable: net_toa
+    season: DJF
+    region: Global
+    weight: 0.0
+    ref_val: 7.999
+    model_init: -1.4523766381400085
+    model_final: 2.5924526431335977
+    bias_init: -9.451376638140008
+    bias_final: -5.406547356866402
+    status: IMPROVED
+  - variable: net_toa
+    season: DJF
+    region: Tropical
+    weight: 0.0
+    ref_val: 50.515
+    model_init: 27.7087271554129
+    model_final: 32.480113724815254
+    bias_init: -22.8062728445871
+    bias_final: -18.034886275184743
+    status: IMPROVED
+  - variable: net_toa
+    season: DJF
+    region: North Midlat
+    weight: 0.0
+    ref_val: -128.2
+    model_init: -122.47255779447995
+    model_final: -120.14961271719098
+    bias_init: 5.727442205520037
+    bias_final: 8.050387282809016
+    status: WORSENED
+  - variable: net_toa
+    season: DJF
+    region: South Midlat
+    weight: 0.0
+    ref_val: 59.162
+    model_init: 58.692967369442854
+    model_final: 62.94294689667263
+    bias_init: -0.46903263055714106
+    bias_final: 3.780946896672633
+    status: WORSENED
+  - variable: net_toa
+    season: DJF
+    region: NH
+    weight: 0.0
+    ref_val: -109.807
+    model_init: -105.8092418852304
+    model_final: -103.53678248066058
+    bias_init: 3.9977581147695904
+    bias_final: 6.270217519339426
+    status: WORSENED
+  - variable: net_toa
+    season: DJF
+    region: SH
+    weight: 0.0
+    ref_val: 70.958
+    model_init: 66.36822546096067
+    model_final: 70.93544838442847
+    bias_init: -4.589774539039329
+    bias_final: -0.022551615571522632
+    status: IMPROVED
+  - variable: net_toa
+    season: DJF
+    region: Equatorial
+    weight: 0.0
+    ref_val: 60.754
+    model_init: 34.889206295921554
+    model_final: 40.17731007592624
+    bias_init: -25.86479370407844
+    bias_final: -20.576689924073754
+    status: IMPROVED
+  - variable: net_toa
+    season: DJF
+    region: North Pole
+    weight: 0.0
+    ref_val: -171.185
+    model_init: -160.30967639741436
+    model_final: -159.42848423329832
+    bias_init: 10.875323602585645
+    bias_final: 11.756515766701671
+    status: WORSENED
+  - variable: net_toa
+    season: DJF
+    region: South Pole
+    weight: 0.0
+    ref_val: -13.868
+    model_init: 0.8001711709158617
+    model_final: 3.058675784833545
+    bias_init: 14.668171170915862
+    bias_final: 16.926675784833545
+    status: WORSENED
+  - variable: net_toa
+    season: JJA
+    region: Global
+    weight: 0.0
+    ref_val: -7.361
+    model_init: -16.000300095194866
+    model_final: -12.593132169920064
+    bias_init: -8.639300095194866
+    bias_final: -5.232132169920064
+    status: IMPROVED
+  - variable: net_toa
+    season: JJA
+    region: Tropical
+    weight: 0.0
+    ref_val: 27.939
+    model_init: 8.231366384597013
+    model_final: 11.798561138017156
+    bias_init: -19.707633615402987
+    bias_final: -16.140438861982844
+    status: IMPROVED
+  - variable: net_toa
+    season: JJA
+    region: North Midlat
+    weight: 0.0
+    ref_val: 47.104
+    model_init: 42.886761619931136
+    model_final: 46.24885443710594
+    bias_init: -4.217238380068863
+    bias_final: -0.8551455628940596
+    status: IMPROVED
+  - variable: net_toa
+    season: JJA
+    region: South Midlat
+    weight: 0.0
+    ref_val: -132.427
+    model_init: -125.47172437395355
+    model_final: -122.35361984227498
+    bias_init: 6.955275626046445
+    bias_final: 10.073380157725005
+    status: WORSENED
+  - variable: net_toa
+    season: JJA
+    region: NH
+    weight: 0.0
+    ref_val: 53.934
+    model_init: 47.266677129836225
+    model_final: 50.36016016809446
+    bias_init: -6.667322870163774
+    bias_final: -3.57383983190554
+    status: IMPROVED
+  - variable: net_toa
+    season: JJA
+    region: SH
+    weight: 0.0
+    ref_val: -115.759
+    model_init: -110.66155133928562
+    model_final: -107.94847620886087
+    bias_init: 5.0974486607143765
+    bias_final: 7.81052379113913
+    status: WORSENED
+  - variable: net_toa
+    season: JJA
+    region: Equatorial
+    weight: 0.0
+    ref_val: 37.946
+    model_init: 15.22704914637967
+    model_final: 19.636559335099772
+    bias_init: -22.718950853620328
+    bias_final: -18.309440664900226
+    status: IMPROVED
+  - variable: net_toa
+    season: JJA
+    region: North Pole
+    weight: 0.0
+    ref_val: 6.693
+    model_init: -7.561538323050456
+    model_final: -4.57450656680656
+    bias_init: -14.254538323050456
+    bias_final: -11.26750656680656
+    status: IMPROVED
+  - variable: net_toa
+    season: JJA
+    region: South Pole
+    weight: 0.0
+    ref_val: -156.313
+    model_init: -141.96579124813968
+    model_final: -140.77395213484087
+    bias_init: 14.347208751860297
+    bias_final: 15.539047865159125
+    status: WORSENED
+  - variable: rsnt
+    season: ALL
+    region: Global
+    weight: 0.0
+    ref_val: 241.556
+    model_init: 227.5846252441404
+    model_final: 230.09193295177522
+    bias_init: -13.971374755859616
+    bias_final: -11.464067048224797
+    status: IMPROVED
+  - variable: rsnt
+    season: ALL
+    region: Tropical
+    weight: 0.0
+    ref_val: 305.725
+    model_init: 286.4727042061939
+    model_final: 289.7023036348112
+    bias_init: -19.252295793806127
+    bias_final: -16.022696365188857
+    status: IMPROVED
+  - variable: rsnt
+    season: ALL
+    region: North Midlat
+    weight: 0.0
+    ref_val: 180.842
+    model_init: 169.5664723714189
+    model_final: 171.32154914224557
+    bias_init: -11.275527628581091
+    bias_final: -9.520450857754453
+    status: IMPROVED
+  - variable: rsnt
+    season: ALL
+    region: South Midlat
+    weight: 0.0
+    ref_val: 173.928
+    model_init: 162.66723923456078
+    model_final: 164.41894202468836
+    bias_init: -11.26076076543921
+    bias_final: -9.509057975311626
+    status: IMPROVED
+  - variable: rsnt
+    season: ALL
+    region: NH
+    weight: 0.0
+    ref_val: 206.041
+    model_init: 197.35505167643186
+    model_final: 199.34498749662004
+    bias_init: -8.685948323568137
+    bias_final: -6.696012503379967
+    status: IMPROVED
+  - variable: rsnt
+    season: ALL
+    region: SH
+    weight: 0.0
+    ref_val: 202.155
+    model_init: 190.7585194905596
+    model_final: 192.85725158038503
+    bias_init: -11.396480509440403
+    bias_final: -9.297748419614969
+    status: IMPROVED
+  - variable: rsnt
+    season: ALL
+    region: Equatorial
+    weight: 0.0
+    ref_val: 313.616
+    model_init: 294.27953084309854
+    model_final: 297.7076297418356
+    bias_init: -19.336469156901423
+    bias_final: -15.9083702581644
+    status: IMPROVED
+  - variable: rsnt
+    season: ALL
+    region: North Pole
+    weight: 0.0
+    ref_val: 105.19
+    model_init: 94.17487262544162
+    model_final: 94.77827602984313
+    bias_init: -11.015127374558373
+    bias_final: -10.411723970156872
+    status: IMPROVED
+  - variable: rsnt
+    season: ALL
+    region: South Pole
+    weight: 0.0
+    ref_val: 82.206
+    model_init: 81.36157008579788
+    model_final: 81.41612725690713
+    bias_init: -0.844429914202117
+    bias_final: -0.7898727430928754
+    status: IMPROVED
+  - variable: rsnt
+    season: DJF
+    region: Global
+    weight: 0.0
+    ref_val: 245.764
+    model_init: 232.16198730468722
+    model_final: 234.9735640285661
+    bias_init: -13.602012695312803
+    bias_final: -10.790435971433904
+    status: IMPROVED
+  - variable: rsnt
+    season: DJF
+    region: Tropical
+    weight: 0.0
+    ref_val: 309.553
+    model_init: 288.94662620907684
+    model_final: 292.65466198572784
+    bias_init: -20.60637379092316
+    bias_final: -16.898338014272152
+    status: IMPROVED
+  - variable: rsnt
+    season: DJF
+    region: North Midlat
+    weight: 0.0
+    ref_val: 74.986
+    model_init: 70.0208318801152
+    model_final: 70.51634780021956
+    bias_init: -4.965168119884812
+    bias_final: -4.4696521997804455
+    status: IMPROVED
+  - variable: rsnt
+    season: DJF
+    region: South Midlat
+    weight: 0.0
+    ref_val: 288.958
+    model_init: 275.75956798735086
+    model_final: 279.0159224764466
+    bias_init: -13.198432012649189
+    bias_final: -9.942077523553444
+    status: IMPROVED
+  - variable: rsnt
+    season: DJF
+    region: NH
+    weight: 0.0
+    ref_val: 108.125
+    model_init: 104.0053928920198
+    model_final: 105.18026252402149
+    bias_init: -4.119607107980196
+    bias_final: -2.9447374759785134
+    status: IMPROVED
+  - variable: rsnt
+    season: DJF
+    region: SH
+    weight: 0.0
+    ref_val: 309.361
+    model_init: 294.6920413062682
+    model_final: 298.12614854215695
+    bias_init: -14.668958693731776
+    bias_final: -11.234851457843039
+    status: IMPROVED
+  - variable: rsnt
+    season: DJF
+    region: Equatorial
+    weight: 0.0
+    ref_val: 316.983
+    model_init: 297.43533761160677
+    model_final: 301.2557846546674
+    bias_init: -19.547662388393253
+    bias_final: -15.727215345332608
+    status: IMPROVED
+  - variable: rsnt
+    season: DJF
+    region: North Pole
+    weight: 0.0
+    ref_val: 7.894
+    model_init: 7.157897881099152
+    model_final: 7.082380708970444
+    bias_init: -0.7361021189008483
+    bias_final: -0.811619291029556
+    status: WORSENED
+  - variable: rsnt
+    season: DJF
+    region: South Pole
+    weight: 0.0
+    ref_val: 190.459
+    model_init: 193.72976393926695
+    model_final: 194.10808154155472
+    bias_init: 3.2707639392669545
+    bias_final: 3.649081541554736
+    status: WORSENED
+  - variable: rsnt
+    season: JJA
+    region: Global
+    weight: 0.0
+    ref_val: 236.741
+    model_init: 223.2169501894994
+    model_final: 225.7472652943032
+    bias_init: -13.524049810500594
+    bias_final: -10.993734705696824
+    status: IMPROVED
+  - variable: rsnt
+    season: JJA
+    region: Tropical
+    weight: 0.0
+    ref_val: 289.657
+    model_init: 272.9516383579795
+    model_final: 275.760112296661
+    bias_init: -16.70536164202047
+    bias_final: -13.896887703338978
+    status: IMPROVED
+  - variable: rsnt
+    season: JJA
+    region: North Midlat
+    weight: 0.0
+    ref_val: 294.329
+    model_init: 277.58631824311726
+    model_final: 281.30883507477597
+    bias_init: -16.74268175688276
+    bias_final: -13.02016492522404
+    status: IMPROVED
+  - variable: rsnt
+    season: JJA
+    region: South Midlat
+    weight: 0.0
+    ref_val: 73.318
+    model_init: 65.02199699765154
+    model_final: 65.78042631839968
+    bias_init: -8.296003002348453
+    bias_final: -7.53757368160032
+    status: IMPROVED
+  - variable: rsnt
+    season: JJA
+    region: NH
+    weight: 0.0
+    ref_val: 306.368
+    model_init: 294.1595749627972
+    model_final: 297.2732239727792
+    bias_init: -12.208425037202804
+    bias_final: -9.094776027220803
+    status: IMPROVED
+  - variable: rsnt
+    season: JJA
+    region: SH
+    weight: 0.0
+    ref_val: 104.983
+    model_init: 96.40080115908648
+    model_final: 97.78861098784682
+    bias_init: -8.582198840913515
+    bias_final: -7.194389012153174
+    status: IMPROVED
+  - variable: rsnt
+    season: JJA
+    region: Equatorial
+    weight: 0.0
+    ref_val: 296.504
+    model_init: 278.79099092029327
+    model_final: 281.8782365426959
+    bias_init: -17.713009079706772
+    bias_final: -14.625763457304135
+    status: IMPROVED
+  - variable: rsnt
+    season: JJA
+    region: North Pole
+    weight: 0.0
+    ref_val: 237.68
+    model_init: 210.00545538039407
+    model_final: 212.35186747506313
+    bias_init: -27.67454461960593
+    bias_final: -25.32813252493687
+    status: IMPROVED
+  - variable: rsnt
+    season: JJA
+    region: South Pole
+    weight: 0.0
+    ref_val: 5.717
+    model_init: 4.796536332085011
+    model_final: 4.7779989685058375
+    bias_init: -0.920463667914989
+    bias_final: -0.939001031494162
+    status: WORSENED
+  - variable: rlnt
+    season: ALL
+    region: Global
+    weight: 0.0
+    ref_val: -240.54
+    model_init: -235.99589102608797
+    model_final: -234.9542079155587
+    bias_init: 4.544108973912004
+    bias_final: 5.585792084441287
+    status: WORSENED
+  - variable: rlnt
+    season: ALL
+    region: Tropical
+    weight: 0.0
+    ref_val: -260.574
+    model_init: -263.19772774832546
+    model_final: -262.4470900479765
+    bias_init: -2.6237277483254475
+    bias_final: -1.873090047976457
+    status: IMPROVED
+  - variable: rlnt
+    season: ALL
+    region: North Midlat
+    weight: 0.0
+    ref_val: -224.208
+    model_init: -212.11336335681702
+    model_final: -211.16650706215663
+    bias_init: 12.09463664318298
+    bias_final: 13.041492937843362
+    status: WORSENED
+  - variable: rlnt
+    season: ALL
+    region: South Midlat
+    weight: 0.0
+    ref_val: -216.804
+    model_init: -203.08696855817473
+    model_final: -201.34246958649138
+    bias_init: 13.717031441825261
+    bias_final: 15.461530413508632
+    status: WORSENED
+  - variable: rlnt
+    season: ALL
+    region: NH
+    weight: 0.0
+    ref_val: -234.727
+    model_init: -226.8804546537851
+    model_final: -226.26805374290933
+    bias_init: 7.846545346214883
+    bias_final: 8.458946257090679
+    status: WORSENED
+  - variable: rlnt
+    season: ALL
+    region: SH
+    weight: 0.0
+    ref_val: -228.726
+    model_init: -217.49081348237502
+    model_final: -216.15684809500195
+    bias_init: 11.235186517624967
+    bias_final: 12.569151904998048
+    status: WORSENED
+  - variable: rlnt
+    season: ALL
+    region: Equatorial
+    weight: 0.0
+    ref_val: -257.496
+    model_init: -263.4641898018969
+    model_final: -262.28603904384073
+    bias_init: -5.968189801896912
+    bias_final: -4.7900390438407285
+    status: IMPROVED
+  - variable: rlnt
+    season: ALL
+    region: North Pole
+    weight: 0.0
+    ref_val: -202.922
+    model_init: -190.58045741489929
+    model_final: -189.61463088622972
+    bias_init: 12.341542585100704
+    bias_final: 13.307369113770287
+    status: WORSENED
+  - variable: rlnt
+    season: ALL
+    region: South Pole
+    weight: 0.0
+    ref_val: -181.093
+    model_init: -165.96123468308213
+    model_final: -164.03353272961408
+    bias_init: 15.131765316917862
+    bias_final: 17.059467270385916
+    status: WORSENED
+  - variable: rlnt
+    season: DJF
+    region: Global
+    weight: 0.0
+    ref_val: -237.765
+    model_init: -233.61416843959233
+    model_final: -232.38097519018703
+    bias_init: 4.150831560407667
+    bias_final: 5.384024809812967
+    status: WORSENED
+  - variable: rlnt
+    season: DJF
+    region: Tropical
+    weight: 0.0
+    ref_val: -259.039
+    model_init: -261.2375662667406
+    model_final: -260.17451749106135
+    bias_init: -2.1985662667406167
+    bias_final: -1.1355174910613925
+    status: IMPROVED
+  - variable: rlnt
+    season: DJF
+    region: North Midlat
+    weight: 0.0
+    ref_val: -203.186
+    model_init: -192.4931611560638
+    model_final: -190.66584627015143
+    bias_init: 10.692838843936213
+    bias_final: 12.52015372984856
+    status: WORSENED
+  - variable: rlnt
+    season: DJF
+    region: South Midlat
+    weight: 0.0
+    ref_val: -229.796
+    model_init: -217.06641714913482
+    model_final: -216.07281220494764
+    bias_init: 12.729582850865164
+    bias_final: 13.723187795052342
+    status: WORSENED
+  - variable: rlnt
+    season: DJF
+    region: NH
+    weight: 0.0
+    ref_val: -217.931
+    model_init: -209.81465003603952
+    model_final: -208.7171642593056
+    bias_init: 8.116349963960483
+    bias_final: 9.213835740694396
+    status: WORSENED
+  - variable: rlnt
+    season: DJF
+    region: SH
+    weight: 0.0
+    ref_val: -238.403
+    model_init: -228.32347833542556
+    model_final: -227.19056361905012
+    bias_init: 10.07952166457444
+    bias_final: 11.212436380949873
+    status: WORSENED
+  - variable: rlnt
+    season: DJF
+    region: Equatorial
+    weight: 0.0
+    ref_val: -256.229
+    model_init: -262.54592822846865
+    model_final: -261.07841106001956
+    bias_init: -6.316928228468683
+    bias_final: -4.849411060019588
+    status: IMPROVED
+  - variable: rlnt
+    season: DJF
+    region: North Pole
+    weight: 0.0
+    ref_val: -179.078
+    model_init: -167.46743556431335
+    model_final: -166.51076295207497
+    bias_init: 11.610564435686657
+    bias_final: 12.567237047925026
+    status: WORSENED
+  - variable: rlnt
+    season: DJF
+    region: South Pole
+    weight: 0.0
+    ref_val: -204.326
+    model_init: -192.92941647484153
+    model_final: -191.04919166020466
+    bias_init: 11.396583525158473
+    bias_final: 13.27680833979534
+    status: WORSENED
+  - variable: rlnt
+    season: JJA
+    region: Global
+    weight: 0.0
+    ref_val: -244.102
+    model_init: -239.21772475469643
+    model_final: -238.34087077740284
+    bias_init: 4.884275245303583
+    bias_final: 5.761129222597161
+    status: WORSENED
+  - variable: rlnt
+    season: JJA
+    region: Tropical
+    weight: 0.0
+    ref_val: -261.718
+    model_init: -264.72063918340746
+    model_final: -263.9617652309187
+    bias_init: -3.002639183407429
+    bias_final: -2.243765230918658
+    status: IMPROVED
+  - variable: rlnt
+    season: JJA
+    region: North Midlat
+    weight: 0.0
+    ref_val: -247.226
+    model_init: -234.69944981166267
+    model_final: -235.0598233512128
+    bias_init: 12.526550188337321
+    bias_final: 12.166176648787193
+    status: IMPROVED
+  - variable: rlnt
+    season: JJA
+    region: South Midlat
+    weight: 0.0
+    ref_val: -205.746
+    model_init: -190.49381510416654
+    model_final: -188.1342033382977
+    bias_init: 15.252184895833455
+    bias_final: 17.611796661702297
+    status: WORSENED
+  - variable: rlnt
+    season: JJA
+    region: NH
+    weight: 0.0
+    ref_val: -252.434
+    model_init: -246.8929276239302
+    model_final: -246.91300236854195
+    bias_init: 5.541072376069791
+    bias_final: 5.520997631458055
+    status: IMPROVED
+  - variable: rlnt
+    season: JJA
+    region: SH
+    weight: 0.0
+    ref_val: -220.741
+    model_init: -207.06258791968924
+    model_final: -205.7372869169047
+    bias_init: 13.678412080310787
+    bias_final: 15.003713083095295
+    status: WORSENED
+  - variable: rlnt
+    season: JJA
+    region: Equatorial
+    weight: 0.0
+    ref_val: -258.557
+    model_init: -263.56386675153425
+    model_final: -262.24157963721996
+    bias_init: -5.006866751534249
+    bias_final: -3.684579637219967
+    status: IMPROVED
+  - variable: rlnt
+    season: JJA
+    region: North Pole
+    weight: 0.0
+    ref_val: -230.987
+    model_init: -217.56714811779182
+    model_final: -216.92648589466674
+    bias_init: 13.419851882208185
+    bias_final: 14.06051410533326
+    status: WORSENED
+  - variable: rlnt
+    season: JJA
+    region: South Pole
+    weight: 0.0
+    ref_val: -162.03
+    model_init: -146.7623203822544
+    model_final: -145.5519085801483
+    bias_init: 15.267679617745625
+    bias_final: 16.478091419851697
+    status: WORSENED
+  - variable: swcf
+    season: ALL
+    region: Global
+    weight: 0.0
+    ref_val: -45.599
+    model_init: -57.534950256347585
+    model_final: -55.084837157752816
+    bias_init: -11.93595025634759
+    bias_final: -9.485837157752815
+    status: IMPROVED
+  - variable: swcf
+    season: ALL
+    region: Tropical
+    weight: 0.0
+    ref_val: -42.876
+    model_init: -59.78269086565287
+    model_final: -56.5934377381688
+    bias_init: -16.90669086565287
+    bias_final: -13.717437738168808
+    status: IMPROVED
+  - variable: swcf
+    season: ALL
+    region: North Midlat
+    weight: 0.0
+    ref_val: -43.205
+    model_init: -49.26453781127925
+    model_final: -47.64646537913798
+    bias_init: -6.059537811279248
+    bias_final: -4.441465379137982
+    status: IMPROVED
+  - variable: swcf
+    season: ALL
+    region: South Midlat
+    weight: 0.0
+    ref_val: -53.439
+    model_init: -61.112391517275746
+    model_final: -59.37331154853878
+    bias_init: -7.6733915172757445
+    bias_final: -5.934311548538782
+    status: IMPROVED
+  - variable: swcf
+    season: ALL
+    region: NH
+    weight: 0.0
+    ref_val: -41.227
+    model_init: -47.208075568789454
+    model_final: -45.32992909202948
+    bias_init: -5.981075568789461
+    bias_final: -4.102929092029486
+    status: IMPROVED
+  - variable: swcf
+    season: ALL
+    region: SH
+    weight: 0.0
+    ref_val: -50.58
+    model_init: -61.66556549072263
+    model_final: -59.586179111008455
+    bias_init: -11.08556549072263
+    bias_final: -9.006179111008459
+    status: IMPROVED
+  - variable: swcf
+    season: ALL
+    region: Equatorial
+    weight: 0.0
+    ref_val: -45.013
+    model_init: -63.69765454246876
+    model_final: -60.30995507722061
+    bias_init: -18.684654542468763
+    bias_final: -15.296955077220609
+    status: IMPROVED
+  - variable: swcf
+    season: ALL
+    region: North Pole
+    weight: 0.0
+    ref_val: -28.286
+    model_init: -35.133807772681806
+    model_final: -34.50140653029292
+    bias_init: -6.847807772681807
+    bias_final: -6.215406530292917
+    status: IMPROVED
+  - variable: swcf
+    season: ALL
+    region: South Pole
+    weight: 0.0
+    ref_val: -28.031
+    model_init: -19.60002245221816
+    model_final: -19.523812339723
+    bias_init: 8.43097754778184
+    bias_final: 8.507187660276998
+    status: WORSENED
+  - variable: swcf
+    season: DJF
+    region: Global
+    weight: 0.0
+    ref_val: -49.462
+    model_init: -60.91736366635273
+    model_final: -58.159041280626354
+    bias_init: -11.45536366635272
+    bias_final: -8.69704128062635
+    status: IMPROVED
+  - variable: swcf
+    season: DJF
+    region: Tropical
+    weight: 0.0
+    ref_val: -44.389
+    model_init: -62.465207781110436
+    model_final: -58.79904596901346
+    bias_init: -18.076207781110437
+    bias_final: -14.410045969013462
+    status: IMPROVED
+  - variable: swcf
+    season: DJF
+    region: North Midlat
+    weight: 0.0
+    ref_val: -20.334
+    model_init: -20.58485439845492
+    model_final: -20.20173812046785
+    bias_init: -0.2508543984549201
+    bias_final: 0.13226187953214763
+    status: IMPROVED
+  - variable: swcf
+    season: DJF
+    region: South Midlat
+    weight: 0.0
+    ref_val: -88.738
+    model_init: -98.01763770693813
+    model_final: -94.77920654103954
+    bias_init: -9.279637706938136
+    bias_final: -6.041206541039548
+    status: IMPROVED
+  - variable: swcf
+    season: DJF
+    region: NH
+    weight: 0.0
+    ref_val: -22.297
+    model_init: -25.169175920032295
+    model_final: -24.08298538311427
+    bias_init: -2.872175920032295
+    bias_final: -1.78598538311427
+    status: IMPROVED
+  - variable: swcf
+    season: DJF
+    region: SH
+    weight: 0.0
+    ref_val: -79.883
+    model_init: -92.65856315976085
+    model_final: -89.25682117161057
+    bias_init: -12.775563159760852
+    bias_final: -9.373821171610567
+    status: IMPROVED
+  - variable: swcf
+    season: DJF
+    region: Equatorial
+    weight: 0.0
+    ref_val: -46.332
+    model_init: -64.90226818266365
+    model_final: -61.12069508206367
+    bias_init: -18.57026818266364
+    bias_final: -14.788695082063668
+    status: IMPROVED
+  - variable: swcf
+    season: DJF
+    region: North Pole
+    weight: 0.0
+    ref_val: -2.151
+    model_init: -1.3377601646241675
+    model_final: -1.4083267032367746
+    bias_init: 0.8132398353758324
+    bias_final: 0.7426732967632252
+    status: IMPROVED
+  - variable: swcf
+    season: DJF
+    region: South Pole
+    weight: 0.0
+    ref_val: -66.677
+    model_init: -47.55656196957537
+    model_final: -47.18759785718205
+    bias_init: 19.12043803042464
+    bias_final: 19.48940214281796
+    status: WORSENED
+  - variable: swcf
+    season: JJA
+    region: Global
+    weight: 0.0
+    ref_val: -43.727
+    model_init: -55.87148866199304
+    model_final: -53.38934245363083
+    bias_init: -12.144488661993048
+    bias_final: -9.662342453630838
+    status: IMPROVED
+  - variable: swcf
+    season: JJA
+    region: Tropical
+    weight: 0.0
+    ref_val: -41.966
+    model_init: -55.89644077845978
+    model_final: -53.126910671706966
+    bias_init: -13.93044077845978
+    bias_final: -11.160910671706961
+    status: IMPROVED
+  - variable: swcf
+    season: JJA
+    region: North Midlat
+    weight: 0.0
+    ref_val: -69.083
+    model_init: -84.71494729178279
+    model_final: -81.08394378786346
+    bias_init: -15.631947291782797
+    bias_final: -12.000943787863466
+    status: IMPROVED
+  - variable: swcf
+    season: JJA
+    region: South Midlat
+    weight: 0.0
+    ref_val: -21.895
+    model_init: -26.97478630429219
+    model_final: -26.24144633481779
+    bias_init: -5.079786304292191
+    bias_final: -4.346446334817792
+    status: IMPROVED
+  - variable: swcf
+    season: JJA
+    region: NH
+    weight: 0.0
+    ref_val: -62.752
+    model_init: -73.85803767612994
+    model_final: -70.82771065453686
+    bias_init: -11.10603767612994
+    bias_final: -8.075710654536858
+    status: IMPROVED
+  - variable: swcf
+    season: JJA
+    region: SH
+    weight: 0.0
+    ref_val: -23.806
+    model_init: -32.702344894409165
+    model_final: -31.33055163802868
+    bias_init: -8.896344894409166
+    bias_final: -7.524551638028679
+    status: IMPROVED
+  - variable: swcf
+    season: JJA
+    region: Equatorial
+    weight: 0.0
+    ref_val: -44.59
+    model_init: -61.02545856294174
+    model_final: -57.98414510458529
+    bias_init: -16.43545856294174
+    bias_final: -13.394145104585286
+    status: IMPROVED
+  - variable: swcf
+    season: JJA
+    region: North Pole
+    weight: 0.0
+    ref_val: -68.93
+    model_init: -95.12875765845882
+    model_final: -92.60612423810821
+    bias_init: -26.19875765845882
+    bias_final: -23.67612423810821
+    status: IMPROVED
+  - variable: swcf
+    season: JJA
+    region: South Pole
+    weight: 0.0
+    ref_val: -1.67
+    model_init: -1.470631332624524
+    model_final: -1.4987445699845874
+    bias_init: 0.19936866737547593
+    bias_final: 0.1712554300154125
+    status: IMPROVED
+  - variable: lwcf
+    season: ALL
+    region: Global
+    weight: 0.0
+    ref_val: 27.822
+    model_init: 24.901756468273312
+    model_final: 26.426716894774337
+    bias_init: -2.920243531726686
+    bias_final: -1.3952831052256633
+    status: IMPROVED
+  - variable: lwcf
+    season: ALL
+    region: Tropical
+    weight: 0.0
+    ref_val: 29.992
+    model_init: 23.012243997482997
+    model_final: 24.336563744974303
+    bias_init: -6.979756002517002
+    bias_final: -5.655436255025699
+    status: IMPROVED
+  - variable: lwcf
+    season: ALL
+    region: North Midlat
+    weight: 0.0
+    ref_val: 24.428
+    model_init: 25.005307152157737
+    model_final: 26.55880337900129
+    bias_init: 0.5773071521577359
+    bias_final: 2.1308033790012884
+    status: WORSENED
+  - variable: lwcf
+    season: ALL
+    region: South Midlat
+    weight: 0.0
+    ref_val: 26.874
+    model_init: 28.7422291891915
+    model_final: 30.657528646734065
+    bias_init: 1.8682291891915033
+    bias_final: 3.7835286467340645
+    status: WORSENED
+  - variable: lwcf
+    season: ALL
+    region: NH
+    weight: 0.0
+    ref_val: 23.969
+    model_init: 22.566600527082144
+    model_final: 23.792109134684484
+    bias_init: -1.402399472917857
+    bias_final: -0.17689086531551856
+    status: IMPROVED
+  - variable: lwcf
+    season: ALL
+    region: SH
+    weight: 0.0
+    ref_val: 26.185
+    model_init: 26.888167608351893
+    model_final: 28.451445178431822
+    bias_init: 0.7031676083518947
+    bias_final: 2.2664451784318222
+    status: WORSENED
+  - variable: lwcf
+    season: ALL
+    region: Equatorial
+    weight: 0.0
+    ref_val: 33.101
+    model_init: 25.248277755010662
+    model_final: 27.033007510857626
+    bias_init: -7.852722244989338
+    bias_final: -6.067992489142372
+    status: IMPROVED
+  - variable: lwcf
+    season: ALL
+    region: North Pole
+    weight: 0.0
+    ref_val: 15.475
+    model_init: 17.506447928292378
+    model_final: 19.133636783377288
+    bias_init: 2.0314479282923767
+    bias_final: 3.6586367833772884
+    status: WORSENED
+  - variable: lwcf
+    season: ALL
+    region: South Pole
+    weight: 0.0
+    ref_val: 15.614
+    model_init: 17.960353851318335
+    model_final: 20.224475774456206
+    bias_init: 2.346353851318334
+    bias_final: 4.610475774456206
+    status: WORSENED
+  - variable: lwcf
+    season: DJF
+    region: Global
+    weight: 0.0
+    ref_val: 27.684
+    model_init: 23.936067672002853
+    model_final: 25.55775804639905
+    bias_init: -3.747932327997149
+    bias_final: -2.1262419536009496
+    status: IMPROVED
+  - variable: lwcf
+    season: DJF
+    region: Tropical
+    weight: 0.0
+    ref_val: 31.021
+    model_init: 23.48211906069799
+    model_final: 25.00593437841058
+    bias_init: -7.538880939302013
+    bias_final: -6.015065621589421
+    status: IMPROVED
+  - variable: lwcf
+    season: DJF
+    region: North Midlat
+    weight: 0.0
+    ref_val: 23.765
+    model_init: 22.901304335821205
+    model_final: 25.12389805943757
+    bias_init: -0.8636956641787967
+    bias_final: 1.358898059437569
+    status: WORSENED
+  - variable: lwcf
+    season: DJF
+    region: South Midlat
+    weight: 0.0
+    ref_val: 24.929
+    model_init: 25.91807111104329
+    model_final: 27.14304139353892
+    bias_init: 0.9890711110432919
+    bias_final: 2.214041393538922
+    status: WORSENED
+  - variable: lwcf
+    season: DJF
+    region: NH
+    weight: 0.0
+    ref_val: 22.736
+    model_init: 21.13614191327774
+    model_final: 22.683699654908292
+    bias_init: -1.5998580867222598
+    bias_final: -0.052300345091709666
+    status: IMPROVED
+  - variable: lwcf
+    season: DJF
+    region: SH
+    weight: 0.0
+    ref_val: 25.673
+    model_init: 25.446135838826486
+    model_final: 26.779354795023536
+    bias_init: -0.2268641611735136
+    bias_final: 1.10635479502354
+    status: WORSENED
+  - variable: lwcf
+    season: DJF
+    region: Equatorial
+    weight: 0.0
+    ref_val: 34.377
+    model_init: 25.218738192603656
+    model_final: 27.201013217510422
+    bias_init: -9.158261807396347
+    bias_final: -7.1759867824895816
+    status: IMPROVED
+  - variable: lwcf
+    season: DJF
+    region: North Pole
+    weight: 0.0
+    ref_val: 11.951
+    model_init: 10.943328267052038
+    model_final: 12.94342521892905
+    bias_init: -1.007671732947962
+    bias_final: 0.9924252189290499
+    status: IMPROVED
+  - variable: lwcf
+    season: DJF
+    region: South Pole
+    weight: 0.0
+    ref_val: 15.777
+    model_init: 16.64677247546967
+    model_final: 18.593777750139807
+    bias_init: 0.8697724754696714
+    bias_final: 2.81677775013981
+    status: WORSENED
+  - variable: lwcf
+    season: JJA
+    region: Global
+    weight: 0.0
+    ref_val: 27.699
+    model_init: 25.098567599341948
+    model_final: 26.58643162740711
+    bias_init: -2.6004324006580544
+    bias_final: -1.1125683725928943
+    status: IMPROVED
+  - variable: lwcf
+    season: JJA
+    region: Tropical
+    weight: 0.0
+    ref_val: 28.85
+    model_init: 21.888510840279686
+    model_final: 23.224879573179976
+    bias_init: -6.9614891597203155
+    bias_final: -5.625120426820025
+    status: IMPROVED
+  - variable: lwcf
+    season: JJA
+    region: North Midlat
+    weight: 0.0
+    ref_val: 24.676
+    model_init: 25.142404828752774
+    model_final: 25.736640049116694
+    bias_init: 0.4664048287527742
+    bias_final: 1.0606400491166947
+    status: WORSENED
+  - variable: lwcf
+    season: JJA
+    region: South Midlat
+    weight: 0.0
+    ref_val: 28.421
+    model_init: 31.755506787981272
+    model_final: 34.453145333706836
+    bias_init: 3.3345067879812715
+    bias_final: 6.032145333706834
+    status: WORSENED
+  - variable: lwcf
+    season: JJA
+    region: NH
+    weight: 0.0
+    ref_val: 25.038
+    model_init: 21.79249999636693
+    model_final: 22.59049407053295
+    bias_init: -3.245500003633069
+    bias_final: -2.4475059294670483
+    status: IMPROVED
+  - variable: lwcf
+    season: JJA
+    region: SH
+    weight: 0.0
+    ref_val: 26.288
+    model_init: 28.859048389253104
+    model_final: 30.655386312676754
+    bias_init: 2.5710483892531046
+    bias_final: 4.367386312676755
+    status: WORSENED
+  - variable: lwcf
+    season: JJA
+    region: Equatorial
+    weight: 0.0
+    ref_val: 31.617
+    model_init: 24.64629927135647
+    model_final: 26.51346642607586
+    bias_init: -6.970700728643534
+    bias_final: -5.103533573924144
+    status: IMPROVED
+  - variable: lwcf
+    season: JJA
+    region: North Pole
+    weight: 0.0
+    ref_val: 19.751
+    model_init: 21.755612237112814
+    model_final: 22.9882713341602
+    bias_init: 2.0046122371128114
+    bias_final: 3.2372713341601984
+    status: WORSENED
+  - variable: lwcf
+    season: JJA
+    region: South Pole
+    weight: 0.0
+    ref_val: 15.115
+    model_init: 18.032501674833725
+    model_final: 20.792266630694947
+    bias_init: 2.917501674833723
+    bias_final: 5.677266630694945
+    status: WORSENED
+  - variable: rsns
+    season: ALL
+    region: Global
+    weight: 0.0
+    ref_val: 160
+    model_init: 149.81511869884648
+    model_final: 152.71625372197994
+    bias_init: -10.184881301153512
+    bias_final: -7.2837462780200575
+    status: IMPROVED
+  - variable: rlns
+    season: ALL
+    region: Global
+    weight: 0.0
+    ref_val: -56
+    model_init: -55.514023553757355
+    model_final: -56.09110749662377
+    bias_init: 0.48597644624264547
+    bias_final: -0.09110749662376971
+    status: IMPROVED
+  - variable: hfss
+    season: ALL
+    region: Global
+    weight: 0.0
+    ref_val: -21
+    model_init: -17.25908188592817
+    model_final: -17.014223075495416
+    bias_init: 3.7409181140718326
+    bias_final: 3.9857769245045835
+    status: WORSENED
+  - variable: hfls
+    season: ALL
+    region: Global
+    weight: 0.0
+    ref_val: -82
+    model_init: -85.72645932152146
+    model_final: -84.68083177584468
+    bias_init: -3.726459321521464
+    bias_final: -2.680831775844686
+    status: IMPROVED
+  - variable: net_sfc
+    season: ALL
+    region: Global
+    weight: 0.0
+    ref_val: 0.6
+    model_init: -9.437419187454962
+    model_final: -5.804736473873796
+    bias_init: -10.037419187454962
+    bias_final: -6.404736473873796
+    status: IMPROVED
+  - variable: toamsfc
+    season: ALL
+    region: Global
+    weight: 0.0
+    ref_val: 0
+    model_init: 1.0265115698178604
+    model_final: 0.9427486407400403
+    bias_init: 1.0265115698178604
+    bias_final: 0.9427486407400403
+    status: IMPROVED

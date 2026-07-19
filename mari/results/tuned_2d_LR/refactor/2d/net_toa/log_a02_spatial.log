@@ -1,0 +1,112 @@
+Launch ECtuner in mode: 2d on phis (2000-2017)
+2026-07-19 17:07:59,837 - INFO - ==== Starting ECtuner 2D Spatial Workflow ====
+2026-07-19 17:07:59,960 - INFO - Loading 2D Data (Sensitivity, Reference, Base)...
+2026-07-19 17:07:59,962 - INFO - Loading 2D sensitivity from: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/data/sensitivities/2D/sensitivity_TL63_415_1991-2000_2D.nc
+2026-07-19 17:08:07,695 - INFO - Loading reference for net_toa from: climate_average_net_toa_CERES EBAF_r180x90_2000-2024.nc
+2026-07-19 17:08:07,707 - INFO - Loading reference for rsnt from: climate_average_rsnt_CERES EBAF_r180x90_2000-2024.nc
+2026-07-19 17:08:07,726 - INFO - Loading reference for rlnt from: climate_average_rlnt_CERES EBAF_r180x90_2000-2024.nc
+2026-07-19 17:08:07,736 - INFO - Loading reference for swcf from: climate_average_swcf_CERES EBAF_r180x90_2000-2024.nc
+2026-07-19 17:08:07,745 - INFO - Loading reference for lwcf from: climate_average_lwcf_CERES EBAF_r180x90_2000-2024.nc
+2026-07-19 17:08:07,753 - WARNING - Missing observation map for 'rsns'. Skipping it from 2D targets/diagnostics.
+2026-07-19 17:08:07,754 - WARNING - Missing observation map for 'rlns'. Skipping it from 2D targets/diagnostics.
+2026-07-19 17:08:07,755 - WARNING - Missing observation map for 'hfss'. Skipping it from 2D targets/diagnostics.
+2026-07-19 17:08:07,755 - WARNING - Missing observation map for 'hfls'. Skipping it from 2D targets/diagnostics.
+2026-07-19 17:08:07,756 - INFO - Loading reference for net_sfc from: climate_average_net_sfc_NOCS_r180x90_2000-2014.nc
+2026-07-19 17:08:07,764 - WARNING - Missing observation map for 'toamsfc'. Skipping it from 2D targets/diagnostics.
+2026-07-19 17:08:07,768 - INFO - Loading cached base maps for phis from /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/ecmean/maps_lres/base_2d_phis_2000_2017.nc
+2026-07-19 17:08:07,775 - INFO - Generating spatial weights and calculating initial biases...
+2026-07-19 17:08:07,792 - INFO - Flattening data
+2026-07-19 17:08:08,558 - INFO - Starting Optimization (dual_annealing)...
+2026-07-19 17:11:09,786 - INFO - Optimization finished. Spatial Cost: 7.2683 | Global Cost: 0.9762
+2026-07-19 17:11:09,996 - INFO - Diagnostic maps saved to: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/net_toa/diagnostics_2d_phis_a02_spatial.nc
+2026-07-19 17:11:10,000 - INFO - 
+Parameters Optimization Result:
+2026-07-19 17:11:10,000 - INFO - --------------------------------------------------------------------------------
+2026-07-19 17:11:10,003 - INFO - |     Parameter     |   New value |   Old value |      Change |   Rel. change |   Min change |   Max change |   Dist. from ref. |
+2026-07-19 17:11:10,003 - INFO - |-------------------+-------------+-------------+-------------+---------------+--------------+--------------+-------------------|
+2026-07-19 17:11:10,003 - INFO - |      RPRCON       |  9.8019e-04 |  1.4000e-03 | -4.1981e-04 |   -2.9986e-01 |  -4.2000e-04 |   4.2000e-04 |       -2.9986e-01 |
+2026-07-19 17:11:10,003 - INFO - |      ENTRORG      |  1.6244e-03 |  1.7500e-03 | -1.2563e-04 |   -7.1788e-02 |  -5.2500e-04 |   5.2500e-04 |       -7.1788e-02 |
+2026-07-19 17:11:10,004 - INFO - |      DETRPEN      |  9.7455e-05 |  7.5000e-05 |  2.2455e-05 |    2.9941e-01 |  -2.2500e-05 |   2.2500e-05 |        2.9941e-01 |
+2026-07-19 17:11:10,004 - INFO - |      ENTRDD       |  2.1041e-04 |  3.0000e-04 | -8.9595e-05 |   -2.9865e-01 |  -9.0000e-05 |   9.0000e-05 |       -2.9865e-01 |
+2026-07-19 17:11:10,004 - INFO - |      RMFDEPS      |  3.8998e-01 |  3.0000e-01 |  8.9982e-02 |    2.9994e-01 |  -9.0000e-02 |   9.0000e-02 |        2.9994e-01 |
+2026-07-19 17:11:10,004 - INFO - |       RVICE       |  1.6900e-01 |  1.3000e-01 |  3.8997e-02 |    2.9997e-01 |  -3.9000e-02 |   3.9000e-02 |        2.9997e-01 |
+2026-07-19 17:11:10,005 - INFO - |    RLCRITSNOW     |  1.4004e-05 |  2.0000e-05 | -5.9955e-06 |   -2.9978e-01 |  -6.0000e-06 |   6.0000e-06 |       -2.9978e-01 |
+2026-07-19 17:11:10,005 - INFO - |     RSNOWLIN2     |  2.1005e-02 |  3.0000e-02 | -8.9947e-03 |   -2.9982e-01 |  -9.0000e-03 |   9.0000e-03 |       -2.9982e-01 |
+2026-07-19 17:11:10,005 - INFO - |      RCLDIFF      |  4.2398e-06 |  6.0000e-06 | -1.7602e-06 |   -2.9336e-01 |  -1.8000e-06 |   1.8000e-06 |       -2.9336e-01 |
+2026-07-19 17:11:10,005 - INFO - |   RCLDIFF_CONVI   |  7.0084e+00 |  1.0000e+01 | -2.9916e+00 |   -2.9916e-01 |  -3.0000e+00 |   3.0000e+00 |       -2.9916e-01 |
+2026-07-19 17:11:10,006 - INFO - |  RDEPLIQREFRATE   |  5.4008e-01 |  5.0000e-01 |  4.0082e-02 |    8.0164e-02 |  -1.5000e-01 |   1.5000e-01 |        8.0164e-02 |
+2026-07-19 17:11:10,006 - INFO - |  RDEPLIQREFDEPTH  |  3.6026e+02 |  5.0000e+02 | -1.3974e+02 |   -2.7948e-01 |  -1.5000e+02 |   1.5000e+02 |       -2.7948e-01 |
+2026-07-19 17:11:10,006 - INFO - | RCL_OVERLAPLIQICE |  4.5502e-01 |  6.5000e-01 | -1.9498e-01 |   -2.9997e-01 |  -1.9500e-01 |   1.9500e-01 |       -2.9997e-01 |
+2026-07-19 17:11:10,006 - INFO - |  RCL_INHOMOGAUT   |  1.0502e+00 |  1.5000e+00 | -4.4983e-01 |   -2.9989e-01 |  -4.5000e-01 |   4.5000e-01 |       -2.9989e-01 |
+2026-07-19 17:11:10,007 - INFO - |  RCL_INHOMOGACC   |  2.1019e+00 |  3.0000e+00 | -8.9814e-01 |   -2.9938e-01 |  -9.0000e-01 |   9.0000e-01 |       -2.9938e-01 |
+2026-07-19 17:11:10,007 - INFO - |      RMINICE      |  7.8000e+01 |  6.0000e+01 |  1.8000e+01 |    3.0000e-01 |  -1.8000e+01 |   1.8000e+01 |        3.0000e-01 |
+2026-07-19 17:11:10,007 - INFO - --------------------------------------------------------------------------------
+
+2026-07-19 17:11:10,007 - INFO - 
+===================== OPTIMIZATION SUMMARY (Biases: Model - Target) ======================
+2026-07-19 17:11:10,008 - INFO - Goal: Bring Biases to 0.0
+
+2026-07-19 17:11:10,008 - INFO - --------------------------------- PRIMARY TUNING TARGETS ---------------------------------
+2026-07-19 17:11:10,008 - INFO - Variable     | Season | Region       | Weight |  Bias Init -> Bias Final | Status
+2026-07-19 17:11:10,008 - INFO - ---------------------------------------------------------------------------------
+2026-07-19 17:11:10,009 - INFO - net_toa      | ALL    | Global       | 1.00   |      5.626 -> [92m     0.976[0m | IMPROVED
+2026-07-19 17:11:10,009 - INFO - 
+-------------------------------- DIAGNOSTIC SIDE-EFFECTS ---------------------------------
+2026-07-19 17:11:10,009 - INFO - Variable     | Season | Region       | Weight |  Bias Init -> Bias Final | Status
+2026-07-19 17:11:10,009 - INFO - ---------------------------------------------------------------------------------
+2026-07-19 17:11:10,010 - INFO - net_toa      | ALL    | Tropical     | 0.00   |      2.687 -> [92m    -2.332[0m | IMPROVED
+2026-07-19 17:11:10,010 - INFO - net_toa      | ALL    | North Midlat | 0.00   |      6.164 -> [92m     2.395[0m | IMPROVED
+2026-07-19 17:11:10,010 - INFO - net_toa      | ALL    | South Midlat | 0.00   |     10.965 -> [92m     6.173[0m | IMPROVED
+2026-07-19 17:11:10,010 - INFO - net_toa      | ALL    | North Pole   | 0.00   |      8.072 -> [92m     5.568[0m | IMPROVED
+2026-07-19 17:11:10,011 - INFO - net_toa      | ALL    | South Pole   | 0.00   |     19.615 -> [92m    16.433[0m | IMPROVED
+2026-07-19 17:11:10,011 - INFO - net_toa      | ALL    | Equatorial   | 0.00   |      2.367 -> [91m    -3.356[0m | WORSENED
+2026-07-19 17:11:10,011 - INFO - net_toa      | ALL    | NH           | 0.00   |      4.927 -> [92m     1.348[0m | IMPROVED
+2026-07-19 17:11:10,011 - INFO - net_toa      | ALL    | SH           | 0.00   |      9.713 -> [92m     5.108[0m | IMPROVED
+2026-07-19 17:11:10,012 - INFO - rsnt         | ALL    | Global       | 0.00   |     -1.305 -> [91m    -4.470[0m | WORSENED
+2026-07-19 17:11:10,012 - INFO - rsnt         | ALL    | Tropical     | 0.00   |     -1.157 -> [91m    -5.277[0m | WORSENED
+2026-07-19 17:11:10,012 - INFO - rsnt         | ALL    | North Midlat | 0.00   |     -2.983 -> [91m    -5.314[0m | WORSENED
+2026-07-19 17:11:10,012 - INFO - rsnt         | ALL    | South Midlat | 0.00   |      0.076 -> [91m    -2.014[0m | WORSENED
+2026-07-19 17:11:10,013 - INFO - rsnt         | ALL    | North Pole   | 0.00   |     -5.579 -> [91m    -6.133[0m | WORSENED
+2026-07-19 17:11:10,013 - INFO - rsnt         | ALL    | South Pole   | 0.00   |      5.026 -> [92m     5.001[0m | IMPROVED
+2026-07-19 17:11:10,013 - INFO - rsnt         | ALL    | Equatorial   | 0.00   |     -0.425 -> [91m    -4.769[0m | WORSENED
+2026-07-19 17:11:10,013 - INFO - rsnt         | ALL    | NH           | 0.00   |     -2.942 -> [91m    -5.592[0m | WORSENED
+2026-07-19 17:11:10,013 - INFO - rsnt         | ALL    | SH           | 0.00   |     -0.584 -> [91m    -3.038[0m | WORSENED
+2026-07-19 17:11:10,014 - INFO - rlnt         | ALL    | Global       | 0.00   |      6.931 -> [92m     5.447[0m | IMPROVED
+2026-07-19 17:11:10,014 - INFO - rlnt         | ALL    | Tropical     | 0.00   |      3.844 -> [92m     2.945[0m | IMPROVED
+2026-07-19 17:11:10,014 - INFO - rlnt         | ALL    | North Midlat | 0.00   |      9.147 -> [92m     7.709[0m | IMPROVED
+2026-07-19 17:11:10,014 - INFO - rlnt         | ALL    | South Midlat | 0.00   |     10.889 -> [92m     8.187[0m | IMPROVED
+2026-07-19 17:11:10,015 - INFO - rlnt         | ALL    | North Pole   | 0.00   |     13.651 -> [92m    11.701[0m | IMPROVED
+2026-07-19 17:11:10,015 - INFO - rlnt         | ALL    | South Pole   | 0.00   |     14.589 -> [92m    11.432[0m | IMPROVED
+2026-07-19 17:11:10,015 - INFO - rlnt         | ALL    | Equatorial   | 0.00   |      2.792 -> [92m     1.413[0m | IMPROVED
+2026-07-19 17:11:10,015 - INFO - rlnt         | ALL    | NH           | 0.00   |      7.869 -> [92m     6.940[0m | IMPROVED
+2026-07-19 17:11:10,016 - INFO - rlnt         | ALL    | SH           | 0.00   |     10.297 -> [92m     8.147[0m | IMPROVED
+2026-07-19 17:11:10,016 - INFO - swcf         | ALL    | Global       | 0.00   |      0.506 -> [91m    -2.576[0m | WORSENED
+2026-07-19 17:11:10,016 - INFO - swcf         | ALL    | Tropical     | 0.00   |      0.248 -> [91m    -3.815[0m | WORSENED
+2026-07-19 17:11:10,016 - INFO - swcf         | ALL    | North Midlat | 0.00   |     -0.103 -> [91m    -2.230[0m | WORSENED
+2026-07-19 17:11:10,017 - INFO - swcf         | ALL    | South Midlat | 0.00   |      1.630 -> [92m    -0.442[0m | IMPROVED
+2026-07-19 17:11:10,017 - INFO - swcf         | ALL    | North Pole   | 0.00   |     -6.228 -> [91m    -6.844[0m | WORSENED
+2026-07-19 17:11:10,017 - INFO - swcf         | ALL    | South Pole   | 0.00   |      6.683 -> [92m     6.643[0m | IMPROVED
+2026-07-19 17:11:10,017 - INFO - swcf         | ALL    | Equatorial   | 0.00   |      0.569 -> [91m    -3.719[0m | WORSENED
+2026-07-19 17:11:10,017 - INFO - swcf         | ALL    | NH           | 0.00   |      0.218 -> [91m    -2.262[0m | WORSENED
+2026-07-19 17:11:10,018 - INFO - swcf         | ALL    | SH           | 0.00   |      0.727 -> [91m    -1.701[0m | WORSENED
+2026-07-19 17:11:10,018 - INFO - lwcf         | ALL    | Global       | 0.00   |     -2.709 -> [91m    -5.028[0m | WORSENED
+2026-07-19 17:11:10,018 - INFO - lwcf         | ALL    | Tropical     | 0.00   |     -5.038 -> [91m    -6.991[0m | WORSENED
+2026-07-19 17:11:10,018 - INFO - lwcf         | ALL    | North Midlat | 0.00   |     -0.397 -> [91m    -2.810[0m | WORSENED
+2026-07-19 17:11:10,019 - INFO - lwcf         | ALL    | South Midlat | 0.00   |     -0.364 -> [91m    -3.319[0m | WORSENED
+2026-07-19 17:11:10,019 - INFO - lwcf         | ALL    | North Pole   | 0.00   |      5.081 -> [92m     2.285[0m | IMPROVED
+2026-07-19 17:11:10,019 - INFO - lwcf         | ALL    | South Pole   | 0.00   |      3.737 -> [92m     0.211[0m | IMPROVED
+2026-07-19 17:11:10,019 - INFO - lwcf         | ALL    | Equatorial   | 0.00   |     -5.041 -> [91m    -7.566[0m | WORSENED
+2026-07-19 17:11:10,020 - INFO - lwcf         | ALL    | NH           | 0.00   |     -1.670 -> [91m    -3.604[0m | WORSENED
+2026-07-19 17:11:10,020 - INFO - lwcf         | ALL    | SH           | 0.00   |     -1.325 -> [91m    -3.812[0m | WORSENED
+2026-07-19 17:11:10,020 - INFO - net_sfc      | ALL    | Global       | 0.00   |     -6.840 -> [91m   -13.138[0m | WORSENED
+2026-07-19 17:11:10,020 - INFO - net_sfc      | ALL    | Tropical     | 0.00   |     -4.390 -> [91m   -11.356[0m | WORSENED
+2026-07-19 17:11:10,021 - INFO - net_sfc      | ALL    | North Midlat | 0.00   |     -8.110 -> [91m   -13.930[0m | WORSENED
+2026-07-19 17:11:10,021 - INFO - net_sfc      | ALL    | South Midlat | 0.00   |    -10.410 -> [91m   -15.821[0m | WORSENED
+2026-07-19 17:11:10,021 - INFO - net_sfc      | ALL    | North Pole   | 0.00   |      5.755 -> [92m     2.637[0m | IMPROVED
+2026-07-19 17:11:10,021 - INFO - net_sfc      | ALL    | South Pole   | 0.00   |    -23.330 -> [91m   -24.347[0m | WORSENED
+2026-07-19 17:11:10,021 - INFO - net_sfc      | ALL    | Equatorial   | 0.00   |     -1.734 -> [91m    -8.780[0m | WORSENED
+2026-07-19 17:11:10,022 - INFO - net_sfc      | ALL    | NH           | 0.00   |    -10.165 -> [91m   -15.881[0m | WORSENED
+2026-07-19 17:11:10,022 - INFO - net_sfc      | ALL    | SH           | 0.00   |     -9.546 -> [91m   -15.515[0m | WORSENED
+2026-07-19 17:11:10,022 - INFO - ==========================================================================================
+
+Automatic copy of the generated YAML file to /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/net_toa/yaml_files

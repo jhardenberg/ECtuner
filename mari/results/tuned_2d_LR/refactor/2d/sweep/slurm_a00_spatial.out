@@ -1,0 +1,190 @@
+[ECMWF-INFO -sbatch] - -------------------------------------------------------------------------------------
+[ECMWF-INFO -sbatch] -  This is the ECMWF jobfilter
+[ECMWF-INFO -sbatch] -  +++ Please report issues using the Support portal +++
+[ECMWF-INFO -sbatch] -  +++ https://support.ecmwf.int                     +++
+[ECMWF-INFO -sbatch] -  /usr/local/bin/ecsbatch: size: 54473, mtime: Mon Jun 29 15:34:27 2026
+[ECMWF-INFO -sbatch] - -------------------------------------------------------------------------------------
+[ECMWF-INFO -sbatch] - Time at submit: Sun Jul 19 15:32:29 2026 (1784475149.5877337) on ac6-102.bullx:/lus/h2resw01/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/notebooks
+[ECMWF-INFO -sbatch] - --- SLURM VARIABLES ---
+[ECMWF-INFO -sbatch] - EC_CLUSTER=ac
+[ECMWF-INFO -sbatch] - SLURM_EXPORT_ENV=ALL
+[ECMWF-INFO -sbatch] - SBATCH_EXPORT=NONE
+[ECMWF-INFO -sbatch] - -----------------------
+[ECMWF-INFO -sbatch] - jobscript: /lus/h2resw01/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/jobs/run_tuner_sweep.sh
+[ECMWF-INFO -sbatch] - --- SCRIPT OPTIONS ---
+[ECMWF-INFO -sbatch] - (override by arg) #SBATCH --job-name=tuner_sweep
+[ECMWF-INFO -sbatch] - #SBATCH --nodes=1
+[ECMWF-INFO -sbatch] - #SBATCH --ntasks=1
+[ECMWF-INFO -sbatch] - #SBATCH --cpus-per-task=8
+[ECMWF-INFO -sbatch] - #SBATCH --mem=128G
+[ECMWF-INFO -sbatch] - #SBATCH --time=04:00:00
+[ECMWF-INFO -sbatch] - #SBATCH --qos=np
+[ECMWF-INFO -sbatch] - -----------------------
+[ECMWF-INFO -sbatch] - --- POST-PROCESSED OPTIONS ---
+[ECMWF-INFO -sbatch] - ARG --positional=['/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/jobs/run_tuner_sweep.sh', '2d', '/lus/h2resw01/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/notebooks/temp_a00_spatial.yaml', '/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep/tuned_a00_spatial.yml', '/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep/log_a00_spatial.log', 'phis', '2000', '2017', 'a00_spatial']
+[ECMWF-INFO -sbatch] - ARG --cpus_per_task=8
+[ECMWF-INFO -sbatch] - ARG --job_name=a00_spatial
+[ECMWF-INFO -sbatch] - ARG --ntasks=1
+[ECMWF-INFO -sbatch] - ARG --nodes=1
+[ECMWF-INFO -sbatch] - ARG --output=/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep/slurm_a00_spatial.out
+[ECMWF-INFO -sbatch] - ARG --qos=np
+[ECMWF-INFO -sbatch] - ARG --time=04:00:00
+[ECMWF-INFO -sbatch] - ARG --mem=128G
+[ECMWF-INFO -sbatch] - ------------------------------
+[ECMWF-INFO -sbatch] - jobtag: ecme3038-a00_spatial-1x256-/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep/slurm_a00_spatial.out
+[ECMWF-INFO -sbatch] - ------------------------------
+[ECMWF-INFO -sbatch] - Average Walltime 240 with a Standard Deviation 0
+[ECMWF-INFO -sbatch] - Runtime history
+[ECMWF-INFO -sbatch] -   Date               | Cores   Cluster   Walltime       Mem
+[ECMWF-INFO -sbatch] -   19.07.2026 - 15:12 | 256        ac         240        128G      
+[ECMWF-INFO -sbatch] - ['/usr/bin/sbatch', '--cpus-per-task=8', '--job-name=a00_spatial', '--ntasks=1', '--nodes=1', '--output=/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep/slurm_a00_spatial.out', '--qos=np', '--time=04:00:00', '--mem=128G', '--export=SLURM_JOB_STDOUT=/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep/slurm_a00_spatial.out,EC_user_time_limit=04:00:00', '--licenses=h2resw01', '/lus/h2resw01/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/jobs/run_tuner_sweep.sh', '2d', '/lus/h2resw01/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/notebooks/temp_a00_spatial.yaml', '/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep/tuned_a00_spatial.yml', '/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep/log_a00_spatial.log', 'phis', '2000', '2017', 'a00_spatial']
+[ECMWF-INFO -sbatch] - sbatch executed on ac
+[ECMWF-INFO -sbatch] - Job queued on ac using method local
+[ECMWF-INFO -sbatch] - Submitted batch job 30778689
+[ECMWF-INFO -ecprofile] /usr/bin/bash NON_INTERACTIVE on ac2-2056 at 20260719_153238.604, PID: 1121575, JOBID: 30778689
+[ECMWF-INFO -ecprofile] $SCRATCH=/ec/res4/scratch/ecme3038
+[ECMWF-INFO -ecprofile] $PERM=/perm/ecme3038
+[ECMWF-INFO -ecprofile] $HPCPERM=/ec/res4/hpcperm/ecme3038
+[ECMWF-INFO -ecprofile] $TMPDIR=/dev/shm/_tmpdir_.ecme3038.30778689
+[ECMWF-INFO -ecprofile] $SCRATCHDIR=/ec/res4/scratchdir/ecme3038/1/30778689
+2026-07-19 15:32:41 | ectuner |     INFO -> ==== Starting ECtuner 2D Spatial Workflow ====
+2026-07-19 15:32:42 | ectuner |     INFO -> Loading 2D Data (Sensitivity, Reference, Base)...
+2026-07-19 15:32:42 | ectuner |     INFO -> Loading 2D sensitivity from: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/data/sensitivities/2D/sensitivity_TL63_415_1991-2000_2D.nc
+/etc/ecmwf/nfs/dh2_2_perm_b/ecme3038/envs/ectuner/lib/python3.11/site-packages/pyproj/network.py:59: UserWarning: pyproj unable to set PROJ database path.
+  _set_context_ca_bundle_path(ca_bundle_path)
+2026-07-19 15:32:50 | ectuner |     INFO -> Loading reference for net_toa from: climate_average_net_toa_CERES EBAF_r180x90_2000-2024.nc
+2026-07-19 15:32:50 | ectuner |     INFO -> Loading reference for rsnt from: climate_average_rsnt_CERES EBAF_r180x90_2000-2024.nc
+2026-07-19 15:32:50 | ectuner |     INFO -> Loading reference for rlnt from: climate_average_rlnt_CERES EBAF_r180x90_2000-2024.nc
+2026-07-19 15:32:50 | ectuner |     INFO -> Loading reference for swcf from: climate_average_swcf_CERES EBAF_r180x90_2000-2024.nc
+2026-07-19 15:32:50 | ectuner |     INFO -> Loading reference for lwcf from: climate_average_lwcf_CERES EBAF_r180x90_2000-2024.nc
+2026-07-19 15:32:50 | ectuner |  WARNING -> Missing observation map for 'rsns'. Skipping it from 2D targets/diagnostics.
+2026-07-19 15:32:50 | ectuner |  WARNING -> Missing observation map for 'rlns'. Skipping it from 2D targets/diagnostics.
+2026-07-19 15:32:50 | ectuner |  WARNING -> Missing observation map for 'hfss'. Skipping it from 2D targets/diagnostics.
+2026-07-19 15:32:50 | ectuner |  WARNING -> Missing observation map for 'hfls'. Skipping it from 2D targets/diagnostics.
+2026-07-19 15:32:50 | ectuner |     INFO -> Loading reference for net_sfc from: climate_average_net_sfc_NOCS_r180x90_2000-2014.nc
+2026-07-19 15:32:50 | ectuner |  WARNING -> Missing observation map for 'toamsfc'. Skipping it from 2D targets/diagnostics.
+2026-07-19 15:32:50 | ectuner |     INFO -> Loading cached base maps for phis from /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/ecmean/maps_lres/base_2d_phis_2000_2017.nc
+2026-07-19 15:32:50 | ectuner |     INFO -> Generating spatial weights and calculating initial biases...
+2026-07-19 15:32:50 | ectuner |     INFO -> Flattening data
+2026-07-19 15:32:52 | ectuner |     INFO -> Starting Optimization (dual_annealing)...
+2026-07-19 15:35:28 | ectuner |     INFO -> Optimization finished. Spatial Cost: 7.3956 | Global Cost: 2.9487
+2026-07-19 15:35:28 | ectuner |     INFO -> Diagnostic maps saved to: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep/diagnostics_2d_phis_a00_spatial.nc
+2026-07-19 15:35:28 | ectuner |     INFO -> 
+Parameters Optimization Result:
+2026-07-19 15:35:28 | ectuner |     INFO -> --------------------------------------------------------------------------------
+2026-07-19 15:35:28 | ectuner |     INFO -> |     Parameter     |   New value |   Old value |      Change |   Rel. change |   Min change |   Max change |   Dist. from ref. |
+2026-07-19 15:35:28 | ectuner |     INFO -> |-------------------+-------------+-------------+-------------+---------------+--------------+--------------+-------------------|
+2026-07-19 15:35:28 | ectuner |     INFO -> |      RPRCON       |  1.1222e-03 |  1.4000e-03 | -2.7781e-04 |   -1.9844e-01 |  -2.8000e-04 |   2.8000e-04 |       -1.9844e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |      ENTRORG      |  1.6024e-03 |  1.7500e-03 | -1.4761e-04 |   -8.4350e-02 |  -3.5000e-04 |   3.5000e-04 |       -8.4350e-02 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |      DETRPEN      |  8.9989e-05 |  7.5000e-05 |  1.4989e-05 |    1.9986e-01 |  -1.5000e-05 |   1.5000e-05 |        1.9986e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |      ENTRDD       |  2.4029e-04 |  3.0000e-04 | -5.9710e-05 |   -1.9903e-01 |  -6.0000e-05 |   6.0000e-05 |       -1.9903e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |      RMFDEPS      |  3.5996e-01 |  3.0000e-01 |  5.9956e-02 |    1.9985e-01 |  -6.0000e-02 |   6.0000e-02 |        1.9985e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |       RVICE       |  1.5599e-01 |  1.3000e-01 |  2.5992e-02 |    1.9994e-01 |  -2.6000e-02 |   2.6000e-02 |        1.9994e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |    RLCRITSNOW     |  1.6018e-05 |  2.0000e-05 | -3.9823e-06 |   -1.9912e-01 |  -4.0000e-06 |   4.0000e-06 |       -1.9912e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |     RSNOWLIN2     |  2.4027e-02 |  3.0000e-02 | -5.9731e-03 |   -1.9910e-01 |  -6.0000e-03 |   6.0000e-03 |       -1.9910e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |      RCLDIFF      |  4.8132e-06 |  6.0000e-06 | -1.1868e-06 |   -1.9781e-01 |  -1.2000e-06 |   1.2000e-06 |       -1.9781e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |   RCLDIFF_CONVI   |  8.0040e+00 |  1.0000e+01 | -1.9960e+00 |   -1.9960e-01 |  -2.0000e+00 |   2.0000e+00 |       -1.9960e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |  RDEPLIQREFRATE   |  5.9962e-01 |  5.0000e-01 |  9.9617e-02 |    1.9923e-01 |  -1.0000e-01 |   1.0000e-01 |        1.9923e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |  RDEPLIQREFDEPTH  |  4.6299e+02 |  5.0000e+02 | -3.7007e+01 |   -7.4013e-02 |  -1.0000e+02 |   1.0000e+02 |       -7.4013e-02 |
+2026-07-19 15:35:28 | ectuner |     INFO -> | RCL_OVERLAPLIQICE |  5.2022e-01 |  6.5000e-01 | -1.2978e-01 |   -1.9966e-01 |  -1.3000e-01 |   1.3000e-01 |       -1.9966e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |  RCL_INHOMOGAUT   |  1.3030e+00 |  1.5000e+00 | -1.9695e-01 |   -1.3130e-01 |  -3.0000e-01 |   3.0000e-01 |       -1.3130e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |  RCL_INHOMOGACC   |  2.4007e+00 |  3.0000e+00 | -5.9925e-01 |   -1.9975e-01 |  -6.0000e-01 |   6.0000e-01 |       -1.9975e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> |      RMINICE      |  7.1992e+01 |  6.0000e+01 |  1.1992e+01 |    1.9987e-01 |  -1.2000e+01 |   1.2000e+01 |        1.9987e-01 |
+2026-07-19 15:35:28 | ectuner |     INFO -> --------------------------------------------------------------------------------
+
+2026-07-19 15:35:28 | ectuner |     INFO -> 
+===================== OPTIMIZATION SUMMARY (Biases: Model - Target) ======================
+2026-07-19 15:35:28 | ectuner |     INFO -> Goal: Bring Biases to 0.0
+
+2026-07-19 15:35:28 | ectuner |     INFO -> --------------------------------- PRIMARY TUNING TARGETS ---------------------------------
+2026-07-19 15:35:28 | ectuner |     INFO -> Variable     | Season | Region       | Weight |  Bias Init -> Bias Final | Status
+2026-07-19 15:35:28 | ectuner |     INFO -> ---------------------------------------------------------------------------------
+2026-07-19 15:35:28 | ectuner |     INFO -> net_toa      | ALL    | Global       | 1.00   |      5.626 -> [92m     2.949[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> 
+-------------------------------- DIAGNOSTIC SIDE-EFFECTS ---------------------------------
+2026-07-19 15:35:28 | ectuner |     INFO -> Variable     | Season | Region       | Weight |  Bias Init -> Bias Final | Status
+2026-07-19 15:35:28 | ectuner |     INFO -> ---------------------------------------------------------------------------------
+2026-07-19 15:35:28 | ectuner |     INFO -> net_toa      | ALL    | Tropical     | 0.00   |      2.687 -> [92m    -0.058[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_toa      | ALL    | North Midlat | 0.00   |      6.164 -> [92m     3.848[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_toa      | ALL    | South Midlat | 0.00   |     10.965 -> [92m     8.064[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_toa      | ALL    | North Pole   | 0.00   |      8.072 -> [92m     6.415[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_toa      | ALL    | South Pole   | 0.00   |     19.615 -> [92m    17.620[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_toa      | ALL    | Equatorial   | 0.00   |      2.367 -> [92m    -0.764[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_toa      | ALL    | NH           | 0.00   |      4.927 -> [92m     2.766[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_toa      | ALL    | SH           | 0.00   |      9.713 -> [92m     6.991[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> rsnt         | ALL    | Global       | 0.00   |     -1.305 -> [91m    -3.020[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> rsnt         | ALL    | Tropical     | 0.00   |     -1.157 -> [91m    -3.412[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> rsnt         | ALL    | North Midlat | 0.00   |     -2.983 -> [91m    -4.285[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> rsnt         | ALL    | South Midlat | 0.00   |      0.076 -> [91m    -0.971[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> rsnt         | ALL    | North Pole   | 0.00   |     -5.579 -> [91m    -5.745[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> rsnt         | ALL    | South Pole   | 0.00   |      5.026 -> [91m     5.108[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> rsnt         | ALL    | Equatorial   | 0.00   |     -0.425 -> [91m    -2.791[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> rsnt         | ALL    | NH           | 0.00   |     -2.942 -> [91m    -4.453[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> rsnt         | ALL    | SH           | 0.00   |     -0.584 -> [91m    -1.825[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> rlnt         | ALL    | Global       | 0.00   |      6.931 -> [92m     5.969[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> rlnt         | ALL    | Tropical     | 0.00   |      3.844 -> [92m     3.354[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> rlnt         | ALL    | North Midlat | 0.00   |      9.147 -> [92m     8.132[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> rlnt         | ALL    | South Midlat | 0.00   |     10.889 -> [92m     9.035[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> rlnt         | ALL    | North Pole   | 0.00   |     13.651 -> [92m    12.159[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> rlnt         | ALL    | South Pole   | 0.00   |     14.589 -> [92m    12.513[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> rlnt         | ALL    | Equatorial   | 0.00   |      2.792 -> [92m     2.027[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> rlnt         | ALL    | NH           | 0.00   |      7.869 -> [92m     7.219[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> rlnt         | ALL    | SH           | 0.00   |     10.297 -> [92m     8.816[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> swcf         | ALL    | Global       | 0.00   |      0.506 -> [91m    -1.152[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> swcf         | ALL    | Tropical     | 0.00   |      0.248 -> [91m    -1.973[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> swcf         | ALL    | North Midlat | 0.00   |     -0.103 -> [91m    -1.260[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> swcf         | ALL    | South Midlat | 0.00   |      1.630 -> [92m     0.597[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> swcf         | ALL    | North Pole   | 0.00   |     -6.228 -> [91m    -6.394[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> swcf         | ALL    | South Pole   | 0.00   |      6.683 -> [91m     6.777[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> swcf         | ALL    | Equatorial   | 0.00   |      0.569 -> [91m    -1.762[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> swcf         | ALL    | NH           | 0.00   |      0.218 -> [91m    -1.176[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> swcf         | ALL    | SH           | 0.00   |      0.727 -> [92m    -0.495[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> lwcf         | ALL    | Global       | 0.00   |     -2.709 -> [91m    -4.284[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> lwcf         | ALL    | Tropical     | 0.00   |     -5.038 -> [91m    -6.327[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> lwcf         | ALL    | North Midlat | 0.00   |     -0.397 -> [91m    -2.083[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> lwcf         | ALL    | South Midlat | 0.00   |     -0.364 -> [91m    -2.397[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> lwcf         | ALL    | North Pole   | 0.00   |      5.081 -> [92m     3.064[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> lwcf         | ALL    | South Pole   | 0.00   |      3.737 -> [92m     1.365[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> lwcf         | ALL    | Equatorial   | 0.00   |     -5.041 -> [91m    -6.692[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> lwcf         | ALL    | NH           | 0.00   |     -1.670 -> [91m    -3.019[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> lwcf         | ALL    | SH           | 0.00   |     -1.325 -> [91m    -3.045[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_sfc      | ALL    | Global       | 0.00   |     -6.840 -> [91m   -10.467[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_sfc      | ALL    | Tropical     | 0.00   |     -4.390 -> [91m    -8.229[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_sfc      | ALL    | North Midlat | 0.00   |     -8.110 -> [91m   -11.688[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_sfc      | ALL    | South Midlat | 0.00   |    -10.410 -> [91m   -13.689[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_sfc      | ALL    | North Pole   | 0.00   |      5.755 -> [92m     4.284[0m | IMPROVED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_sfc      | ALL    | South Pole   | 0.00   |    -23.330 -> [91m   -24.181[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_sfc      | ALL    | Equatorial   | 0.00   |     -1.734 -> [91m    -5.609[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_sfc      | ALL    | NH           | 0.00   |    -10.165 -> [91m   -13.620[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> net_sfc      | ALL    | SH           | 0.00   |     -9.546 -> [91m   -13.051[0m | WORSENED
+2026-07-19 15:35:28 | ectuner |     INFO -> ==========================================================================================
+
+Structured tuning YAML written to: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep/tuned_a00_spatial.yml
+Diagnostic YAML written to: /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/diagnostics_2d_LR/refactor/2d/sweep/diagnostics_a00_spatial.yaml
+[ECMWF-INFO -ecepilog] ----------------------------------------------------------------------------------------------------
+[ECMWF-INFO -ecepilog] This is the ECMWF job Epilogue
+[ECMWF-INFO -ecepilog] +++ Please report issues using the Support portal +++
+[ECMWF-INFO -ecepilog] +++ https://support.ecmwf.int                     +++
+[ECMWF-INFO -ecepilog] ----------------------------------------------------------------------------------------------------
+[ECMWF-INFO -ecepilog] Run at 2026-07-19T15:35:29 on ac
+[ECMWF-INFO -ecepilog] JobName                   : a00_spatial
+[ECMWF-INFO -ecepilog] JobID                     : 30778689
+[ECMWF-INFO -ecepilog] Submit                    : 2026-07-19T15:32:29
+[ECMWF-INFO -ecepilog] Start                     : 2026-07-19T15:32:32
+[ECMWF-INFO -ecepilog] End                       : 2026-07-19T15:35:29
+[ECMWF-INFO -ecepilog] QueuedTime                : 3.0
+[ECMWF-INFO -ecepilog] ElapsedRaw                : 177
+[ECMWF-INFO -ecepilog] ExitCode                  : 0:0
+[ECMWF-INFO -ecepilog] DerivedExitCode           : 0:0
+[ECMWF-INFO -ecepilog] State                     : COMPLETED
+[ECMWF-INFO -ecepilog] Account                   : spnltune
+[ECMWF-INFO -ecepilog] QOS                       : np
+[ECMWF-INFO -ecepilog] User                      : ecme3038
+[ECMWF-INFO -ecepilog] StdOut                    : /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep/slurm_a00_spatial.out
+[ECMWF-INFO -ecepilog] StdErr                    : /ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep/slurm_a00_spatial.out
+[ECMWF-INFO -ecepilog] NNodes                    : 1
+[ECMWF-INFO -ecepilog] NCPUS                     : 256
+[ECMWF-INFO -ecepilog] SBU                       : 107.387
+[ECMWF-INFO -ecepilog] jobtag                    : ecme3038-a00_spatial-1x256-/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep/slurm_a00_spatial.out
+[ECMWF-INFO -ecepilog] ----------------------------------------------------------------------------------------------------
+

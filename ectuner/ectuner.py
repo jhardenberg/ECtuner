@@ -1,668 +1,246 @@
 """
-ECtuner: A tuning tool for EC-Earth
-----------------------------------------------
-This atmospheric tool computes optimal parameter suggestions for the EC-Earth OIFS component
-by minimizing a cost function based on model biases and parameter deviations.
+EC-Earth Tuning Executor (CLI & API).
 
-How it works:
-    1. It reads model diagnostics (Global Means) via ECmean4.
-    2. It compares model output against a reference dataset (Observations).
-    3. It uses a pre-computed Sensitivity Matrix to estimate how parameter
-       changes affect model biases.
-    4. It identifies the optimal parameter set using global optimization 
-       algorithms (Scipy-based) and uses the dual_annealing optimization method by default.
-
-Usage:
-    python ectuner.py [options] <experiment> <year1> <year2>
-
-Arguments:
-    experiment          Experiment tag to be tuned.
-    year1, year2        Start and end years for the tuning period.
-    
-Options:
-    -c, --config        Path to the YAML configuration file.
-    -o, --output        Output YAML file with tuned parameters (Script Engine format).
-    -l, --loglevel      Logging level (DEBUG, INFO, WARNING, ERROR).
-    -m, --method        Optimization method: 'dual_annealing' (recommended), 
-                        'differential_evolution', or 'shgo'.
-    -p, --penalty       Weight for the penalty term (distance from reference params).
-    -i, --inc           Maximum allowed fractional change for parameters (e.g., 0.2 = 20%).
-    -dT, --deltaT       Global temperature adjustment (K) for reference correction.
-    -imb, --imbalance   Target NetTOA imbalance (W/m2) to correct.
-    --freeze            List of parameter names to keep fixed during optimization.
-
-Examples:
-    python ectuner.py -c config-tuner.yaml -l INFO -p 0.5 -i 0.1 -o tuned_parameters.yml -m dual_annealing s000 1990 1997
-    python ectuner.py lr00 1990 2000 -c config_tuner_TL63.yaml -p 0.5 -i 0.1 -o tuned_params_TL63.yml -m dual_annealing
-
-Author:  Jost von Hardenberg    
-Updated: 2026-02-24
+This script serves as the main entry point for both 1D and 2D tuning.
+It provides functions that can be imported directly into Jupyter Notebooks,
+as well as a robust Command Line Interface.
 """
-
 import sys
 import os
-import yaml
 import argparse
-import numpy as np
-from scipy import optimize
-import math
-from tabulate import tabulate
 import copy
-import shutil
 
-from logger import setup_logger
+from .libs.config import Config
+from .libs.logger import setup_logger
+from .libs.result import TuningResult
+from .libs import exporter
 
-def load_config(config_file='config-tuner.yaml'):
+# 1D modules
+from .libs.loader import DataLoader1D
+from .libs.utils import compute_difference, apply_imbalance_correction, apply_temperature_correction
+from .libs.tuner import Tuner1D
+
+# 2D Modules
+from .libs.loader import DataLoader2D
+from .libs.tuner import Tuner2D
+from .libs.utils import save_diagnostic_maps, get_region_mask
+
+
+def run_1d_tuning(config: Config, logger: callable) -> TuningResult:
     """
-    Load configuration file
-    """
-    with open(config_file, 'r') as file:
-        config = yaml.safe_load(file)
-    return config
-
-def load_sensitivity(sens_file='sensitivity_1990-1997.yaml'):
-    """
-    Load sensitivity file (computed externally)
-    """
-    with open(sens_file, 'r') as file:
-        sensitivity = yaml.safe_load(file)
-    return sensitivity
-
-def load_reference(ref_file='gm_reference_EC23.yml'):
-    """
-    Load reference file with reference fluxes/targets
-    """
-
-    with open(ref_file, 'r') as file:
-        ref = yaml.safe_load(file)
-
-    reference = {}
-    # Organize reference data in structure of nesteed dics with
-    # variable, season, region as keys and fluxes as values
-
-    for t in ref.keys():
-        reft = ref[t]['obs']
-        if isinstance(reft, dict):
-            for key1 in reft:
-                for key2 in reft[key1]:
-                    reft[key1][key2] = reft[key1][key2]['mean']
-        else:
-            reft={'ALL': {'Global': reft}}
-
-        reference[t] = reft
-    
-    return reference
-
-
-def apply_imbalance_correction(reference, imbalance = 0., adjust_individual_fluxes = True, sw_fraction = 0.5):
-    """
-    Correct net_toa target for intrinsic model imbalances.
-
-    If the imbalances are > 0, the model creates energy. If < 0, the model destroys energy.
-    So the net_toa reference is corrected in the opposite direction: if the model destroys energy, as it is for ece4 lowres, the net_toa equilibrates at a value > 0.
-
-    If adjust_individual_fluxes is set, the imbalance is propagated to rsnt and rlnt (annual, global). sw_fraction is the part attributed to rsnt (by default it is 0.5), (1-sw_fraction) is attributed to rlnt.
-    """
-    corrected_reference = copy.deepcopy(reference)
-
-    if 'net_toa' in corrected_reference:
-        corrected_reference['net_toa']['ALL']['Global'] -= imbalance
-        print(f'net toa reference: old {reference['net_toa']['ALL']['Global']} -> new {corrected_reference['net_toa']['ALL']['Global']}')
-    
-    if adjust_individual_fluxes:
-        print('Propagating imbalance correction to rsnt and rlnt')
-        if 'rsnt' in corrected_reference:
-            corrected_reference['rsnt']['ALL']['Global'] -= sw_fraction*imbalance
-        
-        if 'rlnt' in corrected_reference:
-            corrected_reference['rlnt']['ALL']['Global'] -= (1-sw_fraction)*imbalance
-
-    return corrected_reference
-
-
-def apply_temperature_correction(reference, slopes, delta_t, weights, weights_season, weights_region):
-    """
-    Modify reference fluxes by subtracting delta_t * slope, only if slope exists.
-    Raise error only if combined weight > 0 and slope is missing.
-    """
-    corrected_reference = copy.deepcopy(reference)
-
-    for var in corrected_reference:
-        var_weight = weights.get(var, 0.0)
-
-        for season in corrected_reference[var]:
-            season_weight = weights_season.get(season, 0.0)
-
-            for region in corrected_reference[var][season]:
-                region_weight = weights_region.get(region, 0.0)
-
-                combined_weight = var_weight * season_weight * region_weight
-
-                # Try to safely get the slope, return None if any level is missing
-                slope = (
-                    slopes.get(var, {})
-                          .get(season, {})
-                          .get(region)
-                )
-
-                # If missing or invalid, handle based on weight
-                if slope is None or (isinstance(slope, float) and math.isnan(slope)):
-                    if combined_weight > 0.0:
-                        raise ValueError(
-                            f"Slope missing or NaN for variable '{var}', season '{season}', region '{region}', "
-                            f"but its combined weight is {combined_weight} (> 0)."
-                        )
-                    else:
-                        slope = 0.0  # Safe fallback if weight is zero
-
-                corrected_reference[var][season][region] += -(delta_t * slope)
-            
-    return corrected_reference
-
-
-def load_base(base_file='ecmean/global_mean_s000_EC-Earth4_r1i1p1f1_1990_1997.yml'):
-    """
-    Load base file with fluxes of configuration to tune
-    """
-
-    with open(base_file, 'r') as file:
-        base = yaml.safe_load(file)
-    return base
-
-def load_params(param_file):
-    """
-    Load parameter file with parameters of configuration to tune
-    """
-
-    with open(param_file, 'r') as file:
-        coso = yaml.safe_load(file)
-        if isinstance(coso, list):
-            # new tuning file in se format
-            params = coso[0]['base.context']['model_config']['oifs']
-        else:
-            # old tuning file
-            params = coso
-
-    if 'tuning' in params:
-        # the tuning file is in SE format
-        old_par = params.copy()
-        params = {}
-
-        for ke1 in old_par['tuning']:
-            for ke2 in old_par['tuning'][ke1]:
-                params[ke2] = old_par['tuning'][ke1][ke2]
-        
-    # Cast all values to float
-    for p in params:
-        params[p] = float(params[p])
-
-    return list(params.keys()), list(params.values())
-
-def compute_difference(base, reference):
-    """
-    Compute the difference between base and reference fluxes
-    """
-
-    difference = {}
-    for key, value in base.items():
-        difference[key] = {}
-        for subkey, subvalue in value.items():
-            if key in reference and subkey in reference[key]:
-                difference[key][subkey] = {}
-                for subsubkey, subsubvalue in subvalue.items():
-                    if subsubkey in reference[key][subkey]:
-                        difference[key][subkey][subsubkey] = subsubvalue - reference[key][subkey][subsubkey]
-            #         else:
-            #             difference[key][subkey][subsubkey] = np.nan
-            # else:
-            #     difference[key][subkey] = np.nan
-    return difference
-
-#Objective function to minimize: sum of squared differences + penalty for exceeding maximum parameter changes
-def objective_function(changes, params, values, reference_pars, penalty, sensitivity,
-                       difference, weights_flux, weights_season, weights_region,
-                       frozen_params=None):
-    """
-    Objective function with frozen parameters support.
-    
-    Parameters:
-        changes (list): list of changes for free parameters only
-        params (list): all parameters (free + frozen)
-        frozen_params (dict): dictionary of frozen parameters {param_name: value}
-    Returns:
-        float: score to minimize
-    """
-
-    if frozen_params is None:
-        frozen_params = {}
-
-    # Reconstrtuction of all changes including frozen parameters
-    all_changes = []
-    free_idx = 0
-    for p in params:
-        if p in frozen_params:
-            all_changes.append(0.0)
-        else:
-            all_changes.append(changes[free_idx])
-            free_idx += 1
-
-    total_difference = 0
-    param_difference = 0
-
-    for fluxname in sensitivity[params[0]].keys():
-        for season in sensitivity[params[0]][fluxname].keys():
-            for region in sensitivity[params[0]][fluxname][season].keys():
-                if not math.isnan(difference.get(fluxname,{}).get(season, {}).get(region, np.nan)):
-                    flux_change = sum(sensitivity[param][fluxname][season][region][0] * all_changes[i]
-                                      for i, param in enumerate(params))
-                    total_difference += (weights_flux[fluxname] *
-                                         weights_region[region] *
-                                         weights_season[season] *
-                                         (difference[fluxname][season][region] + flux_change) ** 2)
-
-    param_difference += sum([((reference_pars[param] - (values[param] + all_changes[i])) / reference_pars[param]) ** 2
-                             for i, param in enumerate(params)])
-
-    return total_difference + param_difference * penalty
-
-def print_table(logger, data):
-    """Prints formatted rows for a professional look"""
-    # Header della tabella
-    header = f"{'Variable':<12} | {'Season':<6} | {'Region':<12} | {'Weight':<6} | {'Bias Init':>10} -> {'Bias Final':>10} | {'Status'}"
-    logger.info(header)
-    logger.info("-" * len(header))
-
-    for r in data:
-        is_improved = abs(r[5]) < abs(r[4])
-        status = "IMPROVED" if is_improved else "WORSENED"
-        color = "\033[92m" if is_improved else "\033[91m"
-        reset = "\033[0m"
-        
-        # r[0]:var, r[1]:season, r[2]:region, r[3]:weight, r[4]:bias_init, r[5]:bias_final
-        logger.info(f"{r[0]:<12} | {r[1]:<6} | {r[2]:<12} | {r[3]:<6} | {r[4]:>10.3f} -> {color}{r[5]:>10.3f}{reset} | {status}")
-
-def log_optimization_results(logger, params, optimal_changes_list, sensitivity, difference, 
-                             weights_flux, weights_season, weights_region):
-    targets = []
-    diagnostics = []
-
-    for fluxname in difference:
-        if fluxname not in sensitivity[params[0]]: continue
-
-        for season in difference[fluxname]:
-            for region in difference[fluxname][season]:
-                bias_init = difference[fluxname][season][region]
-                if math.isnan(bias_init): continue
-
-                flux_change = sum(sensitivity[p][fluxname][season][region][0] * optimal_changes_list[i] 
-                                  for i, p in enumerate(params))
-                bias_final = bias_init + flux_change
-                
-                w_flux = weights_flux.get(fluxname, 0)
-                w_season = weights_season.get(season, 0)
-                w_region = weights_region.get(region, 0)
-                combined_weight = w_flux * w_season * w_region
-                
-                row = [fluxname, season, region, combined_weight, bias_init, bias_final]
-                
-                if combined_weight > 0:
-                    targets.append(row)
-                else:
-                    diagnostics.append(row)
-
-    logger.info("\n" + " OPTIMIZATION SUMMARY (Biases: Model - Target) ".center(90, "="))
-    logger.info("Goal: Bring Biases to 0.0")
-    
-    logger.info("\n" + " PRIMARY TUNING TARGETS ".center(90, "-"))
-    print_table(logger, targets)
-    
-    logger.info("\n" + " DIAGNOSTIC SIDE-EFFECTS ".center(90, "-"))
-    print_table(logger, diagnostics)
-    logger.info("=" * 90 + "\n")
-
-def parse_arguments(arguments):
-    """
-    Parse command line arguments
-    """
-
-    parser = argparse.ArgumentParser(description='EC-Earth tuning tool')
-
-    parser.add_argument('-c', '--config', type=str,
-                        help='yaml configuration file')
-    parser.add_argument('-o', '--output', type=str,
-                        help='output yaml for Script Engine')
-    parser.add_argument('-l', '--loglevel', type=str,
-                        help='logging level')
-    parser.add_argument('-m', '--method', type=str,
-                        help='optimization method (shgo (not recommended), dual_annealing (default), differential_evolution)')
-    # parser.add_argument('-m', '--maxiter', type=int,
-    #                     help='the maximumum number of iterations')
-    parser.add_argument('-p', '--penalty', type=float,
-                        help='penalty for distance from reference parameters')
-    parser.add_argument('-i', '--inc', type=float,
-                        help='fractional maximum parameter change wrt reference')
-    parser.add_argument('-dT', '--deltaT', type=float, 
-                        help='Temperature adjustment for reference correction')
-    parser.add_argument('-mi', '--model_imbalance', type=float, 
-                        help='Intrinsic model imbalance to correct net_toa')
-    parser.add_argument('-t', '--output_tag', type=str, 
-                        help='Tag to be added to output file')
-    # positional
-    parser.add_argument('exp', type=str, help='experiment to tune')
-    parser.add_argument('year1', type=int, help='start year', nargs='?', default=None)
-    parser.add_argument('year2', type=int, help='end year', nargs='?', default=None)
-    parser.add_argument('-a', '--alpha', type=float, help='Hybrid weight (0: spatial, 1: global)')
-    
-    return parser.parse_args(arguments)
-
-def get_arg(args, arg, default):
-    """
-    Support function to get arguments
+    Executes the full 1D tuning workflow. 
 
     Args:
-        args: the arguments
-        arg: the argument to get
-        default: the default value
+        config (Config): The initialized ECtuner configuration.
+        logger (callable): The logger instance.
 
     Returns:
-        The argument value or the default value
+        TuningResult: The object containing all metrics and optimal parameters.
     """
+    logger.info("==== Starting ECtuner 1D Workflow ====")
+    
+    loader = DataLoader1D(config, logger)
+    sensitivity = loader.load_sensitivity()
+    reference = loader.load_reference()
+    original_reference = copy.deepcopy(reference)
 
-    res = getattr(args, arg)
-    if not res:
-        res = default
-    return res
+    weights_flux = config.get('weights', {})
+    weights_season = config.get('weights_season', {})
+    weights_region = config.get('weights_region', {})
+
+    model_imbalance = config.get('args.model_imbalance')
+    if model_imbalance is not None:
+        logger.info(f"[PRE-PROC] Applying model imbalance correction: {model_imbalance} W/m2")
+        reference = apply_imbalance_correction(reference, imbalance=model_imbalance)
+        
+    delta_t = config.get('args.deltaT')
+    slope_file = config.get('files.slope_file')
+    if delta_t is not None and slope_file is not None:
+        slopes_yaml = DataLoader1D(Config(config_path=None, **{'files.sensitivity': slope_file, 'args.exp': 'temp', 'args.year1': 0, 'args.year2': 0})).load_sensitivity()
+        reference, temp_warnings = apply_temperature_correction(reference, slopes_yaml.get('T_slope', {}), delta_t, weights_flux, weights_season, weights_region)
+        logger.info(f"[PRE-PROC] Applied Temperature Correction: {delta_t} K")
+        
+        for w in temp_warnings:
+            logger.warning(f"[Drift Correction] {w}")
+            
+    logger.info("\n" + " PHYSICS-BASED REFERENCE ADJUSTMENTS (Target Shifts) ".center(85, "-"))
+    for v in ['net_toa', 'rsnt', 'rlnt']:
+        if v in reference:
+            v_orig = original_reference[v]['ALL']['Global']
+            v_corr = reference[v]['ALL']['Global']
+            logger.info(f"{v:<12} | Global | {v_orig:>10.4f} | {v_corr:>10.4f} | {v_corr-v_orig:>+12.4f} W/m2")
+    logger.info("-" * 85 + "\n")
+
+    base = loader.load_base()
+    difference = compute_difference(base, reference)
+    param_names, current_values = loader.load_params()
+    ref_params = config.get('reference_parameters', {})
+    frozen_config = config.get('frozen_parameters') or {}
+    if frozen_config:
+        logger.info(f"Frozen parameters (keeping manual tuning): {', '.join(frozen_config.keys())}")
+        
+    inc_val = config.get('args.inc', 0.2)
+    penalty_val = config.get('args.penalty', 0.0)
+    method = config.get('args.method', 'dual_annealing')
+    
+    tuner = Tuner1D(inc=inc_val, penalty=penalty_val, logger=logger)
+    tuner.setup_parameters(current_values, ref_params, frozen_config)
+    tuner.prepare_data(sensitivity, difference, reference, weights_flux, weights_season, weights_region)
+    
+    result = tuner.optimize(method=method)
+
+    return result
+
+def run_2d_tuning(config: Config, logger: callable) -> TuningResult:
+    """
+    Executes the full 2D spatial tuning workflow.
+    """
+    logger.info("==== Starting ECtuner 2D Spatial Workflow ====")
+    
+    loader = DataLoader2D(config, logger)
+    weights_flux = config.get('weights', {})
+    weights_region = config.get('weights_region', {})
+    target_vars = list(weights_flux.keys())
+    
+    # 1. Load Data
+    logger.info("Loading 2D Data (Sensitivity, Reference, Base)...")
+    ds_sens = loader.load_sensitivity()
+    ref_maps = loader.load_reference(target_vars)
+    target_vars = list(ref_maps.keys())
+    base_maps = loader.load_base(target_vars)
+    
+    # 2. Mask & Biases
+    logger.info("Generating spatial weights and calculating initial biases...")
+    mask_2d = get_region_mask(ds_sens, weights_region)
+    
+    bias_maps = {}
+    for var in target_vars:
+        mod_resampled = base_maps[var].reindex_like(ref_maps[var], method='nearest')
+        bias_maps[var] = mod_resampled - ref_maps[var]
+        
+    # 3. Setup Tuner
+    inc_val = config.get('args.inc', 0.2)
+    penalty_val = config.get('args.penalty', 0.0)
+    alpha_val = config.get('spatial_tuning.alpha', 0.0)
+    metric_val = config.get('spatial_tuning.metric', 'l2').lower()
+    method = config.get('args.method', 'dual_annealing')
+    tuner = Tuner2D(inc=inc_val, penalty=penalty_val, alpha=alpha_val, metric=metric_val, logger=logger)
+    param_names, current_values = loader.load_params()
+    ref_params = config.get('reference_parameters')
+    frozen_config = config.get('frozen_parameters') or {}
+    if frozen_config:
+        logger.info(f"Frozen parameters (keeping manual tuning): {', '.join(frozen_config.keys())}")
+        
+    tuner.setup_parameters(current_values, ref_params, frozen_config)
+    tuner.prepare_data(bias_maps, ref_maps, ds_sens, mask_2d, weights_flux, weights_region)
+    
+    # 4. Optimize
+    method = config.get('args.method', 'dual_annealing')
+    result = tuner.optimize(method=method)
+    
+    # 5. Diagnostic NetCDF Export
+    out_dir = config.get('files.output_dir', './')
+    exp = config.get('args.exp', 'unknown')
+    alpha = config.get('spatial_tuning.alpha', 0.0)
+    alpha_str = str(alpha).replace('.', '')
+    
+    output_tag = config.get('args.output_tag', '')
+    if output_tag:
+        run_tag = output_tag
+    else:
+        active_regions = [r for r, w in weights_region.items() if w > 0]
+        region_tag = "-".join(active_regions) if active_regions else "NoRegion"
+        run_tag = f"{region_tag}_a{alpha_str}"
+
+    diag_nc_path = os.path.join(out_dir, f"diagnostics_2d_{exp}_{run_tag}.nc")
+    
+    save_diagnostic_maps(
+        output_path=diag_nc_path,
+        target_vars=target_vars,
+        bias_maps=bias_maps,
+        ds_sens=ds_sens,
+        params=result.param_names,
+        optimal_changes=result.optimal_changes,
+        r2_threshold=config.get('spatial_tuning.r2_threshold', 0.0)
+    )
+    
+    return result
+
+def parse_arguments():
+    """Parses CLI arguments using subparsers for 1D and 2D modes."""
+    parser = argparse.ArgumentParser(description='EC-Earth Tuning Suite (1D and 2D)')
+    subparsers = parser.add_subparsers(dest='mode', required=True, help='Tuning mode')
+
+    # Common arguments for both 1D and 2D
+    for mode in ['1d', '2d']:
+        sp = subparsers.add_parser(mode, help=f'Run {mode.upper()} tuning')
+        sp.add_argument('-c', '--config', type=str, required=True, help='YAML config file')
+        sp.add_argument('-o', '--output', type=str, help='Output YAML for Script Engine')
+        sp.add_argument('-l', '--loglevel', type=str, default='INFO')
+        sp.add_argument('-m', '--method', type=str, default='dual_annealing')
+        sp.add_argument('-p', '--penalty', type=float, help='Penalty weight')
+        sp.add_argument('-i', '--inc', type=float, help='Fractional max parameter change')
+        sp.add_argument('-t', '--output_tag', type=str, default='')
+        sp.add_argument('--logfile', type=str, help='Explicit path for the structured log file (overrides auto-generated name)')
+        
+        # Positional
+        sp.add_argument('exp', type=str, help='Experiment to tune')
+        sp.add_argument('year1', type=int, help='Start year', nargs='?', default=None)
+        sp.add_argument('year2', type=int, help='End year', nargs='?', default=None)
+
+        if mode == '1d':
+            sp.add_argument('-dT', '--deltaT', type=float, help='Temperature adjustment')
+            sp.add_argument('-mi', '--model_imbalance', type=float, help='Intrinsic model imbalance')
+            
+    return parser.parse_args()
+
+
+def main():
+    """Command Line Interface Entry Point."""
+    args = parse_arguments()
+
+    config = Config(args.config, exp=args.exp, year1=args.year1, year2=args.year2)
+    
+    # Override from CLI
+    if args.penalty is not None: config.set('args.penalty', args.penalty)
+    if args.inc is not None: config.set('args.inc', args.inc)
+    if args.method is not None: config.set('args.method', args.method)
+    if args.output_tag is not None: config.set('args.output_tag', args.output_tag)
+    
+    if args.mode == '1d':
+        if args.deltaT is not None: config.set('args.deltaT', args.deltaT)
+        if args.model_imbalance is not None: config.set('args.model_imbalance', args.model_imbalance)
+
+    # Output Path 
+    out = args.output
+    out_dir = config.get('files.output_dir', './')
+    if not out:
+        tag = f"_{args.output_tag}" if args.output_tag else ""
+        filename = f"tuned_{args.exp}_{config.get('args.year1')}-{config.get('args.year2')}_{args.mode.upper()}{tag}.yml"
+        out = os.path.join(out_dir, filename)
+        
+    out_dir_actual = os.path.dirname(os.path.abspath(out))
+    os.makedirs(out_dir_actual, exist_ok=True)
+    if args.logfile:
+        logname = os.path.abspath(args.logfile)
+        os.makedirs(os.path.dirname(logname), exist_ok=True)
+    else:
+        out_filename = os.path.basename(out)
+        log_filename = out_filename.replace('tuned_', 'log_tuned_').replace('.yml', '.log')
+        logname = os.path.join(out_dir_actual, log_filename)
+
+    logger = setup_logger(level=args.loglevel, log_file=logname)
+    
+    if args.mode == '1d':
+        result = run_1d_tuning(config, logger)
+    elif args.mode == '2d':
+        result = run_2d_tuning(config, logger)
+    
+    exporter.print_summary(result,logger)
+    exporter.save_model_yaml(result, out, config.get('parameter_group', {}), config.get('weights', {}), config.get('weights_region', {}))
+        
+    diag_yaml = out.replace('tuned_', 'diagnostics_').replace('.yml', '.yaml')
+    exporter.save_diagnostics_yaml(result, diag_yaml)
 
 if __name__ == '__main__':
-
-    args = parse_arguments(sys.argv[1:])
-
-    config_file = get_arg(args, 'config', 'config-tuner.yaml')
-    year1 = get_arg(args, 'year1', None)
-    year2 = get_arg(args, 'year2', None)
-    exp = get_arg(args, 'exp', None)
-    loglevel = get_arg(args, 'loglevel', 'INFO')
-    #maxiter = get_arg(args, 'maxiter', 10000)
-    penalty = get_arg(args, 'penalty', None)
-    inc = get_arg(args, 'inc', None)
-    out = get_arg(args, 'output', None)
-    method = get_arg(args, 'method', None)
-    tag = get_arg(args, 'output_tag', '')
-    if len(tag) > 0:
-        tag = '_'+tag
-
-    if not exp:
-        print("Error:  experiment not specified")
-        sys.exit(1)
-
-    config = load_config(config_file)
-
-    if not year1:
-        year1 = config['args']['year1']
-    if not year2:
-        year2 = config['args']['year2']
-    if not penalty:
-        penalty = config['args']['penalty']
-    if not inc:
-        inc = config['args']['inc']
-    if not method:
-        method = config['args']['method']
-
-    # Save in results directory
-    if not out:
-        config_files = config.get('files', {})
-        out_dir = config_files.get('output_dir')
-        out_temp = config_files.get('output_template')
-        if out_dir and out_temp:
-            filename = out_temp.format(exp=exp, year1=year1, year2=year2)
-            out = os.path.join(out_dir, filename)
-            os.makedirs(out_dir, exist_ok=True)
-        else:
-            filename = f'tuned_{exp}_{year1}-{year2}_inc{int(inc*100):03d}_p{int(penalty):02d}{tag}.yml'
-            if not out_dir: 
-                out_dir = './'
-            else:
-                os.makedirs(out_dir, exist_ok=True)
-            out = os.path.join(out_dir, filename)
-
-    logname = os.path.join(out_dir, f'log_{exp}_{year1}-{year2}_inc{int(inc*100):03d}_p{int(penalty):02d}{tag}.yml')
-    logger = setup_logger(level=loglevel, log_file=logname)
-    shutil.copy(config_file, out_dir + f'config_{exp}_{year1}-{year2}_inc{int(inc*100):03d}_p{int(penalty):02d}{tag}.yml')
-
-    logger.info("==== ECtuner configuration ====")
-    logger.info("\n" + yaml.safe_dump(config, sort_keys=False))
-
-    # logger.debug("year1: %s", year1)
-    # logger.debug("year2: %s", year2)
-    # logger.debug("experiment: %s", exp)
-    # logger.debug("loglevel: %s", loglevel)
-    # # logger.debug("maxiter: %s", maxiter)
-    # logger.debug("penalty: %s", penalty)
-    # logger.debug("inc: %s", inc)
-    # logger.debug("output: %s", out)
-    # logger.debug("method: %s", method)
-
-    reference_pars = config['reference_parameters']
-    for par in reference_pars:
-        reference_pars[par] = float(reference_pars[par])
-    weights_flux=config['weights']
-    for we in weights_flux:
-        weights_flux[we] = float(weights_flux[we])
-    weights_region=config['weights_region']
-    for we in weights_region:
-        weights_region[we] = float(weights_region[we])
-    weights_season=config['weights_season']
-    for we in weights_season:
-        weights_season[we] = float(weights_season[we])
-    targets=list(weights_flux.keys())
-
-    # Load sensitivities
-    sens_file = config['files']['sensitivity'].format(year1=year1, year2=year2)
-    sensitivity = load_sensitivity(sens_file)
-
-    # Load reference fluxes
-    ref_file = config['files']['reference']
-    reference = load_reference(ref_file)
-    original_reference = copy.deepcopy(reference)
-    
-    logger.debug("year1: %s", year1)
-    logger.debug("year2: %s", year2)
-    logger.debug("experiment: %s", exp)
-    logger.debug("loglevel: %s", loglevel)
-    # logger.debug("maxiter: %s", maxiter)
-    logger.debug("penalty: %s", penalty)
-    logger.debug("inc: %s", inc)
-    logger.debug("output: %s", out)
-    logger.debug("method: %s", method)
-
-    if out:
-        logger.info(f"[CONFIG] Output will be saved to: {out}")
-    else:
-        logger.warning("[CONFIG] No output path specified. Results will only be printed to screen.")
-
-
-    # model_imbalance from command line or config if needed
-    model_imbalance = args.model_imbalance if args.model_imbalance is not None else config.get('args', {}).get('model_imbalance')
-    if model_imbalance is not None:
-        # LOG PRE-CORRECTION
-        old_val = reference.get('net_toa', {}).get('ALL', {}).get('Global', 0.0)
-        
-        logger.info(f"[PRE-PROC] Applying model imbalance correction: {model_imbalance} W/m2")
-        reference = apply_imbalance_correction(reference, model_imbalance)
-        
-        # LOG POST-CORRECTION
-        new_val = reference.get('net_toa', {}).get('ALL', {}).get('Global', 0.0)
-        logger.info(f"           net_toa Global reference: {old_val} -> {new_val}")
-
-    # Modify reference file if there is delta t in config file and the slope file
-    # Check if delta_t and sensitivity (slopes) file exist in config
-    delta_t = args.deltaT if args.deltaT is not None else config.get('args', {}).get('deltaT')
-    slope_file = config['files'].get('slope_file')
-    if delta_t is not None and slope_file is not None:
-        slopes_yaml = load_sensitivity(slope_file)
-        slopes = slopes_yaml.get('T_slope', {})
-        weights = config.get('weights', {})
-        weights_season = config.get('weights_season', {})
-        weights_region = config.get('weights_region', {})
-        corrected_reference = apply_temperature_correction(reference, slopes, delta_t, weights_flux, weights_season, weights_region)
-    else:
-        corrected_reference = reference
-
-    logger.info("\n" + " PHYSICS-BASED REFERENCE ADJUSTMENTS (Target Shifts) ".center(85, "-"))
-    logger.info(f"{'Variable':<12} | {'Region':<12} | {'Original':>10} | {'Corrected':>10} | {'Total Shift':>12}")
-    logger.info("-" * 85)
-
-    for v in ['net_toa', 'rsnt', 'rlnt']: # key variables
-        if v in corrected_reference:
-            v_orig = original_reference[v]['ALL']['Global']
-            v_corr = corrected_reference[v]['ALL']['Global']
-            shift = v_corr - v_orig
-            logger.info(f"{v:<12} | {'Global':<12} | {v_orig:>10.4f} | {v_corr:>10.4f} | {shift:>+12.4f} W/m2")
-    
-    logger.info("-" * 85)
-    if delta_t: logger.info(f" * Applied Temperature Correction: {delta_t} K")
-    if model_imbalance: logger.info(f" * Applied Model Imbalance: {model_imbalance} W/m2")
-    logger.info("-" * 85 + "\n")
-        
-    # Load fluxes of configuration to tune
-    base_file = config['files']['base'].format(exp=exp, year1=year1, year2=year2)
-    base_file = os.path.join(config['files']['ecmean'], base_file)
-    base = load_base(base_file)
-
-    # Load parameters of configuration to tune
-    param_file = config['files']['params'].format(exp=exp)
-    param_file = os.path.join(config['files']['exps'], param_file)
-    params, vals = load_params(param_file)
-
-    values = {p: vals[i] for i, p in enumerate(params)}
-    difference = compute_difference(base, corrected_reference)
-
-    # Frozen parameters
-    frozen_params_list = config.get('frozen_parameters', [])
-    frozen_params = {p: values[p] for p in frozen_params_list if p in values}  
-
-    if frozen_params:
-        logger.info("Frozen parameters detected: %s", ", ".join(f"{p}={v}" for p, v in frozen_params.items()))
-    else:
-        logger.info("No frozen parameters specified.")
-
-    opt_params = [p for p in params if p not in frozen_params]
-
-    # Minval and maxval 
-    epsilon = 1e-12
-    minval = {}
-    maxval = {}
-    for p in params:
-        if p in frozen_params:
-            minval[p] = values[p] - epsilon
-            maxval[p] = values[p] + epsilon
-        else:
-            minval[p] = reference_pars[p] * (1 - inc) - values[p]
-            maxval[p] = reference_pars[p] * (1 + inc) - values[p]
-
-    bounds = [(minval[p], maxval[p]) for p in opt_params]
-
-    logger.debug("Parameter bounds:")
-    logger.debug("-----------------")
-    for p in opt_params:
-        logger.debug("%s: %s - %s", p, minval[p], maxval[p])
-
-    logger.info(f"Optimizing parameters using {method} ...")
-
-    # shgo, dual_annealing o differential_evolution
-    if method == 'shgo':
-        result = optimize.shgo(objective_function, bounds,args=(params, values, reference_pars, penalty, sensitivity, difference,
-                               weights_flux, weights_season, weights_region, frozen_params))
-    elif method == 'dual_annealing':
-        result = optimize.dual_annealing(objective_function, bounds, args=(params, values, reference_pars, penalty, sensitivity, difference,
-                                         weights_flux, weights_season, weights_region,frozen_params))
-    elif method == 'differential_evolution':
-        result = optimize.differential_evolution(objective_function, bounds, args=(params, values, reference_pars, penalty, sensitivity, difference,
-                                                 weights_flux, weights_season, weights_region,frozen_params))
-    else:
-        logger.error("Method not supported")
-        sys.exit(1)
-    
-    # Print the optimal parameter changes
-    optimal_changes = {}
-    free_idx = 0
-    for p in params:
-        if p in frozen_params:
-            optimal_changes[p] = 0.0
-        else:
-            optimal_changes[p] = result.x[free_idx]
-            free_idx += 1
-
-    logger.debug("Optimization result:")
-    logger.debug("--------------------")
-    logger.debug(result)
-
-    logger.info("")
-
-    log_optimization_results(logger, params, [optimal_changes[p] for p in params], 
-                         sensitivity, difference, weights_flux, weights_season, weights_region)
-
-    initial_guess_free = np.zeros(len(opt_params))
-    logger.info("Total score before optimization: %s", 
-            objective_function(initial_guess_free, params, values, reference_pars, penalty, 
-                               sensitivity, difference, weights_flux, weights_season, weights_region, frozen_params))
-
-    logger.info("Total score after optimization: %s", 
-            objective_function(result.x, params, values, reference_pars, penalty, 
-                               sensitivity, difference, weights_flux, weights_season, weights_region, frozen_params))
-    
-    if out:
-        from ruamel.yaml import YAML
-        yaml_ru = YAML(typ="rt")  
-        yaml_ru.indent(mapping=2, sequence=2, offset=0)
-        yaml_ru.preserve_quotes = True
-
-        tuning_block = {}
-        for pg in config['parameter_group']:
-            current_group = {}
-            for p in config['parameter_group'][pg]:
-                if p not in values: continue # skip parameter if not in tuning_file of exp to be tuned
-                
-                val_to_write = values[p] if p in frozen_params else values[p] + optimal_changes[p]
-                current_group[p] = float(f"{val_to_write:.4e}")
-            
-            # Only if the group has at least one parameter, we add it to the tuning block
-            if current_group:
-                tuning_block[pg] = current_group
-
-        full_structure = [
-            {
-                "base.context": {
-                    "model_config": {
-                        "oifs": {
-                            "tuning": tuning_block
-                        }
-                    }
-                }
-            }
-        ]
-
-        with open(out, "w") as f:
-            yaml_ru.dump(full_structure, f)
-        
-            f.write("\n# --- ECtuner meta-parameters ---\n")
-            f.write(f"# penalty: {penalty}\n")
-            f.write(f"# inc (fractional max change): {inc}\n")
-            
-            for section, data in [("flux", weights_flux), ("region", weights_region), ("season", weights_season)]:
-                f.write(f"# weights ({section}):\n")
-                for k, v in data.items():
-                    f.write(f"#   {k}: {v}\n")
-
-        logger.info("Structured tuning YAML written to %s", out)
-
-    print("\nParameters:")
-    print("-----------")
-    outtable = []
-    for p in optimal_changes:
-        outtable.append([p, values[p]+optimal_changes[p], values[p],
-                         optimal_changes[p], optimal_changes[p]/values[p], minval[p], maxval[p], (values[p]+optimal_changes[p]-reference_pars[p])/reference_pars[p]])
-        print(p,':', values[p]+optimal_changes[p])
-    print("")
-    head=['Parameter','New value','Old value', 'Change', 'Relative change','Min change', 'Max change', 'Rel. dist. from ref.']
-    print(tabulate(outtable, headers=head, stralign='center', tablefmt='orgtbl'))
+    main()
