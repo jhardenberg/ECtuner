@@ -3,31 +3,31 @@
       oifs:
         tuning:
           namcumf:
-            RPRCON: 0.0011201
-            ENTRORG: 0.0020998
-            DETRPEN: 8.9989e-05
-            ENTRDD: 0.00024004
-            RMFDEPS: 0.35993
+            RPRCON: 0.0013666
+            ENTRORG: 0.0022705
+            DETRPEN: 9.1184e-05
+            ENTRDD: 0.00025162
+            RMFDEPS: 0.38879
           namcldp:
-            RVICE: 0.15596
-            RLCRITSNOW: 1.6006e-05
-            RSNOWLIN2: 0.024014
-            RCLDIFF: 4.8061e-06
-            RCLDIFF_CONVI: 8.0001
-            RDEPLIQREFRATE: 0.40017
-            RDEPLIQREFDEPTH: 400.03
-            RCL_OVERLAPLIQICE: 0.52019
-            RCL_INHOMOGAUT: 1.2001
-            RCL_INHOMOGACC: 2.4001
+            RVICE: 0.15302
+            RLCRITSNOW: 1.8199e-05
+            RSNOWLIN2: 0.024778
+            RCLDIFF: 4.5782e-06
+            RCLDIFF_CONVI: 9.0579
+            RDEPLIQREFRATE: 0.52656
+            RDEPLIQREFDEPTH: 519.28
+            RCL_OVERLAPLIQICE: 0.79489
+            RCL_INHOMOGAUT: 1.2862
+            RCL_INHOMOGACC: 2.2202
           naerad:
-            RMINICE: 72.0
+            RMINICE: 61.145
 
 # --- ECtuner Meta-Diagnostics ---
 # metric_used: 1D_scalars
 # score_init: 32.03792783
 # total_spatial_cost: 0.00000000
-# total_global_cost: 0.23895492
-# alpha: None | penalty: 0.0 | inc: 0.2
+# total_global_cost: 0.00000000
+# alpha: None | penalty: 0.0 | inc: 0.3
 # weights (flux):
 #   net_toa: 1.0
 #   rsnt: 0.0

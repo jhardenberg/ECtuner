@@ -9,6 +9,7 @@ import sys
 import os
 import argparse
 import copy
+import logging
 
 from .libs.config import Config
 from .libs.logger import setup_logger
@@ -26,16 +27,16 @@ from .libs.tuner import Tuner2D
 from .libs.utils import save_diagnostic_maps, get_region_mask
 
 
-def run_1d_tuning(config: Config, logger: callable) -> TuningResult:
+def run_1d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
     """
-    Executes the full 1D tuning workflow. 
+    Executes the full 1D scalar tuning workflow. 
 
     Args:
-        config (Config): The initialized ECtuner configuration.
-        logger (callable): The logger instance.
+        config: The initialized ECtuner configuration object.
+        logger: The configured logger instance.
 
     Returns:
-        TuningResult: The object containing all metrics and optimal parameters.
+        The TuningResult object containing metrics and optimal parameters.
     """
     logger.info("==== Starting ECtuner 1D Workflow ====")
     
@@ -56,7 +57,8 @@ def run_1d_tuning(config: Config, logger: callable) -> TuningResult:
     delta_t = config.get('args.deltaT')
     slope_file = config.get('files.slope_file')
     if delta_t is not None and slope_file is not None:
-        slopes_yaml = DataLoader1D(Config(config_path=None, **{'files.sensitivity': slope_file, 'args.exp': 'temp', 'args.year1': 0, 'args.year2': 0})).load_sensitivity()
+        temp_config_kwargs = {'files.sensitivity': slope_file, 'args.exp': 'temp', 'args.year1': 0, 'args.year2': 0}
+        slopes_yaml = DataLoader1D(Config(config_path=None, **temp_config_kwargs)).load_sensitivity()
         reference, temp_warnings = apply_temperature_correction(reference, slopes_yaml.get('T_slope', {}), delta_t, weights_flux, weights_season, weights_region)
         logger.info(f"[PRE-PROC] Applied Temperature Correction: {delta_t} K")
         
@@ -74,7 +76,7 @@ def run_1d_tuning(config: Config, logger: callable) -> TuningResult:
     base = loader.load_base()
     difference = compute_difference(base, reference)
     param_names, current_values = loader.load_params()
-    ref_params = config.get('reference_parameters', {})
+    ref_params = config.get('reference_parameters') or {}
     frozen_config = config.get('frozen_parameters') or {}
     if frozen_config:
         logger.info(f"Frozen parameters (keeping manual tuning): {', '.join(frozen_config.keys())}")
@@ -91,9 +93,16 @@ def run_1d_tuning(config: Config, logger: callable) -> TuningResult:
 
     return result
 
-def run_2d_tuning(config: Config, logger: callable) -> TuningResult:
+def run_2d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
     """
     Executes the full 2D spatial tuning workflow.
+
+    Args:
+        config: The initialized ECtuner configuration object.
+        logger: The configured logger instance.
+
+    Returns:
+        The TuningResult object containing global/spatial metrics and optimal parameters.
     """
     logger.info("==== Starting ECtuner 2D Spatial Workflow ====")
     
@@ -126,7 +135,7 @@ def run_2d_tuning(config: Config, logger: callable) -> TuningResult:
     method = config.get('args.method', 'dual_annealing')
     tuner = Tuner2D(inc=inc_val, penalty=penalty_val, alpha=alpha_val, metric=metric_val, logger=logger)
     param_names, current_values = loader.load_params()
-    ref_params = config.get('reference_parameters')
+    ref_params = config.get('reference_parameters') or {}
     frozen_config = config.get('frozen_parameters') or {}
     if frozen_config:
         logger.info(f"Frozen parameters (keeping manual tuning): {', '.join(frozen_config.keys())}")
@@ -135,16 +144,14 @@ def run_2d_tuning(config: Config, logger: callable) -> TuningResult:
     tuner.prepare_data(bias_maps, ref_maps, ds_sens, mask_2d, weights_flux, weights_region)
     
     # 4. Optimize
-    method = config.get('args.method', 'dual_annealing')
     result = tuner.optimize(method=method)
     
     # 5. Diagnostic NetCDF Export
     out_dir = config.get('files.output_dir', './')
     exp = config.get('args.exp', 'unknown')
-    alpha = config.get('spatial_tuning.alpha', 0.0)
-    alpha_str = str(alpha).replace('.', '')
+    alpha_str = str(alpha_val).replace('.', '')
     
-    output_tag = config.get('args.output_tag', '')
+    output_tag = config.get('args.output_tag') or config.get('args.tag') or ''
     if output_tag:
         run_tag = output_tag
     else:
@@ -235,6 +242,9 @@ def main():
         result = run_1d_tuning(config, logger)
     elif args.mode == '2d':
         result = run_2d_tuning(config, logger)
+    else:
+        logger.error(f"Unknown tuning mode: {args.mode}")
+        sys.exit(1)
     
     exporter.print_summary(result,logger)
     exporter.save_model_yaml(result, out, config.get('parameter_group', {}), config.get('weights', {}), config.get('weights_region', {}))

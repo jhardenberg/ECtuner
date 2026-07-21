@@ -18,7 +18,7 @@ YEAR2=$7    # Receives the last year of the experiment
 RUNTAG=$8   # Receives the run tag (e.g., NoRegion_a0)
 
 # central dir (optional) where to copy the generated YAML files
-CENTRAL_DIR="/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/net_toa/yaml_files"
+CENTRAL_DIR="/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/sweep_2/yaml_files"
 mkdir -p "$CENTRAL_DIR"
 
 source /home/ecme3038/miniforge3/etc/profile.d/conda.sh

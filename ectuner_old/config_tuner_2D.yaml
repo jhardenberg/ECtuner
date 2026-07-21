@@ -1,0 +1,72 @@
+# ECtuner 2D Configuration Template
+files:
+  # INPUT DATA 2D
+  ref_2d_dir: "../../ecmean/reference/climatology/EC26-PDAY/r180x90/"
+  sensitivity_nc: "../../sensitivities/spatial/sensitivity_TL255_415_1991-2000_v2_2D.nc"
+  #TEMPLATES 
+  params: "tuning_{exp}.yml"  # Tuning file of experiment to be tuned
+  #DIRECTORIES
+  raw_dir: "/ec/res4/scratch/ecme3038/ece4/" # Raw OIFS experiment data to compute means maps
+  base_2d_dir: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/ecmean/maps_sres/" # Mean maps for our experiments (computed from raw_dir, used for tuning)
+  exps: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/perturb_exps/exps_sres/" # Directory with tuing file to be tuned
+  # Results
+  output_dir: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d/"
+
+spatial_tuning:
+  target_grid: "r180x90"     # Reference grid
+  r2_threshold: 0.3          # R2 threshold: ignore pixels with low R2
+  area_weighting: True       # Weight the error based on the cosine of the latitude
+
+args:
+  year1: 1991
+  year2: 2000
+  penalty: 50                # Penalty for deviation from reference parameter values (should be higher than in 1D because spatial errors are numerically larger)
+  inc: 0.6                   # Maximum acceptable parameter change (should be higher than in 1D because spatial sensitivities are noisier)
+  method: 'dual_annealing'   # Global optimization algorithm
+
+# Parameters to keep fixed during tuning (example)
+frozen_parameters:
+  - RCL_OVERLAPLIQICE
+
+reference_parameters: # Default OIFS parameter values (used for penalty)
+  RPRCON: 0.14E-02     # coefficients for determining conversion from cloud water to rain
+  ENTRORG: 0.175E-02   # entrainment rate (positive buoyant convection)
+  DETRPEN: 0.75E-04    # detrainment rate for penetrative convection
+  ENTRDD: 0.3E-03      # entrainment rate for cumulus downdrafts
+  RMFDEPS: 0.3         # fractional massflux for downdrafts at lfs
+  RVICE: 0.13          # fixed ice fallspeed
+  RLCRITSNOW: 2E-05  # critical autoconversion threshold
+  RSNOWLIN2: 0.3E-01   # Constant governing of the temperature dependence of the autoconversion
+                      # of ice crystals to snow in large-scale precipitation
+  RCLDIFF: 0.6e-05   #correct value from OpenIFS namelist : 0.6e-05      # diffusion-coefficient for evaporation by turbulent mixing
+  RCLDIFF_CONVI: 10.0   # enhancement factor of rcldiff for convection
+  RDEPLIQREFRATE: 0.5 # (50% deposition efficiency in top layer)
+  RDEPLIQREFDEPTH: 500.0 #m (recovery depth scale)
+  RCL_OVERLAPLIQICE: 0.65 #overlap assumption for liquid and ice for deposition
+  RCL_INHOMOGAUT: 1.5
+  RCL_INHOMOGACC: 3
+  RMINICE: 60          # minimum ice crystal radius for sedimentation (microns)
+
+parameter_group: # Grouping for the output in Script Engine (SE) format
+  namcumf: [RPRCON, ENTRORG, DETRPEN, ENTRDD, RMFDEPS]
+  namcldp: [RVICE, RLCRITSNOW, RSNOWLIN2, RCLDIFF, RCLDIFF_CONVI, RDEPLIQREFRATE, RDEPLIQREFDEPTH, RCL_OVERLAPLIQICE, RCL_INHOMOGAUT, RCL_INHOMOGACC]
+  naerad: [RMINICE]
+
+weights: 
+  # Relative weight of the variables in the spatial optimization
+  net_toa: 5.0
+  rsnt: 3.0 
+  rlnt: 3.0
+  swcf: 0.0
+  lwcf: 0.0
+  net_sfc: 0.0
+
+weights_region:
+  # Geographic importance (the final weight of the pixel is Area * Region)
+  Global: 1.0
+  Tropical: 0.0      
+  North Midlat: 0.0
+  South Midlat: 0.0
+  Equatorial: 0.0
+  North Pole: 0.0
+  South Pole: 0.0

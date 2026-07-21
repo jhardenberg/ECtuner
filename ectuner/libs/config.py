@@ -1,8 +1,7 @@
 """
 Configuration management for ECtuner.
 
-This module provides the central classes for handling YAML configurations
-and automating job submissions to SLURM clusters.
+This module provides the central classes for handling YAML configuration.
 """
 import os
 from ruamel.yaml import YAML
@@ -27,8 +26,8 @@ class Config:
         Args:
             config_path (str | None): Path to the YAML configuration file.
             **kwargs: Additional key-value pairs to override or inject directly 
-                into the 'args' block of the configuration (e.g., exp='phis').
-
+            into the 'args' block of the configuration (e.g., exp='phis').
+            
         Raises:
             FileNotFoundError: If the provided ``config_path`` does not exist.
         """

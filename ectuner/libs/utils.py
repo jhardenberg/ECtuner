@@ -9,7 +9,7 @@ This module provides a centralized toolset for data processing. It handles:
 import copy
 import math
 import logging
-from typing import Dict, Any, TYPE_CHECKING
+from typing import Dict, Any, List, Tuple, TYPE_CHECKING
 
 FluxDict = Dict[str, Dict[str, Dict[str, float]]]
 
@@ -96,7 +96,7 @@ def apply_temperature_correction(
     weights_flux: Dict[str, float], 
     weights_season: Dict[str, float], 
     weights_region: Dict[str, float]
-) -> FluxDict:
+) -> Tuple[FluxDict, List[str]]:
     """
     Modifies reference fluxes by subtracting the temperature drift.
 
@@ -105,21 +105,21 @@ def apply_temperature_correction(
     specific region/variable that has an active tuning weight.
 
     Args:
-        reference (FluxDict): The original observation reference dictionary.
-        slopes (dict): Nested dictionary containing the temperature regression 
-            slopes (T_slope).
-        delta_t (float): The temperature adjustment step (K).
-        weights_flux (dict): Weights assigned to each variable.
-        weights_season (dict): Weights assigned to each season.
-        weights_region (dict): Weights assigned to each spatial region.
+        reference: The original observation reference dictionary.
+        slopes: Nested dictionary containing the temperature regression slopes.
+        delta_t: The temperature adjustment step (K).
+        weights_flux: Weights assigned to each variable.
+        weights_season: Weights assigned to each season.
+        weights_region: Weights assigned to each spatial region.
+
+    Returns:
+        A 2-element tuple containing:
+            - The corrected reference dictionary.
+            - A list of warning messages for missing slopes on unweighted regions.
 
     Raises:
         ValueError: If a slope is missing or NaN for a variable/season/region 
             combination that possesses a combined weight strictly greater than 0.
-
-    Returns:
-        FluxDict: A deep copy of the reference dictionary corrected for 
-        temperature drift.
     """
     warnings_list = []
     corrected = copy.deepcopy(reference)
@@ -155,7 +155,20 @@ def apply_temperature_correction(
 def compute_derived_flux(ds: 'xr.Dataset', var_name: str) -> 'xr.DataArray':
     """
     Computes derived atmospheric fluxes from raw OIFS variables.
-    Single Source of Truth for physical definitions in ECtuner.
+    
+    Acts as the Single Source of Truth for physical definitions in ECtuner.
+    If the requested variable already exists in the dataset, it is returned directly.
+
+    Args:
+        ds: The raw multidimensional dataset containing base OIFS variables.
+        var_name: The name of the target flux to compute or extract.
+
+    Returns:
+        The computed data array for the requested flux.
+
+    Raises:
+        ValueError: If the requested variable is neither present in the dataset 
+            nor defined in the internal physical formulas.
     """
     if var_name in ds:
         return ds[var_name]
@@ -177,8 +190,15 @@ def compute_derived_flux(ds: 'xr.Dataset', var_name: str) -> 'xr.DataArray':
 
 def standardize_reference_signs(ref_maps: Dict[str, 'xr.DataArray']) -> Dict[str, 'xr.DataArray']:
     """
-    Standardizes the signs of observational references to match the model conventions.
+    Standardizes the signs of observational references to match model conventions.
+    
     For example, CERES RLNT is positive UP, but the model convention is positive DOWN.
+
+    Args:
+        ref_maps: Dictionary mapping variable names to their observational data arrays.
+
+    Returns:
+        A new dictionary with corrected signs where applicable.
     """
     corrected = {k: v.copy() for k, v in ref_maps.items()}
     
@@ -202,9 +222,19 @@ def regrid_to_regular_smm_safe(
     Implements a fallback mechanism: if the specified CDO method fails 
     (e.g., 'ycon' fails on certain mask topologies), it automatically 
     falls back to bilinear interpolation ('bil').
-    
-    Note: Imports xarray and smmregrid locally to prevent heavy dependencies 
-    from breaking pure 1D tuning environments.
+
+    Args:
+        ds_averaged: The input dataset to regrid.
+        target_grid: The target grid resolution string (e.g., 'r180x90').
+        method: The CDO interpolation method (e.g., 'ycon', 'bil').
+        raw_file_path: Path to a raw model output file to extract source grid info.
+        varname (optional): Forces a variable name on the dataset before regridding.
+
+    Returns:
+        The safely regridded dataset.
+
+    Raises:
+        ImportError: If the 'smmregrid' package is not installed.
     """
     import logging
     import xarray as xr
@@ -247,7 +277,16 @@ def save_diagnostic_maps(
     r2_threshold: float
 ) -> None:
     """
-    Generates and saves a NetCDF file containing the initial and predicted final 2D biases.
+    Generates and saves a NetCDF file containing initial and predicted 2D biases.
+
+    Args:
+        output_path: Destination file path for the NetCDF diagnostic map.
+        target_vars: List of atmospheric variables targeted during tuning.
+        bias_maps: Dictionary mapping variables to their initial spatial bias arrays.
+        ds_sens: The full sensitivity dataset containing slope and R2 values.
+        params: List of active tuning parameters.
+        optimal_changes: Dictionary containing the calculated optimal shifts per parameter.
+        r2_threshold: Threshold to ignore unreliable sensitivities (R2 filter).
     """
     import xarray as xr
     import logging

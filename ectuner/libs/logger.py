@@ -5,6 +5,7 @@ Provides a centralized and flexible logging setup for ECtuner, supporting
 both console and file-based logging with automatic level resolution.
 """
 import logging
+import os
 from typing import Optional, Union
 
 
@@ -16,48 +17,60 @@ def setup_logger(
     """
     Defines and configures a logger for ECtuner.
 
-    Prevents handler duplication if called multiple times and sets up 
-    both terminal stream and file handlers if requested.
+    Prevents general handler duplication if called multiple times, but intelligently 
+    swaps file handlers if the execution loop requests a different log file path.
 
     Args:
-        level (str | int, optional): The desired logging level 
-            (e.g., 'INFO', 'DEBUG', logging.INFO). Defaults to None (WARNING).
-        name (str, optional): The name of the logger instance. Defaults to 'ectuner'.
-        log_file (str, optional): Path to the output log file. Defaults to None.
+        level: The desired logging level (e.g., 'INFO', 'DEBUG', logging.INFO). 
+            Defaults to WARNING if None.
+        name: The name of the logger instance.
+        log_file: Path to the output log file.
 
     Returns:
-        logging.Logger: The configured logger instance.
+        The configured logger instance.
     """
     loglev = convert_logger(level)
     logger = logging.getLogger(name)
-
-    # Update level if logger already exists with handlers
-    if logger.handlers:
-        if loglev != logging.getLevelName(logger.getEffectiveLevel()):
-            logger.setLevel(loglev)
-            logger.info('Updating the log_level to %s', loglev)
-        return logger
-
-    # Avoid duplication/propagation of loggers to the root logger
     logger.propagate = False
-    logger.setLevel(loglev)
 
-    # Create a formatter for the console output
-    formatter = logging.Formatter(
-        '%(asctime)s | %(name)s | %(levelname)8s -> %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
+    # Update level if needed
+    if logger.handlers and loglev != logging.getLevelName(logger.getEffectiveLevel()):
+        logger.setLevel(loglev)
+        logger.info('Updating the log_level to %s', loglev)
+    else:
+        logger.setLevel(loglev)
 
-    # Console Stream Handler
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+    # Check if a StreamHandler already exists
+    has_stream_handler = any(isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler) for h in logger.handlers)
+    
+    if not has_stream_handler:
+        formatter = logging.Formatter(
+            '%(asctime)s | %(name)s | %(levelname)8s -> %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        handler = logging.StreamHandler()
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
 
-    # Optional File Handler
+    # Intelligently swap FileHandler if requested
     if log_file:
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-        logger.addHandler(file_handler)
+        abs_log_path = os.path.abspath(log_file)
+        
+        existing_file_handlers = [h for h in logger.handlers if isinstance(h, logging.FileHandler)]
+        file_handler_exists = False
+        
+        for h in existing_file_handlers:
+            if h.baseFilename == abs_log_path:
+                file_handler_exists = True
+            else:
+                # Remove and safely close old handlers to prevent log leaking across loop iterations
+                logger.removeHandler(h)
+                h.close()
+                
+        if not file_handler_exists:
+            file_handler = logging.FileHandler(abs_log_path)
+            file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+            logger.addHandler(file_handler)
 
     return logger
 
@@ -67,10 +80,10 @@ def convert_logger(loglev: Optional[Union[str, int]] = None) -> str:
     Converts a string or integer to a valid logging level string.
 
     Args:
-        loglev (str | int | None): The input log level.
+        loglev: The input log level.
 
     Returns:
-        str: The sanitized standard logging level name (e.g., 'INFO').
+        The sanitized standard logging level name (e.g., 'INFO').
         
     Raises:
         ValueError: If the input type is neither string, integer, nor None.
@@ -82,16 +95,12 @@ def convert_logger(loglev: Optional[Union[str, int]] = None) -> str:
     elif isinstance(loglev, int):
         loglev = logging.getLevelName(loglev)
     elif loglev is None:
-        loglev = loglev_default
+        return loglev_default
     else:
         raise ValueError('Invalid log level type. Must be a string or an integer.')
 
     # Check if the log level exists in the logging module
-    loglev_int = getattr(logging, loglev, None)
-
-    if loglev_int is None:
-        logging.warning("Invalid logging level '%s' specified. Setting it back to default '%s'.",
-                        loglev, loglev_default)
-        loglev = loglev_default
+    if getattr(logging, loglev, None) is None:
+        return loglev_default
 
     return loglev

@@ -17,7 +17,7 @@ files:
   #Common
   params: tuning_{exp}.yml  # template for your tuining file
   exps: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/ectuner/perturb_exps/exps_lres/" # Directory for 'params' tuning files
-  output_dir: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/2d/CLI/" # Directory for tuning output
+  output_dir: "/ec/res4/hpcperm/ecme3038/ecearth/ecearth4/ECtuner/mari/results/tuned_2d_LR/refactor/1d/CLI/" # Directory for tuning output
 
 args:
   year1: 2000
@@ -27,13 +27,13 @@ args:
   method: 'dual_annealing' # Optimization method (dual_annealing (recommended), differential_evolution, shgo (not recommended))
   
   #1D specific args
-  model_imbalance:  # Model imbalance to be corrected: - (netTOA-netSFC) + (oce_imbalance), -0.74 for low res
+  model_imbalance: # Model imbalance to be corrected: - (netTOA-netSFC) + (oce_imbalance), -0.74 for low res
   deltaT:  # Time step for the reference correction 
 
 #2d tuning options
 spatial_tuning:
   target_grid: "r180x90"
-  alpha: 0 # Hybrid weight (0: spatial, 1: global)
+  alpha: 0.3 # Hybrid weight (0: spatial, 1: global)
   metric: "l1" # Metric for spatial tuning (e.g., l1, l2, rmse)
   area_weighting: True
   #r2_threshold: 0.0 # Ignore pixels where the linear relationship between parameter and response is weak

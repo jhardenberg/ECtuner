@@ -24,9 +24,28 @@ except ImportError:
     regrid_to_regular_smm_safe = None
     compute_derived_flux = None
 
+def _handle_show_or_save(output_path=None):
+    """Internal helper to handle plot saving or showing cleanly."""
+    if output_path:
+        os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        print(f"Plot saved successfully to: {output_path}")
+    else:
+        plt.show()
+    plt.close()
+
 def load_diagnostic_yamls(folder_path: str) -> Dict[str, Any]:
     """
     Scans a folder for ECtuner diagnostic files and loads them.
+
+    Args:
+        folder_path: Path to the directory containing diagnostics YAMLs.
+
+    Returns:
+        A dictionary mapping experiment tags to their parsed diagnostic data.
+        
+    Raises:
+        FileNotFoundError: If the specified folder does not exist.
     """
     folder = Path(folder_path)
     if not folder.exists():
@@ -46,8 +65,14 @@ def load_diagnostic_yamls(folder_path: str) -> Dict[str, Any]:
 
 def build_metrics_dataframe(diag_data: Dict[str, Any]) -> pd.DataFrame:
     """
-    Converts the nested YAML dictionary into a Pandas DataFrame 
-    optimized for Pareto front and Tradeoff plotting.
+    Converts the nested YAML dictionary into a Pandas DataFrame optimized 
+    for Pareto front and Tradeoff plotting.
+
+    Args:
+        diag_data: Data loaded via load_diagnostic_yamls.
+
+    Returns:
+        A DataFrame containing sorted metrics for all experiments.
     """
     records = []
     
@@ -91,9 +116,11 @@ def build_metrics_dataframe(diag_data: Dict[str, Any]) -> pd.DataFrame:
 # ==============================================================================
 def plot_parameter_scatter(diag_data: Dict[str, Any], output_path: str = None) -> None:
     """
-    Creates a scatter plot with parameters on the x-axis and relative value 
-    (with respect to the reference/default) on the y-axis.
-    Each experiment is plotted with a different color.
+    Creates a scatter plot with parameters on the x-axis and relative value.
+
+    Args:
+        diag_data: Dictionary containing loaded diagnostic data.
+        output_path: Optional file path to save the plot.
     """
     if not diag_data:
         print("No data to plot")
@@ -136,15 +163,15 @@ def plot_parameter_scatter(diag_data: Dict[str, Any], output_path: str = None) -
     ax.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    if output_path:
-        plt.savefig(output_path, dpi=300)
-    plt.show()
-
+    _handle_show_or_save(output_path)
 
 def plot_parameter_heatmap(diag_data: Dict[str, Any], output_path: str = None) -> None:
     """
-    Creates a heatmap showing the normalized relative change of parameters 
-    compared to their reference values across different experiments.
+    Creates a heatmap showing the normalized relative change of parameters.
+
+    Args:
+        diag_data: Dictionary containing loaded diagnostic data.
+        output_path: Optional file path to save the plot.
     """
     if not diag_data:
         return
@@ -177,9 +204,7 @@ def plot_parameter_heatmap(diag_data: Dict[str, Any], output_path: str = None) -
                 ax.text(j, i, f'{val:.2e}', ha="center", va="center", color=text_color, fontsize=8)
 
     plt.tight_layout()
-    if output_path:
-        plt.savefig(output_path, dpi=300)
-    plt.show()
+    _handle_show_or_save(output_path)
 
 # ==============================================================================
 # ==============================================================================
@@ -187,6 +212,11 @@ def plot_parameter_heatmap(diag_data: Dict[str, Any], output_path: str = None) -
 def plot_tuning_results_maps(diag_file: str, output_dir: str, run_tag: str) -> None:
     """
     Generates 2D maps comparing Initial Bias vs Final Predicted Bias from the diagnostic NetCDF.
+
+    Args:
+        diag_file: Path to the diagnostic NetCDF file.
+        output_dir: Directory to save the output plots.
+        run_tag: Identifier for the current experiment run.
     """
     ds = xr.open_dataset(diag_file)
     variables = [v.replace('_bias_init', '') for v in ds.data_vars if '_bias_init' in v]
@@ -241,7 +271,12 @@ def plot_tuning_results_maps(diag_file: str, output_dir: str, run_tag: str) -> N
 def plot_tradeoff_comparison(df: pd.DataFrame, group_by: str = 'Metric_Type', output_path: str = None) -> None:
     """
     Global Pareto front plot: spatial error vs global bias.
-    Allows dynamic grouping (e.g., by Metric_Type, Increment, or Target_Weights).
+    Allows dynamic grouping.
+
+    Args:
+        df: DataFrame built from diagnostic data.
+        group_by: Column name to group markers by.
+        output_path: Optional file path to save the plot.
     """
     plt.figure(figsize=(9, 6.5))
     
@@ -288,6 +323,12 @@ def plot_tradeoff_comparison(df: pd.DataFrame, group_by: str = 'Metric_Type', ou
 def plot_variable_pareto(df: pd.DataFrame, var: str, group_by: str = 'Metric_Type', output_path: str = None) -> None:
     """
     Pareto Front specific to a single atmospheric variable.
+
+    Args:
+        df: DataFrame built from diagnostic data.
+        var: The specific atmospheric variable to plot (e.g., 'net_toa').
+        group_by: Column name to group markers by.
+        output_path: Optional file path to save the plot.
     """
     plt.figure(figsize=(9, 6.5))
     
@@ -339,6 +380,13 @@ def plot_variable_pareto(df: pd.DataFrame, var: str, group_by: str = 'Metric_Typ
 def plot_emulator_performance_global(var_name: str, ref_obs: Dict[str, float], data_ecmean: Dict[str, Dict[str, float]], data_predicted_bias: Dict[str, Dict[str, float]], output_path: str = None) -> None:
     """
     1:1 Validation test of the Emulator's global bias prediction against actual EC-Earth outputs.
+
+    Args:
+        var_name: Target variable to validate.
+        ref_obs: Reference observations.
+        data_ecmean: Realized biases from the model run.
+        data_predicted_bias: Biases predicted by ECtuner.
+        output_path: Optional file path to save the plot.
     """
     alphas = list(data_ecmean.keys())
     realized_biases = [data_ecmean[a][var_name] - ref_obs[var_name] for a in alphas]
@@ -365,18 +413,16 @@ def plot_emulator_performance_global(var_name: str, ref_obs: Dict[str, float], d
     if output_path: plt.savefig(output_path, dpi=300)
     else: plt.show()
 
-def _handle_show_or_save(output_path=None):
-    """Internal helper to handle plot saving or showing cleanly."""
-    if output_path:
-        os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
-        print(f"Plot saved successfully to: {output_path}")
-    else:
-        plt.show()
-    plt.close() # Libera la memoria chiudendo la figura
-
 def plot_emulator_vs_model_spatial(var_name, preds_dict, reals_dict, output_path=None):
-    """ Performance 1:1 test (MAE)."""
+    """
+    Performance 1:1 test (MAE) validating emulator spatial predictions against realized outputs.
+
+    Args:
+        var_name: Target variable to validate.
+        preds_dict: Dictionary mapping alphas to predicted MAE.
+        reals_dict: Dictionary mapping alphas to realized MAE.
+        output_path: Optional file path to save the plot.
+    """
     alphas = list(preds_dict.keys())
     x_vals = [preds_dict[a] for a in alphas]
     y_vals = [reals_dict[a] for a in alphas]
@@ -403,9 +449,18 @@ def plot_emulator_vs_model_spatial(var_name, preds_dict, reals_dict, output_path
     _handle_show_or_save(output_path)
 
 def plot_zonal_validation_from_scratch(tuner_diag_file, scratch_dir, exp_tag, year1, year2, ceres_file, var_tuner, output_path=None):
-    """ 
+    """
     Cross-Validation zonal profile (Initial vs Predicted vs Realized).
     
+    Args:
+        tuner_diag_file: NetCDF output from ECtuner.
+        scratch_dir: Directory containing raw EC-Earth output files.
+        exp_tag: Experiment ID (e.g., 'aa00').
+        year1: Start year for climatology.
+        year2: End year for climatology.
+        ceres_file: Path to CERES observational dataset.
+        var_tuner: Variable to validate.
+        output_path: Optional file path to save the plot.
     """
     if regrid_to_regular_smm_safe is None or compute_derived_flux is None:
         raise ImportError("Dipendencies for zonal validation ('smmregrid', ecc.) not available.")

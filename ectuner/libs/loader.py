@@ -1,5 +1,9 @@
 """
 Data Loading Operations for ECtuner (1D and 2D).
+
+This module provides the data ingestion layer, handling the extraction of 
+tuning parameters, sensitivity matrices, and reference observations from 
+YAML and NetCDF files.
 """
 import os
 from ruamel.yaml import YAML
@@ -17,10 +21,23 @@ FluxDict = Dict[str, Dict[str, Dict[str, float]]]
 class BaseDataLoader(ABC):
     """
     Abstract Base Class for ECtuner Data Loaders.
-    Handles shared state initialization and parameter parsing.
-    """
 
+    Establishes the common interface and shared state for reading model parameters 
+    and target observations. 
+
+    Attributes:
+        config (Config): The ECtuner configuration object.
+        exp (str): The name of the experiment being tuned.
+        year1 (int): The start year of the analysis period.
+        year2 (int): The end year of the analysis period.
+    """
     def __init__(self, config: Any) -> None:
+        """
+        Initializes the shared state for the DataLoader.
+
+        Raises:
+            ValueError: If 'exp', 'year1', or 'year2' are missing from the configuration.
+        """
         self.config = config
         self.exp = self.config.get('args.exp')
         self.year1 = self.config.get('args.year1')
@@ -38,7 +55,7 @@ class BaseDataLoader(ABC):
         model components (``oifs``, ``nemo``, etc.) to extract tuning variables.
 
         Returns:
-            tuple: A 2-element tuple containing:
+            Tuple containing:
                 - **list[str]**: A list of all parameter names.
                 - **dict[str, float]**: A dictionary mapping parameter names to their current values.
 
@@ -92,17 +109,32 @@ class BaseDataLoader(ABC):
     
     @abstractmethod
     def load_sensitivity(self) -> Any:
-        """Must return the sensitivity data."""
+        """
+        Loads the pre-computed sensitivity data.
+        
+        Returns:
+            The sensitivity data structure (format depends on the 1D/2D implementation).
+        """
         pass
 
     @abstractmethod
     def load_reference(self, *args, **kwargs) -> Any:
-        """Must return the reference target observations."""
+        """
+        Loads the reference target observations.
+        
+        Returns:
+            The observation data structure (format depends on the 1D/2D implementation).
+        """
         pass
 
     @abstractmethod
     def load_base(self, *args, **kwargs) -> Any:
-        """Must return the base model fluxes."""
+        """
+        Loads the base model fluxes.
+
+        Returns:
+            The base model flux data structure (format depends on the 1D/2D implementation).
+        """
         pass
 
 class DataLoader1D(BaseDataLoader):
@@ -113,34 +145,20 @@ class DataLoader1D(BaseDataLoader):
     from YAML files, standardizing them into nested dictionaries.
 
     Attributes:
-        config (Any): The ECtuner configuration object.
-        exp (str): The name of the experiment being tuned.
-        year1 (int): The start year of the analysis period.
-        year2 (int): The end year of the analysis period.
+        logger (logging.Logger): The logger instance for tracking I/O operations.
     """
 
     def __init__(self, config: Any, logger: Any) -> None:
-        """
-        Initializes the DataLoader1D with the provided configuration.
-
-        Args:
-            config (Any): An instance of the Config class containing the 
-                tuning setup and file paths.
-
-        Raises:
-            ValueError: If 'exp', 'year1', or 'year2' are missing from 
-                the configuration.
-        """
         super().__init__(config)
         self.logger = logger
 
     def load_sensitivity(self) -> Dict[str, Any]:
         """
-        Loads the externally computed sensitivity file.
+        Loads the externally computed 1D sensitivity file.
 
         Returns:
-            dict: A nested dictionary containing the sensitivity coefficients.
-
+            A nested dictionary containing the sensitivity regression coefficients.
+        
         Raises:
             KeyError: If the 'files.sensitivity' template is missing in the config.
             FileNotFoundError: If the generated sensitivity file path does not exist.
@@ -159,18 +177,17 @@ class DataLoader1D(BaseDataLoader):
 
     def load_reference(self) -> FluxDict:
         """
-        Loads and structures the reference target observation fluxes.
+        Loads and standardizes the 1D reference target observation fluxes.
 
-        Transforms the raw observation data to be perfectly symmetric with 
-        the model output structure. 
+        Transforms the raw observation YAML data into a perfectly symmetric 
+        nested structure matching the model output format.
 
         Returns:
-            FluxDict: A structured dictionary of the reference targets.
-                Format: ``{'var': {'season': {'region': value}}}``.
+            A structured dictionary of the reference targets.
+            Format: {'var': {'season': {'region': value}}}.
 
         Raises:
-            FileNotFoundError: If the reference file is missing or the path 
-                is undefined in the config.
+            FileNotFoundError: If the reference file is missing or its path is undefined.
         """
         ref_file = self.config.get('files.reference')
         if not ref_file or not os.path.exists(ref_file):
@@ -198,15 +215,21 @@ class DataLoader1D(BaseDataLoader):
 
     def load_base(self) -> FluxDict:
         """
-        Loads the base fluxes of the configuration to be tuned.
+        Loads the 1D base fluxes of the configuration to be tuned.
+
+        If the base YAML file is not found, attempts to compute the global means 
+        on the fly invoking the ECmean library.
 
         Returns:
-            FluxDict: A structured dictionary of the ECmean base fluxes.
-                Format: ``{'var': {'season': {'region': value}}}``.
+            A structured dictionary of the ECmean base fluxes.
+            Format: {'var': {'season': {'region': value}}}.
 
         Raises:
             KeyError: If the ECmean directory or base file template are missing.
-            FileNotFoundError: If the target ECmean base YAML file does not exist.
+            ValueError: If on-the-fly computation is needed but 'ecmean_config' is missing.
+            ImportError: If the 'ecmean' package is not installed in the environment.
+            RuntimeError: If the ECmean external execution fails.
+            FileNotFoundError: If the base file remains missing even after ECmean execution.
         """
         ecmean_dir = self.config.get('files.ecmean')
         base_template = self.config.get('files.base')
@@ -223,13 +246,13 @@ class DataLoader1D(BaseDataLoader):
             self.logger.warning(f"Base ECmean file not found: {base_file}")
             self.logger.info("Attempting to compute Global Mean on the fly using ECmean...")
             
-            # Recupera il percorso del config specifico di ecmean dal config di ectuner
+            # ecmean_config_path is required for on-the-fly computation
             ecmean_config_path = self.config.get('files.ecmean_config')
             if not ecmean_config_path:
                 raise ValueError("To compute base data on the fly, 'files.ecmean_config' must be specified in the YAML.")
                 
             try:
-                # Importazione ritardata (lazy): fallisce solo se ecmean non è nell'ambiente
+                # Import the ECmean wrapper function
                 from ecmean.global_mean import global_mean
                 
                 # Esecuzione del wrapper
@@ -245,7 +268,7 @@ class DataLoader1D(BaseDataLoader):
             except Exception as e:
                 raise RuntimeError(f"ECmean execution failed with error: {e}")
 
-        # Doppio controllo: se anche dopo ecmean il file non c'è, c'è un problema di configurazione
+        # double-check if the base file was created after ECmean execution
         if not os.path.exists(base_file):
             raise FileNotFoundError(f"ECmean executed, but expected file was not created: {base_file}")
 
@@ -257,21 +280,16 @@ class DataLoader2D(BaseDataLoader):
     """
     DataLoader for 2D spatial tuning operations.
     
-    Inherits from DataLoader1D to reuse parameter parsing (YAML), 
-    while overriding flux loading to handle xarray Datasets and caching.
+    Overrides flux loading mechanisms to handle multidimensional xarray Datasets 
+    and implements a NetCDF caching mechanism for heavy I/O operations.
 
     Attributes:
-        config (Config): The ECtuner configuration object.
-        logger (logging.Logger): The logger instance for tracking I/O and caching.
-        exp (str): The name of the experiment being tuned.
-        year1 (int): The start year of the analysis period.
-        year2 (int): The end year of the analysis period.
+        logger (logging.Logger): The logger instance.
+        target_grid (str): The common spatial grid resolution used for regridding.
     """
 
     def __init__(self, config: Any, logger: Any) -> None:
-        """
-        Initializes the DataLoader2D.
-        """
+        
         super().__init__(config)
         self.logger = logger
         self.target_grid = self.config.get('spatial_tuning.target_grid', 'r180x90')
@@ -281,7 +299,7 @@ class DataLoader2D(BaseDataLoader):
         Loads the 2D spatial sensitivity NetCDF file.
 
         Returns:
-            xr.Dataset: The xarray Dataset containing slope and r2 maps.
+            The xarray Dataset containing slope and R2 maps for all parameters.
 
         Raises:
             FileNotFoundError: If the sensitivity file does not exist.
@@ -295,14 +313,19 @@ class DataLoader2D(BaseDataLoader):
 
     def load_reference(self, variables: List[str]) -> Dict[str, xr.DataArray]:
         """
-        Loads reference climatology maps (observations) for the target variables.
+        Loads reference climatology maps (observations) for target variables.
+
+        Standardizes the observation signs (e.g., UP vs DOWN) to match the 
+        model's internal conventions.
 
         Args:
-            variables (List[str]): List of variable names to load.
+            variables: List of variable names to load.
 
         Returns:
-            Dict[str, xr.DataArray]: Dictionary mapping variable names to their 
-                respective observation data arrays.
+            Dictionary mapping variable names to their standardized observation arrays.
+
+        Raises:
+            KeyError: If the reference 2D directory is missing in the config.
         """
         ref_maps = {}
         ref_dir = self.config.get('files.ref_2d_dir')
@@ -336,15 +359,19 @@ class DataLoader2D(BaseDataLoader):
         """
         Extracts, time-averages, and regrids raw OIFS output maps.
         
-        Implements a caching mechanism: if the processed NetCDF already exists 
-        for the given experiment and years, it loads it directly to save time.
+        Implements a caching mechanism: if the processed NetCDF exists for the 
+        given experiment and years, it loads it directly avoiding expensive 
+        regridding operations.
 
         Args:
-            variables (List[str]): Variables to extract from the raw model output.
+            variables: Variables to extract from the raw model output.
 
         Returns:
-            Dict[str, xr.DataArray]: Dictionary mapping variable names to the 
-                regridded model base state arrays.
+            Dictionary mapping variable names to the regridded model base arrays.
+
+        Raises:
+            KeyError: If the base 2D directory is missing in the config.
+            FileNotFoundError: If cache is missed and raw OIFS files are not found.
         """
         out_dir = self.config.get('files.base_2d_dir')
         if not out_dir:

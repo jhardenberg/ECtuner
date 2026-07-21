@@ -9,7 +9,7 @@ import math
 import numpy as np
 from scipy import optimize
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple, Any, TYPE_CHECKING
+from typing import Dict, List, Tuple, Any, Union, TYPE_CHECKING
 
 from .result import TuningResult
 
@@ -26,17 +26,16 @@ class BaseTuner(ABC):
     limits based on fractional increments, and the SciPy optimizer setup.
 
     Attributes:
-        config (Any): The ECtuner configuration object.
-        logger (Any): The initialized logging object.
-        inc (float): Fractional maximum parameter change relative to the reference.
-        penalty (float): Penalty weight for distance from reference parameters.
-        metric (str): The name of the metric used for optimization (e.g., 'l2', 'l1').
-        params_names (list[str]): Names of all loaded parameters.
-        current_values (dict[str, float]): Current values of the parameters.
-        ref_params (dict[str, float]): Reference baseline values for parameters.
-        frozen_params (dict[str, float]): Parameters locked out of optimization.
-        opt_params (list[str]): Parameters actively undergoing optimization.
-        bounds (list[tuple[float, float]]): Calculated min/max limits for SciPy.
+        config: The ECtuner configuration object.
+        logger: The initialized logging object.
+        inc: Fractional maximum parameter change relative to the reference.
+        penalty: Penalty weight for distance from reference parameters.
+        params_names: Names of all loaded parameters.
+        current_values: Current values of the parameters.
+        ref_params: Reference baseline values for parameters.
+        frozen_params: Parameters locked out of optimization.
+        opt_params: Parameters actively undergoing optimization.
+        bounds: Calculated min/max limits for SciPy.
     """
 
     def __init__(self, inc: float, penalty: float,logger: Any) -> None:
@@ -44,9 +43,9 @@ class BaseTuner(ABC):
         Initializes the base tuner with configuration and logger.
 
         Args:
-            inc (float): Fractional maximum parameter change relative to the reference.
-            penalty (float): Penalty weight for distance from reference parameters.
-            logger (Any): The configured logger instance.
+            inc: Fractional maximum parameter change relative to the reference.
+            penalty: Penalty weight for distance from reference parameters.
+            logger: The configured logger instance.
         """
         self.logger = logger
         self.inc = float(inc)
@@ -60,10 +59,17 @@ class BaseTuner(ABC):
         self.opt_params: List[str] = []
         self.bounds: List[Tuple[float, float]] = []
 
-    def setup_parameters(self, param_dict: Dict[str, float], ref_dict: Dict[str, float], frozen_config: Any) -> None:
+    def setup_parameters(self, param_dict: Dict[str, float], ref_dict: Dict[str, float], frozen_config: Union[List[str], Dict[str, Any]]) -> None:
         """
         Organizes parameters into free and frozen sets.
+        
         Handles both legacy lists and new dictionary formats for frozen parameters.
+
+        Args:
+            param_dict: Current values of parameters.
+            ref_dict: Reference baseline values of parameters.
+            frozen_config: List of frozen parameter names, or dictionary mapping names 
+                to custom frozen values (or "default").
         """
         self.params_names = list(param_dict.keys())
         self.current_values = {k: float(v) for k, v in param_dict.items()}
@@ -105,14 +111,10 @@ class BaseTuner(ABC):
         The objective cost function to be minimized by SciPy.
 
         Args:
-            changes (np.ndarray): An array of numerical changes proposed by 
-                the optimizer for the free parameters.
+            changes: An array of numerical changes proposed by the optimizer.
 
         Returns:
-            float: The calculated cost (error + penalty) to be minimized.
-            
-        Raises:
-            NotImplementedError: If not overridden by a child class.
+            The calculated cost (error + penalty) to be minimized.
         """
         pass
 
@@ -121,13 +123,11 @@ class BaseTuner(ABC):
         Executes the SciPy minimization algorithm.
 
         Args:
-            method (str, default 'dual_annealing'): The optimization algorithm to use.
-                Supported values are 'dual_annealing', 'differential_evolution', 
-                and 'shgo'.
+            method: The optimization algorithm to use. Supported values: 'L-BFGS-B', 
+                'dual_annealing', 'differential_evolution', 'shgo'.
 
         Returns:
-            np.ndarray: An array containing the optimal changes found for 
-            the free parameters.
+            An array containing the optimal changes found for the free parameters.
 
         Raises:
             ValueError: If an unsupported optimization method is provided.
@@ -147,7 +147,7 @@ class BaseTuner(ABC):
             if not result.success:
                 self.logger.warning(f"L-BFGS-B did not fully converge. Message: {result.message}")
 
-        if method == 'dual_annealing':
+        elif method == 'dual_annealing':
             m_kwargs = {
                 "method": "L-BFGS-B", 
                 "options": {"ftol": 1e-12, "gtol": 1e-12, "maxls": 50}
@@ -220,11 +220,12 @@ class Tuner1D(BaseTuner):
         Injects data and normalizes weights for the objective function.
 
         Args:
-            sensitivity (dict): Pre-calculated sensitivity coefficients.
-            difference (dict): Realized biases between model and observations.
-            weights_flux (dict): Weights for the tuning target variables.
-            weights_season (dict): Weights for the seasonal intervals.
-            weights_region (dict): Weights for the spatial regions.
+            sensitivity: Pre-calculated sensitivity coefficients.
+            difference: Realized biases between model and observations.
+            reference: Observational references for final output evaluations.
+            weights_flux: Weights for the tuning target variables.
+            weights_season: Weights for the seasonal intervals.
+            weights_region: Weights for the spatial regions.
         """
         self.sensitivity = sensitivity
         self.difference = difference
@@ -268,11 +269,10 @@ class Tuner1D(BaseTuner):
                         )
                         
                         total_difference += combined_weight * ((diff_val + flux_change) ** 2)
-                        # paraboloide perfetto.
-                        # algoritmi stocastici come dual_annealing, shgo o differential_evolution 
-                        # sono matematicamente sovradimensionati. 
-                        # Un solver a gradiente come L-BFGS-B o un solutore least_squares 
-                        # troverebbe lo stesso esatto minimo globale in una frazione del tempo.
+                        # Note: This is a perfect paraboloid. Stochastic algorithms like 
+                        # dual_annealing or differential_evolution are mathematically oversized here. 
+                        # A gradient solver like L-BFGS-B will find the same exact global 
+                        # minimum in a fraction of the time.
 
         for param in self.params_names:
             ref_val = self.ref_params[param]
@@ -287,11 +287,10 @@ class Tuner1D(BaseTuner):
         Executes the optimization process for 1D targets.
 
         Args:
-            method (str, default 'dual_annealing'): The chosen optimizer.
+            method: The chosen optimizer.
 
         Returns:
-            TuningResult: An object containing all the metrics and the 
-            calculated optimal parameters.
+            An object containing metrics and the calculated optimal parameters.
         """
         free_changes = self.run_optimizer(method)
         
@@ -332,8 +331,13 @@ class Tuner1D(BaseTuner):
     
     def evaluate_biases(self, optimal_changes_dict: dict) -> dict:
         """
-        Calculates the initial and final biases for all active targets and diagnostics.
-        Returns a structured dictionary ready to be logged or saved to JSON.
+        Calculates initial and final biases for all targets and diagnostics.
+
+        Args:
+            optimal_changes_dict: Mapping of parameter names to their optimal changes.
+
+        Returns:
+            A structured dictionary containing 'targets' and 'diagnostics' evaluations.
         """
         evaluation = {
             'targets': [],
@@ -394,6 +398,16 @@ class Tuner2D(BaseTuner):
     """
 
     def __init__(self, inc: float, penalty: float, alpha: float, metric: str, logger: Any) -> None:
+        """
+        Initializes the 2D Tuner.
+
+        Args:
+            inc: Fractional maximum parameter change relative to the reference.
+            penalty: Penalty weight for distance from reference parameters.
+            alpha: Blending weight between spatial error (0.0) and global error (1.0).
+            metric: Error metric to compute ('l2' for MSE, 'l1' for MAE).
+            logger: The configured logger instance.
+        """
         super().__init__(inc, penalty, logger)
         self.alpha = float(alpha)
         self.metric = metric.lower()
@@ -435,10 +449,12 @@ class Tuner2D(BaseTuner):
         Flattens the 2D geospatial maps into 1D arrays for fast matrix operations.
 
         Args:
-            bias_maps (dict): Dictionary mapping variable names to their 2D bias arrays.
-            ref_maps (dict): Dictionary mapping variable names to their reference arrays.
-            ds_sens (xarray.Dataset): The 2D sensitivity dataset.
-            mask_2d (xarray.DataArray): The regional and area-weighted mask.
+            bias_maps: Dictionary mapping variable names to their 2D bias arrays.
+            ref_maps: Dictionary mapping variable names to their reference arrays.
+            ds_sens: The 2D sensitivity dataset.
+            mask_2d: The regional and area-weighted mask.
+            weights_flux: Weights for the tuning target variables.
+            weights_region: Weights for the spatial regions.
         """
         self.logger.info("Flattening data")
         self.bias_maps_2d = bias_maps
@@ -521,11 +537,11 @@ class Tuner2D(BaseTuner):
         Executes the optimization process for 2D spatial targets.
 
         Args:
-            method (str, default 'dual_annealing'): The chosen optimizer.
+            method: The chosen optimizer.
 
         Returns:
-            TuningResult: An object containing all spatial and global metrics, 
-            along with the calculated optimal parameters.
+            An object containing all spatial and global metrics, along with 
+            the calculated optimal parameters.
         """
         free_changes = self.run_optimizer(method)
         
@@ -585,8 +601,13 @@ class Tuner2D(BaseTuner):
 
     def evaluate_biases(self, optimal_changes_dict: dict) -> dict:
         """
-        Calculates initial and final regional biases from 2D maps to populate 
-        the unified TuningResult tables.
+        Calculates initial and final regional biases from 2D maps.
+
+        Args:
+            optimal_changes_dict: Mapping of parameter names to optimal changes.
+
+        Returns:
+            A structured dictionary populating the unified TuningResult tables.
         """
         import xarray as xr
         import numpy as np

@@ -1,3 +1,9 @@
+"""
+Experiment Automation Module.
+
+Provides wrappers to interact with SLURM for batch submission 
+of EC-Earth tuning experiments.
+"""
 import os
 import subprocess
 from copy import deepcopy
@@ -6,23 +12,46 @@ from .config import Config
 
 
 class ExperimentSLURM:
+    """
+    Prepares and submits a tuning experiment to the SLURM scheduler.
+
+    Allows on-the-fly modification of configuration values before dispatching
+    the batch job.
+    """
     def __init__(self, base_config: Config, exp_name: str) -> None:
+        """
+        Initializes the SLURM experiment wrapper.
+
+        Args:
+            base_config: The base ECtuner configuration object.
+            exp_name: The targeted experiment identifier (e.g., 'aa00').
+        """
         self.base_config = deepcopy(base_config)
         self.base_config.set('args.exp', exp_name)
         
     def set(self, key_path: str, value: Any) -> None:
-        """Modifica qualsiasi valore nel config (1D o 2D)."""
+        """
+        Modifies a configuration value dynamically before submission.
+        
+        Args:
+            key_path: Dot-notated string indicating the config key (e.g., 'args.inc').
+            value: The new value to set.
+        """
         self.base_config.set(key_path, value)
         
     def submit(self, job_template: str, run_tag: str) -> None:
-        # Salvataggio config temporaneo
-        temp_config_path = os.path.abspath(f"temp_{run_tag}.yaml")
-        self.base_config.save(temp_config_path)
+        """
+        Saves the current configuration to disk and submits the job to SLURM.
         
-        # Percorsi output (usando i valori attuali nel config)
+        Args:
+            job_template: Path to the SLURM bash script template.
+            run_tag: Identifier tag for this specific run.
+        """
         out_dir = self.base_config.get('files.output_dir', './output')
         os.makedirs(out_dir, exist_ok=True)
-        
+        temp_config_path = os.path.join(out_dir, f"temp_{run_tag}.yaml")
+        self.base_config.save(temp_config_path)
+       
         out_yml = os.path.join(out_dir, f"tuned_{run_tag}.yml")
         log_file = os.path.join(out_dir, f"log_{run_tag}.log")
         slurm_out = os.path.join(out_dir, f"slurm_{run_tag}.out")
@@ -41,4 +70,4 @@ class ExperimentSLURM:
         ]
         
         subprocess.run(cmd, check=True)
-        print(f">>> Job {run_tag} sent.")
+        print(f">>> Job {run_tag} sent. (Outputs in {out_dir}).")

@@ -14,15 +14,16 @@ class TuningResult:
     methods to export data for the EC-Earth Script Engine and data analysis.
 
     Attributes:
-        target_vars (list[str]): Variables targeted during optimization.
-        param_names (list[str]): All parameter names evaluated.
-        optimal_changes (dict[str, float]): Absolute changes applied to parameters.
-        initial_values (dict[str, float]): Starting values of the parameters.
-        ref_values (dict[str, float]): Default OIFS reference values.
-        bounds (dict[str, tuple[float, float]]): Min/max limits for parameters.
-        metrics (dict[str, Any]): Global metadata and final score metrics.
-        var_metrics (dict[str, dict[str, float]]): Metrics broken down by variable.
-        bias_evaluation (dict[str, list[dict]]): Initial vs Final bias comparisons (1D).
+        target_vars: Variables targeted during optimization.
+        param_names: All parameter names evaluated.
+        optimal_changes: Absolute changes applied to parameters.
+        initial_values: Starting values of the parameters.
+        ref_values: Default reference values.
+        bounds: Min/max limits for parameters.
+        frozen_params: Parameters locked out of optimization.
+        metrics: Global metadata and final score metrics.
+        var_metrics: Metrics broken down by variable.
+        bias_evaluation: Initial vs Final bias comparisons.
     """
 
     def __init__(
@@ -63,7 +64,15 @@ class TuningResult:
         self.bias_evaluation: Dict[str, List[Dict[str, Any]]] = {}
 
     def set_var_metrics(self, var_name: str, predicted_global_bias: float, spatial_cost: float, global_cost: float) -> None:
-        """Stores the predicted metrics for a specific variable."""
+        """
+        Stores the predicted metrics for a specific variable.
+        
+        Args:
+            var_name: The name of the target variable.
+            predicted_global_bias: The expected new global bias.
+            spatial_cost: The spatial cost component.
+            global_cost: The global cost component.
+        """
         self.var_metrics[var_name] = {
             'predicted_global_bias': predicted_global_bias,
             'spatial_cost': spatial_cost,
@@ -79,11 +88,13 @@ class TuningResult:
         return self.var_metrics.get(var_name, {}).get('spatial_cost')
 
     def get_new_parameters(self) -> Dict[str, float]:
-        """Returns a dictionary with the new absolute parameter values."""
+        """
+        Returns a dictionary with the new absolute parameter values.
+        Safely falls back to initial values if an optimal change is missing.
+        """
         return {
             p: self.frozen_params[p] if p in self.frozen_params
-                else self.initial_values[p] + self.optimal_changes[p] 
+                else self.initial_values[p] + self.optimal_changes.get(p, 0.0) 
             for p in self.param_names
         }
-
     

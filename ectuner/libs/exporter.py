@@ -18,6 +18,10 @@ if TYPE_CHECKING:
 def print_summary(result: 'TuningResult', logger: Any) -> None:
     """
     Prints the parameter summary table and bias evaluation in the log.
+
+    Args:
+        result: The TuningResult object containing optimization data.
+        logger: The configured logger instance.
     """
     outtable = []
     new_params = result.get_new_parameters()
@@ -83,6 +87,13 @@ def _print_bias_table(logger: Any, data: List[Dict[str, Any]]) -> None:
 def save_model_yaml(result: 'TuningResult', filepath: str, parameter_group_config: Dict[str, List[str]], weights_flux: Dict[str, float], weights_region: Dict[str, float]) -> None:
     """
     Writes the YAML file in the format required by the OIFS Script Engine.
+
+    Args:
+        result: The TuningResult object containing optimization data.
+        filepath: Destination path for the output YAML file.
+        parameter_group_config: Mapping of group names (e.g., 'NAMCUMF') to parameter lists.
+        weights_flux: Variables and their corresponding weights.
+        weights_region: Regions and their corresponding weights.
     """
     os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
     
@@ -152,7 +163,8 @@ def save_diagnostics_yaml(result: 'TuningResult', filepath: str) -> None:
     Exports the detailed optimization results to a YAML file for data analysis.
 
     Args:
-        filepath (str): Destination path for the diagnostic YAML file.
+        result: The TuningResult object containing optimization data.
+        filepath: Destination path for the diagnostic YAML file.
     """
     os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
     

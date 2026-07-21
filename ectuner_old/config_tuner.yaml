@@ -1,0 +1,98 @@
+files:
+  # INPUT DATA
+  reference: ecmean/reference/gm_reference_EC23.yml  # Target observations (Obs)
+  sensitivity: sensitivities/sensitivity_TL255_415_{year1}-{year2}.yaml  # sensitivity file template
+  slope_file: utils/slopes.yaml # file with slopes for temperature correction
+  # TEMPLATES
+  base: global_mean_{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml  # ECmean output pattern for the experiment to be tuned
+  params: params_{exp}.yml  # template for your tuining file
+  output_template: tuned_{exp}_{year1}_{year2}.yml  # template for the output file name
+  #DIRECTORIES
+  ecmean: /path/to/folder/of/computed/global_mean # Directory for 'base' ECmean files
+  exps: /path/to/folder/of/tuning/parameter/to/tune # Directory for 'params' tuning files
+  output_dir: /path/to/folder/for/tuning/output # Directory for tuning output
+
+args:
+  # Default years for sensitivities
+  year1: 1990
+  year2: 2000
+  penalty: 10  # Penalty for deviation from reference parameter values
+  inc: 0.2  # Maximum acceptable parameter change
+  method: 'dual_annealing' # Optimization method (dual_annealing (recommended), differential_evolution, shgo (not recommended))
+  model_imbalance: -0.74 # Model imbalance to be corrected: - (netTOA-netSFC) + (oce_imbalance), -0.74 for low res
+  deltaT: 0.5 # Time step for the reference correction 
+
+# Parameters to keep fixed during tuning (example)
+frozen_parameters:
+  - RCLDIFF_CONVI 
+  - RPRCON
+
+reference_parameters: # Default OIFS parameter values (used for penalty)
+  RPRCON: 0.14E-02     # coefficients for determining conversion from cloud water to rain
+  ENTRORG: 0.175E-02   # entrainment rate (positive buoyant convection)
+  DETRPEN: 0.75E-04    # detrainment rate for penetrative convection
+  ENTRDD: 0.3E-03      # entrainment rate for cumulus downdrafts
+  RMFDEPS: 0.3         # fractional massflux for downdrafts at lfs
+  RVICE: 0.13          # fixed ice fallspeed
+  RLCRITSNOW: 2E-05  # critical autoconversion threshold
+  RSNOWLIN2: 0.3E-01   # Constant governing of the temperature dependence of the autoconversion
+                      # of ice crystals to snow in large-scale precipitation
+  RCLDIFF: 0.3e-05   #correct value from OpenIFS namelist : 0.6e-05  # diffusion-coefficient for evaporation by turbulent mixing
+  RCLDIFF_CONVI: 10.0   # enhancement factor of rcldiff for convection
+  RDEPLIQREFRATE: 0.5 # (50% deposition efficiency in top layer)
+  RDEPLIQREFDEPTH: 500.0 #m (recovery depth scale)
+  RCL_OVERLAPLIQICE: 0.65 #overlap assumption for liquid and ice for deposition
+  RCL_INHOMOGAUT: 1.5
+  RCL_INHOMOGACC: 3
+  RMINICE: 60          # minimum ice crystal radius for sedimentation (microns)
+
+
+parameter_group: # Parameter grouping for SE output
+  namcumf: 
+    - RPRCON
+    - ENTRORG
+    - DETRPEN
+    - ENTRDD
+    - RMFDEPS
+  namcldp:
+    - RVICE
+    - RLCRITSNOW
+    - RSNOWLIN2
+    - RCLDIFF
+    - RCLDIFF_CONVI
+    - RDEPLIQREFRATE
+    - RDEPLIQREFDEPTH
+    - RCL_OVERLAPLIQICE
+    - RCL_INHOMOGAUT
+    - RCL_INHOMOGACC
+  naerad:
+    - RMINICE
+  
+weights_season:  # Weights for different seasons
+  ALL: 1.0
+  DJF: 0.
+  JJA: 0.
+
+weights_region:  # Weights for different regions
+  Global: 1.0
+  Tropical: 0.3
+  North Midlat: 0.3
+  South Midlat: 0.3
+  NH: 0.
+  SH: 0.
+  Equatorial: 0.
+  North Pole: 0.
+  South Pole: 0.
+
+weights:  # Weights for different target variables
+  net_toa: 3.0
+  rsnt: 0.5
+  rlnt: 0.5
+  swcf: 0.2
+  lwcf: 0.2
+  rsns: 0.
+  rlns: 0.
+  hfss: 0.
+  hfls: 0.
+  net_sfc: 0.
+  toamsfc: 0.
