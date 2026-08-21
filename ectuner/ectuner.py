@@ -49,6 +49,9 @@ def run_1d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
     weights_season = config.get('weights_season', {})
     weights_region = config.get('weights_region', {})
 
+    if len(weights_region) > 1:
+        logger.info("Note: Region weights are additive. Overlapping regions (e.g., Global and NH) will stack their weights.")
+
     model_imbalance = config.get('args.model_imbalance')
     if model_imbalance is not None:
         logger.info(f"[PRE-PROC] Applying model imbalance correction: {model_imbalance} W/m2")
@@ -110,6 +113,9 @@ def run_2d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
     weights_flux = config.get('weights', {})
     weights_region = config.get('weights_region', {})
     target_vars = list(weights_flux.keys())
+
+    if len(weights_region) > 1:
+        logger.info("Note: Region weights are additive. Overlapping regions (e.g., Global and NH) will stack their weights.")
     
     # 1. Load Data
     logger.info("Loading 2D Data (Sensitivity, Reference, Base)...")

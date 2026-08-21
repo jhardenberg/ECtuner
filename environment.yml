@@ -46,3 +46,4 @@ dependencies:
     - ecmean @ git+https://github.com/oloapinivad/ecmean.git@main # for ECmean4 diagnostics
     - ecbundle @ git+https://github.com/ecmwf/ecbundle.git
     - smmregrid
+    - pytest

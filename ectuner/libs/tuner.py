@@ -12,6 +12,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple, Any, Union, TYPE_CHECKING
 
 from .result import TuningResult
+from .utils import REGION_BOUNDS
 
 
 if TYPE_CHECKING:
@@ -141,7 +142,7 @@ class BaseTuner(ABC):
                 x0=initial_guess,
                 method='L-BFGS-B',
                 bounds=self.bounds,
-                options={"ftol": 1e-12, "gtol": 1e-12, "maxls": 50, "disp": False}
+                options={"ftol": 1e-12, "gtol": 1e-12, "maxls": 50}
             )
             
             if not result.success:
@@ -192,11 +193,21 @@ class Tuner1D(BaseTuner):
         """
         for p, custom_val in self.frozen_params.items():
             curr_val = self.current_values[p]
+            ref_val = self.ref_params[p]
             
             if custom_val == curr_val:
                 continue
                 
             delta_p = custom_val - curr_val
+
+            if ref_val != 0:
+                rel_shift = abs(custom_val - ref_val) / abs(ref_val)
+                if rel_shift > self.inc:
+                    self.logger.warning(
+                        f"CRITICAL: Frozen parameter '{p}' is shifted by {rel_shift:.1%} "
+                        f"from reference (max linear bound is {self.inc:.1%}). "
+                    )
+
             self.logger.info(f"[Pre-Shift 1D] Absorbing frozen parameter '{p}' (delta_p: {delta_p:e})")
             
             for fluxname in self.difference:
@@ -424,11 +435,21 @@ class Tuner2D(BaseTuner):
         """
         for p, custom_val in self.frozen_params.items():
             curr_val = self.current_values[p]
+            ref_val = self.ref_params[p]
             
             if custom_val == curr_val:
                 continue
                 
             delta_p = custom_val - curr_val
+
+            if ref_val != 0:
+                rel_shift = abs(custom_val - ref_val) / abs(ref_val)
+                if rel_shift > self.inc:
+                    self.logger.warning(
+                        f"CRITICAL: Frozen parameter '{p}' is shifted by {rel_shift:.1%} "
+                        f"from reference (max linear bound is {self.inc:.1%}). "
+                    )
+
             self.logger.info(f"[Pre-Shift 2D] Absorbing frozen parameter '{p}' (delta_p: {delta_p:e})")
             
             for var in self.target_vars:
@@ -613,12 +634,6 @@ class Tuner2D(BaseTuner):
         import numpy as np
         
         evaluation = {'targets': [], 'diagnostics': []}
-        region_bounds = {
-            'Global': (-90, 90), 'Tropical': (-30, 30), 'North Midlat': (30.0, 90.0),
-            'South Midlat': (-90.0, -30.0), 'North Pole': (60.0, 90.0), 
-            'South Pole': (-90.0, -60.0), 'Equatorial': (-20.0, 20.0),
-            'NH': (20.0, 90.0), 'SH': (-90.0, -20.0)
-        }
 
         for var in self.target_vars:
             b_init_map = self.bias_maps_2d[var]
@@ -633,7 +648,7 @@ class Tuner2D(BaseTuner):
             b_final_map = b_init_map + delta_pred
             var_w = self.weights_flux.get(var, 0.0)
 
-            for region, bounds in region_bounds.items():
+            for region, bounds in REGION_BOUNDS.items():
                 reg_w = self.weights_region.get(region, 0.0)
                 combined_w = var_w * reg_w
 

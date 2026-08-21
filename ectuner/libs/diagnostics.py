@@ -103,6 +103,10 @@ def build_metrics_dataframe(diag_data: Dict[str, Any]) -> pd.DataFrame:
             var = t['variable']
             if t['region'] == 'Global':
                 record[f'{var}_AbsBias'] = abs(t['bias_final'])
+
+        var_metrics = data.get('var_metrics', {})
+        for var_name, stats in var_metrics.items():
+            record[f'{var_name}_Spatial_Cost'] = stats.get('spatial_cost', np.nan)
                 
         records.append(record)
         
@@ -209,6 +213,20 @@ def plot_parameter_heatmap(diag_data: Dict[str, Any], output_path: str = None) -
 # ==============================================================================
 # ==============================================================================
 
+def compute_diagnostic_metrics(ds: xr.Dataset, var: str):
+    """Zonal metrics and plots limits for a given variable from the diagnostic NetCDF."""
+    b_init = ds[f'{var}_bias_init']
+    b_final = ds[f'{var}_bias_final']
+    improv = ds[f'{var}_improvement']
+
+    vmax = float(max(abs(b_init).max().item(), abs(b_final).max().item()))
+    vmin = -vmax
+    
+    zonal_init = b_init.mean(dim='lon')
+    zonal_final = b_final.mean(dim='lon')
+    
+    return b_init, b_final, improv, vmin, vmax, zonal_init, zonal_final
+
 def plot_tuning_results_maps(diag_file: str, output_dir: str, run_tag: str) -> None:
     """
     Generates 2D maps comparing Initial Bias vs Final Predicted Bias from the diagnostic NetCDF.
@@ -222,6 +240,9 @@ def plot_tuning_results_maps(diag_file: str, output_dir: str, run_tag: str) -> N
     variables = [v.replace('_bias_init', '') for v in ds.data_vars if '_bias_init' in v]
     
     for var in variables:
+
+        b_init, b_final, improv, vmin, vmax, zonal_init, zonal_final = compute_diagnostic_metrics(ds, var)
+
         fig = plt.figure(figsize=(24, 5))
         gs = fig.add_gridspec(1, 4, width_ratios=[1, 1, 1, 0.6])
 
@@ -229,13 +250,6 @@ def plot_tuning_results_maps(diag_file: str, output_dir: str, run_tag: str) -> N
         ax1 = fig.add_subplot(gs[1], projection=ccrs.PlateCarree())
         ax2 = fig.add_subplot(gs[2], projection=ccrs.PlateCarree())
         ax_zonal = fig.add_subplot(gs[3])
-
-        b_init = ds[f'{var}_bias_init']
-        b_final = ds[f'{var}_bias_final']
-        improv = ds[f'{var}_improvement']
-        
-        vmax = max(float(abs(b_init).max()), float(abs(b_final).max()))
-        vmin = -vmax
         
         im0 = b_init.plot(ax=ax0, transform=ccrs.PlateCarree(), cmap='RdBu_r', vmin=vmin, vmax=vmax, add_colorbar=False)
         ax0.set_title(f'{var} - Initial Bias')
@@ -251,9 +265,6 @@ def plot_tuning_results_maps(diag_file: str, output_dir: str, run_tag: str) -> N
             
         fig.colorbar(im1, ax=[ax0, ax1], location='bottom', label='Bias Units', fraction=0.05, pad=0.08)
         fig.colorbar(im2, ax=[ax2], location='bottom', label='Improvement', fraction=0.05, pad=0.08)
-
-        zonal_init = b_init.mean(dim='lon')
-        zonal_final = b_final.mean(dim='lon')
 
         ax_zonal.plot(zonal_init, ds.lat, label='Init (Red)', color='red', linestyle='--', lw=1.5)
         ax_zonal.plot(zonal_final, ds.lat, label='Final (Blue)', color='blue', lw=2)
@@ -333,7 +344,7 @@ def plot_variable_pareto(df: pd.DataFrame, var: str, group_by: str = 'Metric_Typ
     plt.figure(figsize=(9, 6.5))
     
     col_bias = f'{var}_AbsBias'
-    col_spat = 'Phys_Spatial_Total'
+    col_spat = f'{var}_Spatial_Cost'
 
     if col_bias not in df.columns:
         print(f"Variable {var} not found in DataFrame for Pareto plot.")

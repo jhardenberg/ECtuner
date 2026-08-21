@@ -1,13 +1,22 @@
-.. ECtuner documentation master file, created by
-   sphinx-quickstart on Sat Oct 19 21:22:33 2024.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+===================================
+ECtuner: EC-Earth Optimization Tool
+===================================
 
-ECtuner documentation
-=====================
+ECtuner is an advanced optimization framework designed to objectively tune 
+EC-Earth4 OpenIFS parameters in both 1D (global scalars) and 2D (spatial maps).
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   ectuner
+   installation
+   configuration
+   usage
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API Reference
+
+   api_cli
+   api_core
+   api_utils

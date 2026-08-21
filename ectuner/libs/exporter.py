@@ -14,6 +14,26 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .result import TuningResult
 
+def get_yaml_parser() -> YAML:
+    """Configures the YAML parser to natively support NumPy types."""
+    yaml_ru = YAML(typ="rt")
+    yaml_ru.indent(mapping=2, sequence=2, offset=0)
+    yaml_ru.preserve_quotes = True
+
+    def represent_numpy_float(representer, data):
+        return representer.represent_float(float(data))
+
+    def represent_numpy_int(representer, data):
+        return representer.represent_int(int(data))
+
+    def represent_numpy_array(representer, data):
+        return representer.represent_list(data.tolist())
+
+    yaml_ru.representer.add_representer(np.floating, represent_numpy_float)
+    yaml_ru.representer.add_representer(np.integer, represent_numpy_int)
+    yaml_ru.representer.add_representer(np.ndarray, represent_numpy_array)
+
+    return yaml_ru
 
 def print_summary(result: 'TuningResult', logger: Any) -> None:
     """
@@ -97,9 +117,7 @@ def save_model_yaml(result: 'TuningResult', filepath: str, parameter_group_confi
     """
     os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
     
-    yaml_ru = YAML(typ="rt")  
-    yaml_ru.indent(mapping=2, sequence=2, offset=0)
-    yaml_ru.preserve_quotes = True
+    yaml_ru = get_yaml_parser()
 
     new_params = result.get_new_parameters()
     tuning_block = {}
@@ -141,22 +159,6 @@ def save_model_yaml(result: 'TuningResult', filepath: str, parameter_group_confi
 
     print(f"Structured tuning YAML written to: {filepath}")
 
-    
-def _adjustment_for_yaml(data: Any) -> Any:
-    """Recursively converts numpy data types to native Python types for YAML serialization."""
-    import numpy as np
-    if isinstance(data, dict):
-        return {k: _adjustment_for_yaml(v) for k, v in data.items()}
-    elif isinstance(data, list):
-        return [_adjustment_for_yaml(v) for v in data]
-    elif isinstance(data, (np.floating, float)):
-        return float(data)
-    elif isinstance(data, (np.integer, int)):
-        return int(data)
-    elif isinstance(data, np.ndarray):
-        return _adjustment_for_yaml(data.tolist())
-    return data
-
 
 def save_diagnostics_yaml(result: 'TuningResult', filepath: str) -> None:
     """
@@ -184,16 +186,16 @@ def save_diagnostics_yaml(result: 'TuningResult', filepath: str) -> None:
             'ref_value': float(result.ref_values[p])
         })
 
-    raw_diagnostic_data = {
-        'metrics': {k: float(v) if isinstance(v, (int, float, np.floating)) else v for k, v in result.metrics.items()},
+    diagnostic_data = {
+        'metrics': result.metrics,
+        'var_metrics': result.var_metrics,
         'parameters': params_list,
         'biases': result.bias_evaluation
     }
 
-    diagnostic_data = _adjustment_for_yaml(raw_diagnostic_data)
-
-    yaml_ru = YAML(typ="rt")
-    yaml_ru.default_flow_style = False
+    yaml_ru = get_yaml_parser()
+    yaml_ru.default_flow_style = False  # Use block style for better readability
+    
     with open(filepath, 'w') as f:
         yaml_ru.dump(diagnostic_data, f)
         

@@ -6,6 +6,7 @@ of EC-Earth tuning experiments.
 """
 import os
 import subprocess
+import re
 from copy import deepcopy
 from typing import Any
 from .config import Config
@@ -69,5 +70,15 @@ class ExperimentSLURM:
             mode, temp_config_path, out_yml, log_file, exp_name, str(year1), str(year2), run_tag
         ]
         
-        subprocess.run(cmd, check=True)
-        print(f">>> Job {run_tag} sent. (Outputs in {out_dir}).")
+        try:
+            result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+         
+            match = re.search(r"Submitted batch job (\d+)", result.stdout)
+            job_id = match.group(1) if match else "UNKNOWN"
+            
+            print(f">>> Job {run_tag} sent. Job ID: {job_id} (Outputs in {out_dir}).")
+            return job_id 
+            
+        except subprocess.CalledProcessError as e:
+            print(f"Error submitting job {run_tag}. SLURM Error:\n{e.stderr}")
+            raise RuntimeError(f"SLURM submission failed for {run_tag}") from e

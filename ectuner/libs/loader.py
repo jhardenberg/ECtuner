@@ -359,9 +359,11 @@ class DataLoader2D(BaseDataLoader):
         """
         Extracts, time-averages, and regrids raw OIFS output maps.
         
-        Implements a caching mechanism: if the processed NetCDF exists for the 
-        given experiment and years, it loads it directly avoiding expensive 
-        regridding operations.
+        Implements a caching mechanism: if the processed NetCDF exists and 
+        contains all requested variables for the given experiment and years, 
+        it loads it directly avoiding expensive regridding operations.
+        If variables are missing, computes only the missing ones, appends them 
+        to the cache, and saves it.
 
         Args:
             variables: Variables to extract from the raw model output.
@@ -378,14 +380,26 @@ class DataLoader2D(BaseDataLoader):
             raise KeyError("Missing 'files.base_2d_dir' in configuration.")
             
         os.makedirs(out_dir, exist_ok=True)
-        cache_file = os.path.join(out_dir, f"base_2d_{self.exp}_{self.year1}_{self.year2}.nc")
+        cache_file = os.path.join(out_dir, f"base_2d_{self.exp}_{self.year1}_{self.year2}_{self.target_grid}.nc")
+
+        ds_chached = None
+        missing_vars = variables.copy()
 
         if os.path.exists(cache_file):
-            self.logger.info(f"Loading cached base maps for {self.exp} from {cache_file}")
-            ds_base = xr.open_dataset(cache_file)
-            return {var: ds_base[var] for var in variables if var in ds_base}
+            try:
+                ds_cached = xr.open_dataset(cache_file)
+                missing_vars = [var for var in variables if var not in ds_cached.data_vars]
+                if not missing_vars:
+                    self.logger.info(f"Loading all cached base maps for {self.exp} from {cache_file}")
+                    return {var: ds_cached[var] for var in variables}
 
-        self.logger.info(f"Cache not found. Extracting 2D maps for {self.exp} (this may take a while...)")
+                self.logger.info(f"Cache not found. Extracting 2D maps for {self.exp} (this may take a while...)")
+            except Exception as e:
+                self.logger.warning(f"Failed to read cache file {cache_file}: {e}. Recomputing base maps.")
+                ds_cached = None
+                missing_vars = variables
+
+        self.logger.info(f"Extracting 2D maps for {self.exp} (variables: {missing_vars})")
         raw_dir = self.config.get('files.raw_dir')
         raw_pattern = os.path.join(raw_dir, self.exp, f"output/oifs/{self.exp}_atm_cmip6_1m_*.nc")
         
@@ -393,22 +407,22 @@ class DataLoader2D(BaseDataLoader):
         if not filz:
             raise FileNotFoundError(f"No raw OIFS files found in {raw_pattern}")
 
-        ds = xr.open_mfdataset(
+        ds_raw = xr.open_mfdataset(
             filz, chunks={'time_counter': 12}, combine='nested', 
             concat_dim='time_counter', compat='override', 
             coords='minimal', data_vars='minimal'
         )
         
-        if 'time_counter' in ds.dims: 
-            ds = ds.rename({'time_counter': 'time'})
+        if 'time_counter' in ds_raw.dims: 
+            ds_raw = ds_raw.rename({'time_counter': 'time'})
 
         extracted_vars = []
         sample_file = filz[0]
         methods_map = self.config.get('spatial_tuning.methods_map', {})
 
-        for var in variables:
+        for var in missing_vars:
             self.logger.info(f"Processing and regridding {var}...")
-            y_raw = compute_derived_flux(ds, var).sel(time=slice(str(self.year1), str(self.year2))).mean('time').compute()
+            y_raw = compute_derived_flux(ds_raw, var).sel(time=slice(str(self.year1), str(self.year2))).mean('time').compute()
             
             regrid_method = methods_map.get(var, 'ycon')
             y_reg = regrid_to_regular_smm_safe(
@@ -419,9 +433,15 @@ class DataLoader2D(BaseDataLoader):
             )
             extracted_vars.append(y_reg)
 
-        ds_base = xr.merge(extracted_vars)
+        ds_new = xr.merge(extracted_vars)
+        if ds_cached is not None:
+            self.logger.info(f"Appending missing variables to existing cache: {cache_file}")
+            ds_base = xr.merge([ds_cached, ds_new], compat='override')
+        else:
+            ds_base = ds_new
+
         ds_base.to_netcdf(cache_file)
-        self.logger.info(f"Cache saved successfully: {cache_file}")
+        self.logger.info(f"Cache updated and saved successfully: {cache_file}")
         
         return {var: ds_base[var] for var in variables}
     

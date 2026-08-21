@@ -16,6 +16,17 @@ FluxDict = Dict[str, Dict[str, Dict[str, float]]]
 if TYPE_CHECKING:
     import xarray as xr
 
+REGION_BOUNDS = {
+    'Global': (-90.0, 90.0),
+    'Tropical': (-30.0, 30.0),
+    'North Midlat': (30.0, 90.0),
+    'South Midlat': (-90.0, -30.0),
+    'North Pole': (60.0, 90.0),
+    'South Pole': (-90.0, -60.0),
+    'Equatorial': (-20.0, 20.0),
+    'NH': (20.0, 90.0),
+    'SH': (-90.0, -20.0),
+}
 
 def compute_difference(base: FluxDict, reference: FluxDict) -> FluxDict:
     """
@@ -337,26 +348,14 @@ def get_region_mask(ds_sens: 'xr.Dataset', weights_region: Dict[str, float]) -> 
         lon = ds_sens.lon
         
         mask = np.cos(np.deg2rad(lat))
-        
-        region_bounds = {
-            'Global': (-90, 90),
-            'Tropical': (-30, 30),
-            'North Midlat': (30.0, 90.0),
-            'South Midlat': (-90.0, -30.0),
-            'North Pole': (60.0, 90.0),
-            'South Pole': (-90.0, -60.0),
-            'Equatorial': (-20.0, 20.0),
-            'NH': (20.0, 90.0),
-            'SH': (-90.0, -20.0),
-        }
 
         regional_weight_map = xr.DataArray(np.zeros_like(lat), coords={'lat': lat}, dims='lat')
 
         for region, weight in weights_region.items():
             if weight <= 0: 
                 continue
-            if region in region_bounds:
-                low, high = region_bounds[region]
+            if region in REGION_BOUNDS:
+                low, high = REGION_BOUNDS[region]
                 regional_weight_map = regional_weight_map.where(
                     (lat < low) | (lat > high), 
                     regional_weight_map + weight

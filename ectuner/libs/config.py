@@ -5,6 +5,7 @@ This module provides the central classes for handling YAML configuration.
 """
 import os
 from ruamel.yaml import YAML
+from ruamel.yaml.error import YAMLError
 from copy import deepcopy
 from typing import Any, Dict, Optional
 
@@ -36,11 +37,15 @@ class Config:
         if config_path:
             if not os.path.exists(config_path):
                 raise FileNotFoundError(f"Config file not found: {config_path}")
-            with open(config_path, 'r') as f:
-                loaded_config = YAML().load(f)
-                # Fail-safe: if the file is empty, yaml returns None
-                self.config = loaded_config if loaded_config is not None else {}
+            try:
+                with open(config_path, 'r') as f:
+                    loaded_config = YAML().load(f)
+                    # Fail-safe: if the file is empty, yaml returns None
+                    self.config = loaded_config if loaded_config is not None else {}
+            except YAMLError as e:
+                raise ValueError(f"YAML syntax error in {config_path}.\nDetails: {e}")
         
+
         # Initialize the args block if it does not exist
         if 'args' not in self.config:
             self.config['args'] = {}

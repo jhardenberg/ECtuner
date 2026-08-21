@@ -1,111 +1,31 @@
 # ECtuner
+#[![Documentation Status](https://readthedocs.org/projects/ectuner/badge/?version=latest)](https://ectuner.readthedocs.io/)
 
-## Atmospheric tuning tool for EC-Earth
+ECtuner is an advanced optimization framework designed to objectively tune EC-Earth4 OpenIFS parameters in both 1D (global scalars) and 2D (spatial maps).
 
-ECtuner is an advanced optimization framework designed to objectively tune EC-Earth4 OpenIFS parameters. It minimizes model biases relative to observations by balancing radiative fluxes and climate state variables
+## Features
+* **1D & 2D Tuning**: Scalar optimization and pixel-by-pixel spatial tuning.
+* **Automated Orchestration**: SLURM-integrated loops for EC-Earth4.
+* **Diagnostic Suite**: Pareto fronts, spatial error maps, and parameter heatmaps.
 
+## Documentation
+For full installation instructions, YAML configuration details, and the Python API reference, read the Official Documentation.
 
-The framework supports multiple tuning strategies and automated workflows:
-* **1D Global Tuning**: scalar optimization based on global/regional averages (interfacing with [ECmean4](https://github.com/oloapinivad/ECmean4)).
-* **2D Spatial Tuning**: pixel by pixel optimization using NetCDF maps to minimize local biases across the grid.
-* **Automated Orchestration**: SLURM-integrated loop (`ecearth4_loop.py`) to automatically duplicate jobs, inject new parameters, and submit the next simulation using EC-Earth4.
-* **Diagnostic Suite**: python script to generate pareto fronts, spatial error maps, and parameter heatmaps.
-* **Python API**: fully compatible with Jupyter Notebooks for interactive tuning and data analysis.
-
----
-
-## Repository Structure
-
-* `ectuner/ectuner.py`: The main Command Line Interface (CLI) and API entry point.
-* `ectuner/libs/`: The mathematical core containing Loaders, Tuners (1D/2D), and Exporters.
-* `scripts/ecearth4_loop.py`: The SLURM orchestrator for automated iterative tuning.
-* `ectuner/libs/diagnostics.py`: Visualization module for tuning results.
-* `data/sensitivities/`: Pre-computed sensitivity matrices for standard EC-Earth4 configurations.
-
----
-## Configuration
-
-The tool is entirely driven by a master YAML configuration file (e.g., `templates/ectuner_master_config_.yaml`). This file dictates:
-1. **Target Variables & Weights**: Which variables to tune (e.g., `net_toa`, `rsnt`) and their relative importance.
-2. **Paths**: Where to find sensitivity matrices, reference observations, and model outputs.
-3. **Parameters**: The reference limits and frozen (locked) parameters.
-4. **Spatial Settings**: Specific settings for 2D mode (e.g., `alpha` blending between global and spatial cost).
-
----
-
-## Workflow & Usage
-
-### 1. Sensitivity Stage (Pre-requisite)
-Optimization requires precomputed parameter sensitivities. You can compute these sensitivities using an ensemble of perturbed runs. 
-The script `sensitivity.py` computes sensitivities of radiative fluxes and target variables to model parameters. It automatically recognizes the parameters changed in each run, extracts the changes, and builds the response file.
-
+## Quick installation
 ```bash
-# Basic usage (uses defaults from config_sens.yaml)
-python scripts/sensitivity.py -c config_sens.yaml
-
-# Explicitly setting the base experiment, the ref tag, and years
-python scripts/sensitivity.py -c config_sens.yaml s000 "s???" 1990 1997
+git clone [https://github.com/your-repo/ECtuner.git](https://github.com/your-repo/ECtuner.git)
+cd ECtuner
+conda env create -f environment.yml
+pip install -e .
 ```
 
-> *Note: To create the sensitivities, you need a folder containing all the tuning files with the parameters perturbed one at a time, along with the corresponding global mean. To save computational time, pre-calculated sensitivities for standard EC-Earth4 configurations are provided in the `data/sensitivities/` folder where you can also find a dedicated README.md.*
-
-
-### 2. The Tuning Stage (CLI)
-`ectuner` operates via subcommands (`1d` or `2d`). You must provide the YAML config, the target experiment ID, and the time window (start/end years).
-
-**Run 1D Global Tuning:**
+## Quick Start
+Compute sensitivities and run the optimizer via CLI:
 ```bash
-ectuner 1d -c config.yaml -o output/tuned_{exp}.yml {exp} 1990 2000
-```
-**Advanced 1D Physics Options**
-- Delta T Adjustment (-dT): Applies a reference correction based on temperature using slopes defined in `slopes.yaml`. Crucial for tuning coupled model simulations.
-- Model Imbalance (-imb): Corrects the net_toa target to cope with intrinsic model energy imbalances (mainly for low-resolution configurations).
-
-**Run 2D Spatial Tuning:**
-```bash
-ectuner 2d -c config.yaml -o output/tuned_{exp}.yml -t tag {exp} 1990 2000
+ectuner 1d -c config.yaml -o output/tuned_exp.yml exp 1990 2000
 ```
 
-**Key CLI Arguments:**
-* `-c, --config`: Path to the master YAML configuration.
-* `-p, --penalty`: (Default: 10) Sets the weight for the penalty term. Higher values keep the new parameters closer to the OIFS defaults to avoid physically unrealistic solutions.
-* `-i, --inc`: (Default: 0.2) The maximum allowed fractional change (e.g., 0.1 limits changes to ±10% of the reference value).
-* `-m, --method`: Choose the optimization algorithm. dual_annealing is recommended for most cases, but differential_evolution is also supported.
-* `-o, --output`: Specifies the path to save the suggested tuning as a YAML file, formatted for the EC-Earth4 Script Engine (SE).
-* ` --freeze`: A list of parameters to keep fixed at their current values during the optimization.
-
-### 3. Usage from Jupyter Notebooks (API)
-Since ECtuner is packaged, you can import its core functions directly into Python scripts or Notebooks for interactive workflows:
-
-```python
-from ectuner.libs.config import Config
-from ectuner.libs.logger import setup_logger
-from ectuner.ectuner import run_1d_tuning, run_2d_tuning
-
-# Initialize
-config = Config('config.yaml', exp='ie00', year1=1990, year2=2000)
-logger = setup_logger(level='INFO')
-
-# Run optimization programmatically
-result = run_1d_tuning(config, logger)
-print(result.get_new_parameters())
-```
-
-### 4. Automated SLURM Loop (Continuous Tuning)
-Instead of manually running the tuner and submitting jobs, use the orchestrator to clone a finished experiment, optimize its parameters, and submit the new one automatically:
-```bash
-python scripts/ecearth4_loop.py exp1 exp2 -a duplicate -c config.yaml -m 1d
-```
-> *Note: This command reads the outputs of `exp1`, computes the new parameters, uses the EC-Earth `duplicate-job.py` script to clone the environment into `exp2`, injects the new YAML, and automatically submits the job via `launch.sh`*
-
-
-### Optimization Output
-At the end of an optimization run, ECtuner generates:
-1. `tuned_<exp>.yml`: The OIFS-compatible namelist block with the new parameters.
-2. `diagnostics_<exp>.yaml`: A structured file containing final cost scores, relative parameter changes, and bias evaluations.
-3. `diagnostics_2d_<exp>.nc` (2D mode only): A NetCDF file containing the spatial maps of initial vs. predicted final biases.
-You can feed these diagnostic files directly into the `diagnostics.py` module to plot parameter scatter plot, parameter heatmaps and tuning validation profiles.
-
+## Example Ouput
 Below is an example of a tuning run involving 16 parameters:
 
 |     Parameter     |     New value |   Old value |       Change |   Relative change |   Min change |   Max change |   Rel. dist. from ref. |
