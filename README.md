@@ -13,7 +13,7 @@ For full installation instructions, YAML configuration details, and the Python A
 
 ## Quick installation
 ```bash
-git clone [https://github.com/your-repo/ECtuner.git](https://github.com/your-repo/ECtuner.git)
+git clone (https://github.com/maalbanese/ECtuner/tree/refactor)
 cd ECtuner
 conda env create -f environment.yml
 pip install -e .
