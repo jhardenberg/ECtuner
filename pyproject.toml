@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ectuner"
+version = "1.0.0"
+description = "EC-Earth Tuning Suite for 1D and 2D parameter optimization."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "name", email = "email@example.com" }
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "xarray",
+    "ruamel.yaml",
+    "pandas",
+    "matplotlib",
+    "cartopy",
+    "tabulate"
+]
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov"]
+
+[project.scripts]
+# To create CLI command to execute from terminal
+ectuner = "ectuner.ectuner:main"
+ectuner-sens-1d = "ectuner.scripts.sensitivity:main"
+ectuner-sens-2d = "ectuner.scripts.sensitivity_2D:main"
+
+[tool.setuptools.packages.find]
+include = ["ectuner*"]

@@ -1,0 +1,38 @@
+# Choice of interface
+interface: EC-Earth4
+# Choice of model name. It is printed in the output table
+model:
+  name: EC-Earth4
+
+dirs:
+  exp: 'EXPERIMENT FOLDER'
+  tab: 'TABLE OUTPUT FOLDER'
+  fig: 'WHERE TO PUT YOUR FIGURE OUTPUT'
+
+# global mean configuration options
+global_mean:
+  variables: 
+    atm: [tas_land, tas, psl, pr, evspsbl, pme, clt, cll, clm, clh,
+          pr_oce, pme_oce, pr_land, pme_land,
+          net_toa, rsnt, rlnt, rsntcs, rlntcs, swcf, lwcf,
+          rsns, rlns, hfss, hfls, net_sfc_nosn, net_sfc,
+          toamsfc_nosn, toamsfc]
+    oce: [tos, sos, zos, wfo]
+    ice: [siconc]
+    tab: [rsnt, rlnt, net_toa, rsns, rlns, hfss, hfls, swcf, lwcf, net_sfc, toamsfc, 
+            tas, clt, cll, clm, clh, pr, pme, psl]
+  regions: ['Global', 'Tropical', 'North Midlat', 'South Midlat', 'NH', 'SH', 'Equatorial', 'North Pole', 'South Pole'] # for available regions, please check documentation
+  seasons: ['ALL', 'DJF', 'JJA'] # also `MAM` and `SON` are available
+  reference: EC26-PDAY
+
+# performance_indices configuration options
+performance_indices:
+  variables:
+    atm2d: [net_sfc, tas, psl, pr, tauu, tauv]
+    atm3d: [ta, ua, va, hus]
+    oce: [tos, sos]
+    ice: [siconc]
+  regions: ['Global', 'North Midlat', 'Tropical', 'South Midlat']  # for available regions, please check documentation
+  seasons: ['ALL', 'DJF', 'JJA'] 
+  climatology: EC24
+
