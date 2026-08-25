@@ -1,8 +1,11 @@
 # --- Cartelle personali e cache ---
-mari/
 __pycache__/
 ectuner/__pycache__/
-ectuner/data/ecmean/**/figs/
-ectuner/data/sensitivities/NO_sensitivity_TL255_415_1991-2000_v2.yaml
-ectuner/data/sensitivities/2D/NO_sensitivity_TL255_415_1991-2000_v2_2D.yaml
+data/ecmean/**/figs/
+data/sensitivities/NO_sensitivity_TL255_415_1991-2000_v2.yaml
+data/sensitivities/2D/NO_sensitivity_TL255_415_1991-2000_v2_2D.nc
 ectuner.egg-info/
+ectuner_old/
+mari/
+.pytest_cache/
+tutorial/

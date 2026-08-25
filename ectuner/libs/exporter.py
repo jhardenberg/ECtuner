@@ -30,7 +30,11 @@ def get_yaml_parser() -> YAML:
         return representer.represent_list(data.tolist())
 
     yaml_ru.representer.add_representer(np.floating, represent_numpy_float)
+    yaml_ru.representer.add_representer(np.float64, represent_numpy_float)
+    yaml_ru.representer.add_representer(np.float32, represent_numpy_float)
     yaml_ru.representer.add_representer(np.integer, represent_numpy_int)
+    yaml_ru.representer.add_representer(np.int64, represent_numpy_int)
+    yaml_ru.representer.add_representer(np.int32, represent_numpy_int)
     yaml_ru.representer.add_representer(np.ndarray, represent_numpy_array)
 
     return yaml_ru

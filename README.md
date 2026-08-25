@@ -1,11 +1,11 @@
 # ECtuner
-#[![Documentation Status](https://readthedocs.org/projects/ectuner/badge/?version=latest)](https://ectuner.readthedocs.io/)
+[![Documentation Status](https://readthedocs.org/projects/ectuner/badge/?version=latest)](https://ectuner.readthedocs.io/)
 
 ECtuner is an advanced optimization framework designed to objectively tune EC-Earth4 OpenIFS parameters in both 1D (global scalars) and 2D (spatial maps).
 
 ## Features
 * **1D & 2D Tuning**: Scalar optimization and pixel-by-pixel spatial tuning.
-* **Automated Orchestration**: SLURM-integrated loops for EC-Earth4.
+* **Automated Orchestration**: HPC-ready SLURM-integrated loops.
 * **Diagnostic Suite**: Pareto fronts, spatial error maps, and parameter heatmaps.
 
 ## Documentation
@@ -16,14 +16,27 @@ For full installation instructions, YAML configuration details, and the Python A
 git clone (https://github.com/maalbanese/ECtuner/tree/refactor)
 cd ECtuner
 conda env create -f environment.yml
+conda activate ectuner
 pip install -e .
 ```
 
 ## Quick Start
-Compute sensitivities and run the optimizer via CLI:
+To see how ECtuner works without downloading heavy climate model data: generate the dummy sandbox and run the optimizer
+```bash
+# 1. Generate the dummy data and configuration
+python generate_tutorial.py
+
+# 2. Run the optimizer (1D or 2D)
+ectuner 1d -c tutorial/config_tutorial.yaml -o tutorial/output/tuned_1d.yml dummy_exp 2000 2010
+```
+
+## Real Usage
+To optimize actual climate model outputs, provide the configuration file and pre-computed parameter sensitivities:
 ```bash
 ectuner 1d -c config.yaml -o output/tuned_exp.yml exp 1990 2000
 ```
+
+*A complete guide on how to configure your YAML files, compute sensitivities, and use the tuner is available in the [Official Documentation](https://ectuner.readthedocs.io/).*
 
 ## Example Ouput
 Below is an example of a tuning run involving 16 parameters:

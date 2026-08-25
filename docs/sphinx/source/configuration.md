@@ -27,7 +27,7 @@ Ignored in 1D mode, these parameters dictate how the 2D spatial engine behaves:
 
 ### Parameters Setup (`frozen_parameters` & `reference_parameters`)
 * `frozen_parameters`: Allows locking specific parameters to their default values or forcing them to a custom value (e.g., `RPRCON: default`).
-* `reference_parameters`: The baseline OIFS values used by the penalty function.
+* `reference_parameters`: The baseline values used by the penalty function.
 
 ### Weights & Targets (`weights`, `weights_region`, `weights_season`)
 Defines the relative importance of each atmospheric variable to tune (e.g., `net_toa`, `rsnt`), geographical region, and season in the cost function. 
@@ -37,7 +37,9 @@ Defines the relative importance of each atmospheric variable to tune (e.g., `net
 
 ## 2. Sensitivity Configurations
 
-Before running the tuner, sensitivities must be computed using an ensemble of perturbed runs via `scripts/sensitivity.py` (1D) or `scripts/sensitivity_2d.py` (2D). Their respective configuration files dictate how ECmean4 processes the ensemble members.
+Before running the tuner, sensitivities must be computed using an ensemble of perturbed runs via the built-in CLI commands `ectuner-sens-1d` or `ectuner-sens-2d`. TThese commands require a dedicated configuration file (you can find `config_sens.yaml` and `config_sens_2d.yaml` in the `templates/` directory) that dictates how the tool processes the ensemble members to extract the linear regression slopes. 
+
+> *For a practical, step-by-step guide on how to prepare your data and compute sensitivities, please refer to the **[Usage Guide](usage.md)**.*
 
 ---
 
@@ -60,7 +62,8 @@ To save computational time, pre-calculated sensitivities for standard EC-Earth4 
 ## 4. Repository Structure Overview
 
 * `ectuner/ectuner.py`: Main Command Line Interface (CLI) and API entry point.
-* `ectuner/libs/`: Mathematical core containing Loaders, Tuners (1D/2D), and Exporters.
-* `scripts/`: Automation tools, including `ecearth4_loop.py` (SLURM orchestrator) and sensitivity scripts.
+* `ectuner/libs/`: Core containing Loaders, Tuners (1D/2D), and Exporters.
+* `integrations/`: Infrastructure-specific automation tools (e.g., `ecearth4_loop.py` SLURM orchestrator).
 * `data/sensitivities/`: Pre-computed sensitivity matrices and catalog README.
 * `templates/`: Master configuration templates.
+* `tutorial/`: Lightweight sandbox environment generated for quick testing.
