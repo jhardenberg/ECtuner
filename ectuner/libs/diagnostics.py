@@ -509,5 +509,3 @@ def plot_zonal_validation_from_scratch(tuner_diag_file, scratch_dir, exp_tag, ye
     ax.set_ylim(-90, 90)
     plt.tight_layout()
     _handle_show_or_save(output_path)
-
-

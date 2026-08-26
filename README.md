@@ -13,12 +13,14 @@ For full installation instructions, YAML configuration details, and the Python A
 
 ## Quick installation
 ```bash
-git clone (https://github.com/maalbanese/ECtuner/tree/refactor)
+git clone https://github.com/jhardenberg/ECtuner.git
 cd ECtuner
 conda env create -f environment.yml
 conda activate ectuner
 pip install -e .
 ```
+ECtuner relies on complex Earth System dependencies (such as CDO, ecCodes, and ESMF via `ecmean` and `xesmf`).  
+To ensure complete reproducibility and avoid compilation errors, **a Conda environment is mandatory**. The provided `environment.yml` fetches pre-compiled binaries from `conda-forge`, guaranteeing a stable and consistent setup.
 
 ## Quick Start
 To see how ECtuner works without downloading heavy climate model data: generate the dummy sandbox and run the optimizer

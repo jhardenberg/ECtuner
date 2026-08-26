@@ -7,9 +7,11 @@ name = "ectuner"
 version = "1.0.0"
 description = "EC-Earth Tuning Suite for 1D and 2D parameter optimization."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
-    { name = "name", email = "email@example.com" }
+    { name = "Jost von Hardenberg", email="jost.hardenberg@polito.it" }
+    { name = "Federico Fabiano", email = "f.fabiano@isac.cnr.it" }
+    { name = "Marianna Albanese", email = "marianna.albanese@polito.it" }
 ]
 dependencies = [
     "numpy",
