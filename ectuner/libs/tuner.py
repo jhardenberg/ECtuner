@@ -285,6 +285,9 @@ class Tuner1D(BaseTuner):
                         # A gradient solver like L-BFGS-B will find the same exact global 
                         # minimum in a fraction of the time.
 
+                        # normalise `total_difference` relative to the reference values (making it dimensionless) 
+                        # because the scale of the penalty in 1D depends on the physical quantities involved.
+
         for param in self.params_names:
             ref_val = self.ref_params[param]
             if ref_val != 0:
@@ -505,7 +508,8 @@ class Tuner2D(BaseTuner):
             
             for p in self.opt_params:
                 s_ds = ds_sens.sel(variable=var, parameter=p).sortby(['lat', 'lon'])
-                s_val = s_ds.slope.values.flatten()[valid_pix]
+                s_val = np.nan_to_num(s_ds.slope.values.flatten()[valid_pix], nan=0.0)
+                #s_val = s_ds.slope.values.flatten()[valid_pix]
                 r2_val = s_ds.r2.values.flatten()[valid_pix]
                 
                 slopes_raw.append(s_val.copy())

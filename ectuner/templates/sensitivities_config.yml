@@ -3,7 +3,7 @@ files:
   sensitivity: /path/to/output/sensitivity_TL255_415_{year1}-{year2}.yaml
   # INPUT: Templates for finding your ECmean and Tuning files
   base: global_mean_k0{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml
-  params: tuning_{exp}.yml
+  params: tuning_{exp}.yml  # Note: 'params' must be just the filename pattern, not a full path.
   # PATHS: Update these to your local machine
   ecmean: ecmean/gm_sres_v2/
   exps: perturb_exps/exps_sres_v2/

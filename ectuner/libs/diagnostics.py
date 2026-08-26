@@ -89,8 +89,8 @@ def build_metrics_dataframe(diag_data: Dict[str, Any]) -> pd.DataFrame:
         # Determine Physical Units based on metric type
         if record['Metric'] == 'l2':
             record['Metric_Type'] = 'L2 (Quadratic)'
-            record['Phys_Spatial_Total'] = np.sqrt(record['Raw_Spatial_Cost'])
-            record['Phys_Global_Total'] = np.sqrt(record['Raw_Global_Cost'])
+            record['Phys_Spatial_Total'] = record['Raw_Spatial_Cost']
+            record['Phys_Global_Total'] = record['Raw_Global_Cost']
         else:
             record['Metric_Type'] = 'L1 (Linear)'
             record['Phys_Spatial_Total'] = record['Raw_Spatial_Cost']

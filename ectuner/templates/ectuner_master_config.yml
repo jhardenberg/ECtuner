@@ -18,7 +18,7 @@ files:
   base_2d_dir: "/ec/res4/.../ecmean/maps_lres/"
   
   # --- Common Paths ---
-  params: "tuning_{exp}.yml"
+  params: "tuning_{exp}.yml"  # Note: 'params' must be just the filename pattern, not a full path.
   exps: "/ec/res4/.../perturb_exps/exps_lres/" 
   output_dir: "/ec/res4/.../results/tuned/"
 

@@ -2,7 +2,7 @@ files:
   # OUTPUT: Where the result will be saved
   sensitivity_nc: /path/to/output/sensitivity_TL255_415_{year1}-{year2}_v2_2D.nc
   # INPUT: Templates for finding your ECmean and Tuning files
-  params: tuning_{exp}.yml
+  params: tuning_{exp}.yml  # Note: 'params' must be just the filename pattern, not a full path.
   # PATHS: Update these to your local machine
   exps: perturb_exps/exps_sres_v2/
   raw_dir: "/ec/res4/scratch/user/ece4/"
@@ -11,7 +11,8 @@ files:
 spatial_tuning:
   # Target grid per il calcolo spaziale (usata da smmregrid)
   target_grid: "r180x90"
-  methods_map: "ycon"
+  methods_map: 
+    net_toa: "ycon"
   target_vars: 
       - net_toa
       - rsnt

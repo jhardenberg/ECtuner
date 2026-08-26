@@ -247,12 +247,14 @@ def run_pipeline(
 
 if __name__ == "__main__":
     import argparse
-    
-    # Valori di default 
-    BASE_PERM = os.environ.get("HPCPERM", "/ec/res4/hpcperm/ecme3038")
-    WORKSPACE = os.path.join(BASE_PERM, "ecearth/ecearth4")
-    DEFAULT_CONFIG = os.path.join(WORKSPACE, "ECtuner/mari/ectuner/myconfigs/myconfig_415_LR.yaml")
-    DEFAULT_JOB_DIR = os.path.join(WORKSPACE, "jobs/v4.1.5/")
+    import os
+
+    # Utilize the HPCPERM environment variable if set, 
+    # otherwise default to the current working directory
+    BASE_PERM = os.environ.get("HPCPERM", os.getcwd())
+    WORKSPACE = os.path.join(BASE_PERM, "path/to/your/workspace")  # Adjust this path as necessary
+    DEFAULT_CONFIG = os.path.join(WORKSPACE, "path/to/your/config.yaml")  # Adjust this path as necessary
+    DEFAULT_JOB_DIR = os.path.join(WORKSPACE, "path/to/your/jobs")  # Adjust this path as necessary
     DEFAULT_QUESTS_DIR = os.path.join(WORKSPACE, "ecearth-quests/ece4")
 
     parser = argparse.ArgumentParser(description="EC-Earth4 Orchestration Loop")

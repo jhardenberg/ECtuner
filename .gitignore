@@ -9,3 +9,5 @@ ectuner_old/
 mari/
 .pytest_cache/
 tutorial/
+jobs/run_tuner_sweep_mari.sh
+integrations/ecearth4/ecearth4_loop_mari.py
