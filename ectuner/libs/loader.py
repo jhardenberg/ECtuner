@@ -382,7 +382,7 @@ class DataLoader2D(BaseDataLoader):
         os.makedirs(out_dir, exist_ok=True)
         cache_file = os.path.join(out_dir, f"base_2d_{self.exp}_{self.year1}_{self.year2}_{self.target_grid}.nc")
 
-        ds_chached = None
+        ds_cached = None 
         missing_vars = variables.copy()
 
         if os.path.exists(cache_file):
