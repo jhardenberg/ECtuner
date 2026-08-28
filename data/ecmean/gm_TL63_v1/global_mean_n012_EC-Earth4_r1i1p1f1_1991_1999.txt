@@ -1,0 +1,30 @@
+|   Variable   |             Longname              |  Units  |     EC-Earth4 |      Obs.      |  Dataset   |   Years   |
+|--------------+-----------------------------------+---------+---------------+----------------+------------+-----------|
+|     tas      |    2m Temperature (land-only)     | celsius |   13.1837     |  13.697±0.301  |    CRU     | 1991-2020 |
+|     psl      |      Mean Sea Level Pressure      |   hPa   | 1011.16       | 1011.43±0.052  |    ERA5    | 1991-2020 |
+|      pr      |           Precipitation           | mm/day  |    2.73461    |   2.85±0.039   |   MSWEP    | 1991-2020 |
+|   evspsbl    |            Evaporation            | mm/day  |   -2.74177    |  -2.906±0.056  |    ERA5    | 1991-2020 |
+|     pme      |        Precip. minus Evap.        | mm/day  |   -0.00715564 |  0.023±0.021   |    ERA5    | 1991-2020 |
+|     clt      |         Total Cloud Cover         |  frac   |    0.62491    |  0.675±0.002   | CERES-EBAF | 2000-2020 |
+|     cll      |          Low Cloud Cover          |  frac   |    0.332639   |  0.382±0.003   |    ERA5    | 1991-2020 |
+|     clm      |        Medium Cloud Cover         |  frac   |    0.308904   |  0.248±0.003   |    ERA5    | 1991-2020 |
+|     clh      |         High Cloud Cover          |  frac   |    0.383487   |  0.341±0.003   |    ERA5    | 1991-2020 |
+|    pr_oce    |       Precipitation (ocean)       |   Sv    |   12.0127     |  13.395±0.235  |   MSWEP    | 1991-2020 |
+|   pme_oce    |    Precip. minus Evap. (ocean)    |   Sv    |   -1.86878    |  -1.277±0.133  |    ERA5    | 1991-2020 |
+|   pr_land    |       Precipitation (land)        |   Sv    |    4.12668    |  3.445±0.069   |   MSWEP    | 1991-2020 |
+|   pme_land   |    Precip. minus Evap. (land)     |   Sv    |    1.82654    |  1.412±0.071   |    ERA5    | 1991-2020 |
+|   net_toa    |              TOA Net              |  W/m2   |    5.57691    |  0.898±0.555   | CERES-EBAF | 2000-2020 |
+|     rsnt     |            TOA SW Net             |  W/m2   |  240.184      | 241.341±0.606  | CERES-EBAF | 2000-2020 |
+|     rlnt     |            TOA LW Net             |  W/m2   | -234.606      | -240.444±0.307 | CERES-EBAF | 2000-2020 |
+|    rsntcs    |      TOA SW Net (clear sky)       |  W/m2   |  285.294      | 287.046±0.522  | CERES-EBAF | 2000-2020 |
+|    rlntcs    |      TOA LW Net (clear sky)       |  W/m2   | -258.944      | -268.349±0.252 | CERES-EBAF | 2000-2020 |
+|     swcf     |         SW Cloud Forcing          |  W/m2   |  -45.1103     | -45.705±0.331  | CERES-EBAF | 2000-2020 |
+|     lwcf     |         LW Cloud Forcing          |  W/m2   |   24.3377     |  27.906±0.267  | CERES-EBAF | 2000-2020 |
+|     rsns     |          Surface Net SW           |  W/m2   |  162.235      |      160       | Wild 2020  |     -     |
+|     rlns     |          Surface Net LW           |  W/m2   |  -59.163      |      -56       | Wild 2020  |     -     |
+|     hfss     |            Surface SH             |  W/m2   |  -17.8185     |      -21       | Wild 2020  |     -     |
+|     hfls     |            Surface LH             |  W/m2   |  -79.4025     |      -82       | Wild 2020  |     -     |
+| net_sfc_nosn |     Net Surface (no snowfall)     |  W/m2   |    5.85072    |      0.6       | Wild 2020  |     -     |
+|   net_sfc    |            Net Surface            |  W/m2   |    5.08967    |      0.6       | Wild 2020  |     -     |
+| toamsfc_nosn | TOA - Sfc Net Radiation (no snow) |  W/m2   |   -0.273816   |       0        |    None    |     -     |
+|   toamsfc    |      TOA - Sfc Net Radiation      |  W/m2   |    0.487232   |       0        |    None    |     -     |
