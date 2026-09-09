@@ -1,12 +1,12 @@
 # ECtuner
 [![Documentation Status](https://readthedocs.org/projects/ectuner/badge/?version=latest)](https://ectuner.readthedocs.io/)
 
-ECtuner is an advanced optimization framework designed to objectively tune EC-Earth4 OpenIFS parameters in both 1D (global scalars) and 2D (spatial maps).
+ECtuner is an advanced optimization tool designed to objectively tune EC-Earth4 OpenIFS parameters in both 1D (global scalars) and 2D (spatial maps).
 
 ## Features
-* **1D & 2D Tuning**: Scalar optimization and pixel-by-pixel spatial tuning.
+* **1D & 2D Tuning**: scalar optimization and pixel-by-pixel spatial tuning.
 * **Automated Orchestration**: HPC-ready SLURM-integrated loops.
-* **Diagnostic Suite**: Pareto fronts, spatial error maps, and parameter heatmaps.
+* **Diagnostic Suite**: pareto fronts, spatial error maps, and parameter heatmaps.
 
 ## Documentation
 For full installation instructions, YAML configuration details, and the Python API reference, read the Official Documentation.
@@ -19,7 +19,7 @@ conda env create -f environment.yml
 conda activate ectuner
 pip install -e .
 ```
-ECtuner relies on complex Earth System dependencies (such as CDO, ecCodes, and ESMF via `ecmean` and `xesmf`).  
+ECtuner relies on some Earth System dependencies (such as CDO and ESMF via `ecmean` and `xesmf`).  
 To ensure complete reproducibility and avoid compilation errors, **a Conda environment is mandatory**. The provided `environment.yml` fetches pre-compiled binaries from `conda-forge`, guaranteeing a stable and consistent setup.
 
 ## Quick Start

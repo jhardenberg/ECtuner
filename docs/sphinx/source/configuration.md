@@ -1,6 +1,6 @@
 ## Configuration & Data Catalog
 
-ECtuner is entirely driven by master YAML configuration files. You can find ready-to-use templates inside the `ectuner/templates/` directory of the repository. 
+ECtuner is driven by master YAML configuration files. You can find ready-to-use templates inside the `ectuner/templates/` directory of the repository. 
 
 ## 1. The Master Configuration File
 
@@ -8,26 +8,26 @@ A standard configuration file (e.g., `ectuner_master_config.yaml`) is divided in
 
 ### Files & Paths (`files`)
 Defines where ECtuner should look for inputs and save outputs. It handles both 1D and 2D specific paths:
-* `reference`: Path to the 1D observational reference YAML (e.g., CERES-based global means).
-* `sensitivity`: Path to the 1D sensitivity regression coefficients YAML.
-* `sensitivity_nc`: Path to the 2D NetCDF sensitivity map (for spatial mode).
-* `raw_dir` & `exps`: Directories containing raw OIFS model outputs and parameter perturbation files.
+* `reference`: path to the 1D observational reference YAML (e.g., CERES-based global means).
+* `sensitivity`: path to the 1D sensitivity regression coefficients YAML.
+* `sensitivity_nc`: path to the 2D NetCDF sensitivity map (for spatial mode).
+* `raw_dir` & `exps`: directories containing raw OIFS model outputs and parameter perturbation files.
 
 ### Tuning Arguments (`args`)
 Controls the runtime parameters:
-* `year1` & `year2`: The time window used for averaging model climatology.
-* `inc`: The maximum fractional change allowed relative to reference values (e.g., `0.2` limits changes to $\pm 20\%$).
-* `penalty`: Weight for the distance penalty from OIFS default parameters. Prevents the optimizer from finding mathematically correct but physically unrealistic solutions.
-* `method`: The optimization algorithm. `dual_annealing` is the robust default.
+* `year1` & `year2`: the time window used for averaging model climatology.
+* `inc`: the maximum fractional change allowed relative to reference values (e.g., `0.2` limits changes to $\pm 20\%$).
+* `penalty`: weight for the distance penalty from OIFS default parameters. Prevents the optimizer from finding mathematically correct but physically unrealistic solutions.
+* `method`: the optimization algorithm. `dual_annealing` is the robust default.
 
 ### Spatial Tuning Options (`spatial_tuning`)
 Ignored in 1D mode, these parameters dictate how the 2D spatial engine behaves:
-* `alpha`: The blending weight between spatial error ($\alpha = 0$) and global error ($\alpha = 1$).
-* `metric`: The cost error metric, typically `"l2"` (MSE) or `"l1"` (MAE).
+* `alpha`: the blending weight between spatial error ($\alpha = 0$) and global error ($\alpha = 1$).
+* `metric`: the cost error metric, typically `"l2"` (MSE) or `"l1"` (MAE).
 
 ### Parameters Setup (`frozen_parameters` & `reference_parameters`)
-* `frozen_parameters`: Allows locking specific parameters to their default values or forcing them to a custom value (e.g., `RPRCON: default`).
-* `reference_parameters`: The baseline values used by the penalty function.
+* `frozen_parameters`: allows locking specific parameters to their default values or forcing them to a custom value (e.g., `RPRCON: default`).
+* `reference_parameters`: the baseline values used by the penalty function.
 
 ### Weights & Targets (`weights`, `weights_region`, `weights_season`)
 Defines the relative importance of each atmospheric variable to tune (e.g., `net_toa`, `rsnt`), geographical region, and season in the cost function. 
@@ -61,9 +61,9 @@ To save computational time, pre-calculated sensitivities for standard EC-Earth4 
 
 ## 4. Repository Structure Overview
 
-* `ectuner/ectuner.py`: Main Command Line Interface (CLI) and API entry point.
-* `ectuner/libs/`: Core containing Loaders, Tuners (1D/2D), and Exporters.
-* `integrations/`: Infrastructure-specific automation tools (e.g., `ecearth4_loop.py` SLURM orchestrator).
-* `data/sensitivities/`: Pre-computed sensitivity matrices and catalog README.
-* `templates/`: Master configuration templates.
-* `tutorial/`: Lightweight sandbox environment generated for quick testing.
+* `ectuner/ectuner.py`: main Command Line Interface (CLI) and API entry point.
+* `ectuner/libs/`: core containing Loaders, Tuners (1D/2D), and Exporters.
+* `integrations/`: infrastructure-specific automation tools (e.g., `ecearth4_loop.py` SLURM orchestrator).
+* `data/sensitivities/`: pre-computed sensitivity matrices and catalog README.
+* `templates/`: master configuration templates.
+* `tutorial/`: lightweight sandbox environment generated for quick testing.

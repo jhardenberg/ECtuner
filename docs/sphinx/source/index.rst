@@ -2,7 +2,7 @@
 ECtuner: Climate Model Optimization Tool
 ===================================
 
-ECtuner is an advanced, automated optimization framework designed to objectively tune climate model parameters. 
+ECtuner is an advanced, automated optimization tool designed to objectively tune climate model parameters. 
 Originally developed for EC-Earth4 OpenIFS, it allows for robust parameter estimation 
 in both **1D (global/regional scalars)** and **2D (spatial maps)**.
 
@@ -15,13 +15,13 @@ Core Features
 
 * **Dual Optimization Modes:** 
   
-  * *1D Tuning:* Optimizes based on regional and global scalar means.
-  * *2D Spatial Tuning:* Performs pixel-by-pixel optimization using a hybrid spatial-global loss function.
+  * *1D Tuning:* optimizes based on regional and global scalar means.
+  * *2D Spatial Tuning:* performs pixel-by-pixel optimization using a hybrid spatial-global loss function.
 
-* **Objective Cost Functions:** Highly customizable weighting for specific target fluxes (e.g., ``net_toa``, ``rsnt``), seasons, and geographical domains.
-* **Penalty Constraints:** Built-in penalty mechanisms keep tuned parameters within physically realistic bounds relative to their defaults.
-* **Diagnostic Suite:** Automatically evaluates initial vs. predicted biases, generates NetCDF spatial diagnostic maps, and exports ready-to-use YAML parameter blocks.
-* **HPC Integration:** Includes utility scripts for integration into SLURM-based continuous tuning workflows.
+* **Objective Cost Functions:** customizable weighting for specific target fluxes (e.g., ``net_toa``, ``rsnt``), seasons, and geographical domains.
+* **Penalty Constraints:** penalty mechanisms keep tuned parameters within physically realistic bounds relative to their defaults.
+* **Diagnostic Suite:** automatically evaluates initial vs. predicted biases, generates NetCDF spatial diagnostic maps, and exports ready-to-use YAML parameter blocks.
+* **HPC Integration:** includes utility scripts for integration into SLURM-based continuous tuning workflows.
 
 How it works
 ------------

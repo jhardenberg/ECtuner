@@ -495,8 +495,10 @@ def extract_1d_validation_data(experiment_tags, ecmean_dir, diagnostics_dir, ref
     with open(reference_file, 'r') as f:
         ref_raw = yaml.safe_load(f)
         for var, data in ref_raw.items():
-            if 'obs' in data and 'ALL' in data['obs'] and 'Global' in data['obs']['ALL']:
-                ref_obs[var] = data['obs']['ALL']['Global']['mean']
+            if isinstance(data, dict) and isinstance(data.get('obs'), dict):
+                obs = data['obs']
+                if isinstance(obs.get('ALL'), dict) and 'Global' in obs['ALL']:
+                    ref_obs[var] = obs['ALL']['Global']['mean']
 
     # 2. Extract Data for each Experiment
     for tag in experiment_tags:
@@ -511,8 +513,10 @@ def extract_1d_validation_data(experiment_tags, ecmean_dir, diagnostics_dir, ref
             with open(ecmean_files[0], 'r') as f:
                 ecm_raw = yaml.safe_load(f)
                 for var, data in ecm_raw.items():
-                    if 'ALL' in data and 'Global' in data['ALL']:
-                        data_ecmean[tag][var] = data['ALL']['Global']
+                    # Applica la stessa logica protettiva qui!
+                    if isinstance(data, dict) and isinstance(data.get('ALL'), dict):
+                        if 'Global' in data['ALL']:
+                            data_ecmean[tag][var] = data['ALL']['Global']
         else:
             print(f"Warning: Missing ECmean file for tag {tag}")
 
@@ -597,7 +601,7 @@ def extract_zonal_validation_data(var_name: str, tag: str, diag_2d_file: str, ba
 
     return latitudes, zonal_init, zonal_pred, zonal_realized
 
-def plot_emulator_performance_global(var_name: str, ref_obs: Dict[str, float], data_ecmean: Dict[str, Dict[str, float]], data_predicted_bias: Dict[str, Dict[str, float]], output_path: str = None) -> None:
+def plot_emulator_performance_global(var_name: str, ref_obs: Dict[str, float], data_ecmean: Dict[str, Dict[str, float]], data_predicted_bias: Dict[str, Dict[str, float]], output_path: str = None, color_mapping: dict = None) -> None:
     """
     1:1 Validation test of the Emulator's global bias prediction against actual EC-Earth outputs.
 
@@ -608,16 +612,18 @@ def plot_emulator_performance_global(var_name: str, ref_obs: Dict[str, float], d
         data_predicted_bias: Biases predicted by ECtuner.
         output_path: Optional file path to save the plot.
     """
-    alphas = list(data_ecmean.keys())
+    alphas = sorted(list(data_ecmean.keys()))
     realized_biases = [data_ecmean[a][var_name] - ref_obs[var_name] for a in alphas]
     predicted_biases = [data_predicted_bias[a][var_name] for a in alphas]
 
     plt.figure(figsize=(6.5, 6.5))
-    colors = ['#e41a1c', '#4daf4a', '#377eb8', '#984ea3', '#ff7f00', '#ffff33'][:len(alphas)]
+    default_colors = ['#e41a1c', '#4daf4a', '#377eb8', '#984ea3', '#ff7f00', '#ffff33']
     
     for i, a in enumerate(alphas):
         lab = a.replace('_', ' = ').title().replace('Alpha', r'$\alpha$')
-        plt.scatter(predicted_biases[i], realized_biases[i], color=colors[i], s=130, label=lab, edgecolors='black', zorder=5)
+        color = color_mapping.get(a, default_colors[i % len(default_colors)]) if color_mapping else default_colors[i % len(default_colors)]
+
+        plt.scatter(predicted_biases[i], realized_biases[i], color=color, s=130, label=lab, edgecolors='black', zorder=5)
 
     lims = [min(predicted_biases + realized_biases) - 0.5, max(predicted_biases + realized_biases) + 0.5]
     plt.plot(lims, lims, 'k--', alpha=0.5, label='1:1 Ideal Line')
@@ -633,7 +639,7 @@ def plot_emulator_performance_global(var_name: str, ref_obs: Dict[str, float], d
     if output_path: plt.savefig(output_path, dpi=300)
     else: plt.show()
 
-def plot_emulator_vs_model_spatial(var_name: str, preds_dict: Dict[str, float], reals_dict: Dict[str, float], output_path: str = None) -> None:
+def plot_emulator_vs_model_spatial(var_name: str, preds_dict: Dict[str, float], reals_dict: Dict[str, float], output_path: str = None, color_mapping: dict = None) -> None:
     """
     Performance 1:1 test validating emulator spatial predictions against realized outputs.
 
@@ -642,17 +648,19 @@ def plot_emulator_vs_model_spatial(var_name: str, preds_dict: Dict[str, float], 
         preds_dict: Dictionary mapping run tags/alphas to predicted errors.
         reals_dict: Dictionary mapping run tags/alphas to actual realized errors.
         output_path: Optional file path to save the plot.
+        color_mapping: Optional dictionary mapping alpha values to colors.
     """
-    alphas = list(preds_dict.keys())
+    alphas = sorted(list(preds_dict.keys()))
     x_vals = [preds_dict[a] for a in alphas]
     y_vals = [reals_dict[a] for a in alphas]
 
     plt.figure(figsize=(6.5, 6.5))
-    colors = ['#e41a1c', '#4daf4a', '#377eb8', '#984ea3', '#ff7f00', '#ffff33'][:len(alphas)]
+    default_colors = ['#e41a1c', '#4daf4a', '#377eb8', '#984ea3', '#ff7f00', '#ffff33']
 
     for i, a in enumerate(alphas):
         lab = a.replace('_', ' = ').title().replace('Alpha', r'$\alpha$')
-        plt.scatter(x_vals[i], y_vals[i], color=colors[i], s=130, label=lab, edgecolors='black', zorder=5)
+        color = color_mapping.get(a, default_colors[i % len(default_colors)]) if color_mapping else default_colors[i % len(default_colors)]
+        plt.scatter(x_vals[i], y_vals[i], color=color, s=130, label=lab, edgecolors='black', zorder=5)
 
     all_vals = x_vals + y_vals
     margin = (max(all_vals) - min(all_vals)) * 0.2 if len(all_vals) > 1 else 1.0

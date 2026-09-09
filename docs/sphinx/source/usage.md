@@ -7,8 +7,8 @@ ECtuner operates through a structured workflow that spans from pre-computing sen
 Optimization requires precomputed parameter sensitivities. You can compute these sensitivities using an ensemble of perturbed runs (One At a Time perturbations).
 
 **Data Requirements:**
-* **1D Mode:** A directory containing the YAML parameter files for each perturbed run, along with the corresponding global mean files computed by ECmean4.
-* **2D Mode:** The raw NetCDF outputs (`*atm_cmip6_1m*.nc`) from your ensemble model runs.
+* **1D Mode:** a directory containing the YAML parameter files for each perturbed run, along with the corresponding global mean files computed by ECmean4.
+* **2D Mode:** the raw NetCDF outputs (`*atm_cmip6_1m*.nc`) from your ensemble model runs.
 
 The tool provides built-in CLI commands to compute sensitivities. It automatically recognizes the parameters changed in each run, extracts the changes, and builds the response file.
 
@@ -36,8 +36,8 @@ ectuner-sens-2d -c config_sens_2d.yaml
 ectuner 1d -c config.yaml -o output/tuned_{exp}.yml {exp} 1990 2000
 ```
 **Advanced 1D Physics Options**
-- `-dT, --deltaT`: Applies a reference correction based on temperature using slopes defined in `data/utils/slopes.yaml`. Important for tuning coupled model simulations o remove temperature drifts.
-- `-imb, --model_imbalance`: Corrects the `net_toa` target to cope with intrinsic model energy imbalances (mainly for low-resolution configurations).
+- `-dT, --deltaT`: applies a reference correction based on temperature using slopes defined in `data/utils/slopes.yaml`. Important for tuning coupled model simulations o remove temperature drifts.
+- `-imb, --model_imbalance`: corrects the `net_toa` target to cope with intrinsic model energy imbalances (mainly for low-resolution configurations).
 
 **Run 2D Spatial Tuning:**
 ```bash
@@ -45,11 +45,11 @@ ectuner 2d -c config.yaml -o output/tuned_{exp}.yml -t tag {exp} 1990 2000
 ```
 
 **Key CLI Arguments:**
-* `-c, --config`: Path to the master YAML configuration.
-* `-p, --penalty`: (Default: 0) Sets the weight for the penalty term. Higher values keep the new parameters closer to the OIFS defaults to avoid physically unrealistic solutions.
-* `-i, --inc`: (Default: 0.2) The maximum allowed fractional change (e.g., 0.1 limits changes to ±10% of the reference value).
-* `-m, --method`: Choose the optimization algorithm. `dual_annealing` is recommended for most cases, but `differential_evolution` and `L-BFGS-B` are also supported.
-* `-o, --output`: Specifies the path to save the suggested tuning as a YAML file.
+* `-c, --config`: path to the master YAML configuration.
+* `-p, --penalty`: (Default: 0) sets the weight for the penalty term. Higher values keep the new parameters closer to the OIFS defaults to avoid physically unrealistic solutions.
+* `-i, --inc`: (Default: 0.2) the maximum allowed fractional change (e.g., 0.1 limits changes to ±10% of the reference value).
+* `-m, --method`: choose the optimization algorithm. `dual_annealing` is recommended for most cases, but `differential_evolution` and `L-BFGS-B` are also supported.
+* `-o, --output`: specifies the path to save the suggested tuning as a YAML file.
 
 ### 3. Usage from Jupyter Notebooks (API)
 Since ECtuner is packaged, you can import its core functions directly into Python scripts or Notebooks for interactive workflows:
@@ -80,9 +80,9 @@ python integrations/ecearth4/ecearth4_loop.py exp_old exp_new -a duplicate -c co
 
 ### Optimization Output
 At the end of an optimization run, ECtuner generates:
-1. `tuned_<exp>.yml`: The model-compatible namelist block with the new parameters.
-2. `diagnostics_<exp>.yaml`: A structured file containing final cost scores, relative parameter changes, and bias evaluations.
-3. `diagnostics_2d_<exp>.nc` (2D mode only): A NetCDF file containing the spatial maps of initial vs. predicted final biases.
+1. `tuned_<exp>.yml`: the model-compatible namelist block with the new parameters.
+2. `diagnostics_<exp>.yaml`: a structured file containing final cost scores, relative parameter changes, and bias evaluations.
+3. `diagnostics_2d_<exp>.nc` (2D mode only): a NetCDF file containing the spatial maps of initial vs. predicted final biases.
 You can feed these diagnostic files directly into the `diagnostics.py` module to plot parameter scatter plot, parameter heatmaps and tuning validation profiles.
 
 #### Example output table
