@@ -51,8 +51,8 @@ class BaseDataLoader(ABC):
         Loads the physical parameter file of the configuration to tune.
 
         Features robust extraction supporting both the Script Engine (SE) format 
-        and legacy flattened dictionaries. It dynamically scans across multiple 
-        model components (``oifs``, ``nemo``, etc.) to extract tuning variables.
+        and legacy flattened dictionaries. It extracts ONLY the parameters explicitly 
+        listed in the 'reference_parameters' block of the ECtuner configuration.
 
         Returns:
             Tuple containing:
@@ -78,35 +78,38 @@ class BaseDataLoader(ABC):
         with open(param_file, 'r') as file:
             raw_data = YAML().load(file)
 
-        params: Dict[str, Any] = {}
+        ref_params = self.config.get('reference_parameters') or {}
+        target_param_names = set(ref_params.keys())
         
-        if isinstance(raw_data, list) and len(raw_data) > 0 and 'base.context' in raw_data[0]:
-            model_config = raw_data[0]['base.context'].get('model_config', {})
+        extracted_params: Dict[str, float] = {}
 
-            if 'oifs' in model_config and 'tuning' in model_config['oifs']:
-                for namelist, namelist_params in model_config['oifs']['tuning'].items():
-                    if isinstance(namelist_params, dict):
-                        params.update(namelist_params)
-                        
-            if 'nemo' in model_config and 'tuning' in model_config['nemo']:
-                for domain, domain_params in model_config['nemo']['tuning'].items():
-                    if isinstance(domain_params, dict):
-                        params.update(domain_params)
-        else:
-            if 'tuning' in raw_data:
-                for section in raw_data['tuning'].values():
-                    if isinstance(section, dict):
-                        params.update(section)
-            else:
-                params = raw_data
+        def recursive_search(data: Any) -> None:
+            if isinstance(data, dict):
+                for k, v in data.items():
+                    if k in target_param_names:
+                        try:
+                            extracted_params[k] = float(v)
+                        except (ValueError, TypeError):
+                            raise ValueError(f"Could not cast parameter '{k}' with value '{v}' to float.")
+                    else:
+                        recursive_search(v)
+            elif isinstance(data, list):
+                for item in data:
+                    recursive_search(item)
 
-        try:
-            float_params = {k: float(v) for k, v in params.items()}
-        except ValueError as e:
-            raise ValueError(f"Could not cast all parameters to float in {param_file}. Details: {e}")
+        recursive_search(raw_data)
 
-        return list(float_params.keys()), float_params
-    
+        missing_params = target_param_names - set(extracted_params.keys())
+        if missing_params and hasattr(self, 'logger'):
+            self.logger.warning(
+                f"[DataLoader] The following reference parameters were NOT found in {param_file} "
+                f"and will fallback to reference defaults: {', '.join(missing_params)}"
+            )
+            for p in missing_params:
+                extracted_params[p] = ref_params[p] 
+
+        return list(extracted_params.keys()), extracted_params
+
     @abstractmethod
     def load_sensitivity(self) -> Any:
         """
@@ -167,7 +170,10 @@ class DataLoader1D(BaseDataLoader):
         if not sens_template:
             raise KeyError("Missing 'files.sensitivity' in configuration.")
             
-        sens_file = sens_template.format(year1=self.year1, year2=self.year2)
+        sens_y1 = self.config.get('args.sens_year1', self.year1)
+        sens_y2 = self.config.get('args.sens_year2', self.year2)
+        
+        sens_file = sens_template.format(year1=sens_y1, year2=sens_y2)
         
         if not os.path.exists(sens_file):
             raise FileNotFoundError(f"Sensitivity file not found: {sens_file}")
@@ -304,9 +310,16 @@ class DataLoader2D(BaseDataLoader):
         Raises:
             FileNotFoundError: If the sensitivity file does not exist.
         """
-        sens_file = self.config.get('files.sensitivity_nc')
+        sens_template = self.config.get('files.sensitivity_nc')
+        if not sens_template:
+            raise KeyError("Missing 'files.sensitivity_nc' in configuration.")
+
+        sens_y1 = self.config.get('args.sens_year1', self.year1)
+        sens_y2 = self.config.get('args.sens_year2', self.year2)
+
+        sens_file = sens_template.format(year1=sens_y1, year2=sens_y2)
         if not sens_file or not os.path.exists(sens_file):
-            raise FileNotFoundError(f"2D Sensitivity file not found: {sens_file}")
+                    raise FileNotFoundError(f"2D Sensitivity file not found: {sens_file}")
 
         self.logger.info(f"Loading 2D sensitivity from: {sens_file}")
         return xr.open_dataset(sens_file)

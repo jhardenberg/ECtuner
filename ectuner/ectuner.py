@@ -24,7 +24,7 @@ from .libs.tuner import Tuner1D
 # 2D Modules
 from .libs.loader import DataLoader2D
 from .libs.tuner import Tuner2D
-from .libs.utils import save_diagnostic_maps, get_region_mask
+from .libs.utils import save_diagnostic_maps, get_region_mask, autodetect_experiment_years
 
 
 def run_1d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
@@ -219,7 +219,13 @@ def main():
     if args.inc is not None: config.set('args.inc', args.inc)
     if args.method is not None: config.set('args.method', args.method)
     if args.output_tag is not None: config.set('args.output_tag', args.output_tag)
-    
+    if args.year1 is not None: config.set('args.year1', args.year1)
+    if args.year2 is not None: config.set('args.year2', args.year2)
+
+    y1, y2 = autodetect_experiment_years(config)
+    config.set('args.year1', y1)
+    config.set('args.year2', y2)
+                                          
     if args.mode == '1d':
         if args.deltaT is not None: config.set('args.deltaT', args.deltaT)
         if args.model_imbalance is not None: config.set('args.model_imbalance', args.model_imbalance)
@@ -229,7 +235,7 @@ def main():
     out_dir = config.get('files.output_dir', './')
     if not out:
         tag = f"_{args.output_tag}" if args.output_tag else ""
-        filename = f"tuned_{args.exp}_{config.get('args.year1')}-{config.get('args.year2')}_{args.mode.upper()}{tag}.yml"
+        filename = f"tuning_{args.exp}_{config.get('args.year1')}-{config.get('args.year2')}_{args.mode.upper()}{tag}.yml"
         out = os.path.join(out_dir, filename)
         
     out_dir_actual = os.path.dirname(os.path.abspath(out))
@@ -239,7 +245,7 @@ def main():
         os.makedirs(os.path.dirname(logname), exist_ok=True)
     else:
         out_filename = os.path.basename(out)
-        log_filename = out_filename.replace('tuned_', 'log_tuned_').replace('.yml', '.log')
+        log_filename = out_filename.replace('tuning_', 'log_tuning_').replace('.yml', '.log')
         logname = os.path.join(out_dir_actual, log_filename)
 
     logger = setup_logger(level=args.loglevel, log_file=logname)
@@ -255,7 +261,7 @@ def main():
     exporter.print_summary(result,logger)
     exporter.save_model_yaml(result, out, config.get('parameter_group', {}), config.get('weights', {}), config.get('weights_region', {}))
         
-    diag_yaml = out.replace('tuned_', 'diagnostics_').replace('.yml', '.yaml')
+    diag_yaml = out.replace('tuning_', 'diagnostics_').replace('.yml', '.yaml')
     exporter.save_diagnostics_yaml(result, diag_yaml)
 
 if __name__ == '__main__':

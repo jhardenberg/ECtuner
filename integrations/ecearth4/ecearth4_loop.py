@@ -60,14 +60,13 @@ def fetch_yaml_from_hpc(exp_name: str, job_dir: str, target_dest: str) -> bool:
         
     return False
 
-def check_sensitivities(config: Config, logger) -> bool:
+def check_sensitivities(config: Config, logger, mode: str) -> bool:
     """
     Verifies the existence of the required sensitivity file (1D or 2D).
     If it doesn't exist, notifies the user that the ensemble must be run first.
     """
-    mode = '2d' if config.get('spatial_tuning') else '1d'
-    year1 = config.get('args.year1')
-    year2 = config.get('args.year2')
+    sens_y1 = config.get('args.sens_year1', config.get('args.year1'))
+    sens_y2 = config.get('args.sens_year2', config.get('args.year2'))
     
     if mode == '2d':
         sens_path = config.get('files.sensitivity_nc')
@@ -75,8 +74,7 @@ def check_sensitivities(config: Config, logger) -> bool:
         sens_path = config.get('files.sensitivity')
         
     if sens_path:
-        # Se il path contiene i placeholder, li formattiamo
-        sens_file = sens_path.format(year1=year1, year2=year2) if '{year1}' in sens_path else sens_path
+        sens_file = sens_path.format(year1=sens_y1, year2=sens_y2) if '{year1}' in sens_path else sens_path
         if os.path.exists(sens_file):
             logger.info(f"[CHECK] Sensitivity file found: {sens_file}")
             return True
@@ -130,7 +128,8 @@ def run_pipeline(
     action: str = 'duplicate',
     model_kind: str = 'CPLD',    # AMIP, CPLD, OMIP
     model_sub: str = 'FAST',     # FAST, PALEO
-    quest_base_config: str = 'config.yml' # Template di base per quests
+    quest_base_config: str = 'config.yml', # Template di base per quests
+    submit: bool = True
 ) -> None:
     """
     Tuning execution pipeline.
@@ -142,7 +141,7 @@ def run_pipeline(
     config = Config(config_path, exp=exp_prev)
     
     # 2. Check sensitivities before proceeding with the mathematics
-    if not check_sensitivities(config, logger):
+    if not check_sensitivities(config, logger, mode):
         raise FileNotFoundError("No sensitivity files found. Impossible to proceed with tuning. Please run the ensemble generation first.")
 
     # 3. Ensure the parameter input file exists locally (optional pull from HPC)
@@ -165,7 +164,7 @@ def run_pipeline(
     # 5. Save the optimized YAML file
     output_dir = config.get('files.output_dir', './')
     os.makedirs(output_dir, exist_ok=True)
-    final_tuning_name = f"tuned_{exp_next}.yml"
+    final_tuning_name = f"tuning_{exp_next}.yml"
     result_path = os.path.join(output_dir, final_tuning_name)
     
     exporter.save_model_yaml(
@@ -235,14 +234,18 @@ def run_pipeline(
             update_tuning_file_in_yaml(main_config_path, final_tuning_name)
 
     #7. Launch the job
-    cmd_launch = ["./launch.sh"]
-    try:
-        logger.info(f"Submitting job from: {exp_job_dir}")
-        subprocess.run(cmd_launch, cwd=exp_job_dir, check=True)
-        logger.info(f"=== Loop completed successfully! {exp_next} is running on SLURM ===")
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Critical error during job submission: {e}")
-        raise
+    if submit:
+        cmd_launch = ["./launch.sh"]
+        try:
+            logger.info(f"Submitting job from: {exp_job_dir}")
+            subprocess.run(cmd_launch, cwd=exp_job_dir, check=True)
+            logger.info(f"=== Loop completed successfully! {exp_next} is running on SLURM ===")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Critical error during job submission: {e}")
+            raise
+    else:
+        logger.info(f"=== Loop completed successfully! Job for {exp_next} is prepared in {exp_job_dir}. ===")
+        logger.info("Automatic submission bypassed. You can submit it manually when ready.")
 
 
 if __name__ == "__main__":
@@ -251,11 +254,10 @@ if __name__ == "__main__":
 
     # Utilize the HPCPERM environment variable if set, 
     # otherwise default to the current working directory
-    BASE_PERM = os.environ.get("HPCPERM", os.getcwd())
-    WORKSPACE = os.path.join(BASE_PERM, "path/to/your/workspace")  # Adjust this path as necessary
-    DEFAULT_CONFIG = os.path.join(WORKSPACE, "path/to/your/config.yaml")  # Adjust this path as necessary
-    DEFAULT_JOB_DIR = os.path.join(WORKSPACE, "path/to/your/jobs")  # Adjust this path as necessary
-    DEFAULT_QUESTS_DIR = os.path.join(WORKSPACE, "ecearth-quests/ece4")
+    BASE_DIR = os.environ.get("/path/to/hpcperm", os.getcwd()) # Adjust this path as necessary
+    DEFAULT_CONFIG = os.path.join(BASE_DIR, "path/to/your/config.yaml")  # Adjust this path as necessary
+    DEFAULT_JOB_DIR = os.path.join(BASE_DIR, "path/to/your/jobs")  # Adjust this path as necessary
+    DEFAULT_QUESTS_DIR = os.path.join(BASE_DIR, "ecearth-quests/ece4")
 
     parser = argparse.ArgumentParser(description="EC-Earth4 Orchestration Loop")
     parser.add_argument("exp_prev", type=str, help="Name of the terminated experiment")
@@ -270,6 +272,7 @@ if __name__ == "__main__":
     parser.add_argument("-k", "--kind", type=str, default='CPLD', help="Model type (CPLD, AMIP, OMIP)")
     parser.add_argument("--submodel", type=str, default='FAST', help="Sub-configuration (FAST, PALEO)")
     parser.add_argument("--quest_config", type=str, default='config_TL63.yml', help="Base configuration for quests")
+    parser.add_argument("--no_submit", action='store_true', help="Prepare the job folder but do NOT run launch.sh")
 
     args = parser.parse_args()
 
@@ -283,7 +286,8 @@ if __name__ == "__main__":
         action=args.action,
         model_kind=args.kind,
         model_sub=args.submodel,
-        quest_base_config=args.quest_config
+        quest_base_config=args.quest_config, 
+        submit=not args.no_submit
     )
 
 # how to use: 

@@ -8,6 +8,9 @@ This module provides a centralized toolset for data processing. It handles:
 """
 import copy
 import math
+import os
+import glob
+import re
 import logging
 from typing import Dict, Any, List, Tuple, TYPE_CHECKING
 
@@ -366,3 +369,41 @@ def get_region_mask(ds_sens: 'xr.Dataset', weights_region: Dict[str, float]) -> 
 
         mask_2d = (mask * regional_weight_map).expand_dims(lon=len(lon)).assign_coords(lon=lon)
         return mask_2d
+
+
+def autodetect_experiment_years(config: Config, exp: str) -> tuple[int, int]:
+    """
+    Scans the raw scratch directory to find the last 20 simulated years.
+    """
+    y1 = config.get('args.year1')
+    y2 = config.get('args.year2')
+    
+    if y1 is not None and y2 is not None:
+        return int(y1), int(y2)
+        
+    print(f"[Auto-Detect] Years not fully specified. Scanning raw files for experiment '{exp}'...")
+    
+    raw_dir = config.get('files.raw_dir', '/ec/res4/scratch/ecme3038/ece4')
+    pattern = os.path.join(raw_dir, exp, "output/oifs", f"{exp}_atm_cmip6_1m_*.nc")
+    
+    files = glob.glob(pattern)
+    if not files:
+        raise ValueError(f"Cannot auto-detect years: no OIFS files found matching {pattern}")
+        
+    years = []
+    for f in files:
+        match = re.search(r'_1m_(\d{4})', os.path.basename(f))
+        if match:
+            years.append(int(match.group(1)))
+            
+    if not years:
+        raise ValueError("Files found, but could not parse years from filenames.")
+        
+    max_year = max(years)
+    min_year = min(years)
+    
+    y2_auto = max_year
+    y1_auto = max(min_year, y2_auto - 20 + 1)
+    
+    print(f"[Auto-Detect] Found data from {min_year} to {max_year}. Using window: {y1_auto}-{y2_auto}.")
+    return y1_auto, y2_auto

@@ -601,7 +601,7 @@ def extract_zonal_validation_data(var_name: str, tag: str, diag_2d_file: str, ba
 
     return latitudes, zonal_init, zonal_pred, zonal_realized
 
-def plot_emulator_performance_global(var_name: str, ref_obs: Dict[str, float], data_ecmean: Dict[str, Dict[str, float]], data_predicted_bias: Dict[str, Dict[str, float]], output_path: str = None, color_mapping: dict = None) -> None:
+def plot_emulator_performance_global(var_name: str, ref_obs: Dict[str, float], data_ecmean: Dict[str, Dict[str, float]], data_predicted_bias: Dict[str, Dict[str, float]], base_bias: float = None, output_path: str = None, color_mapping: dict = None) -> None:
     """
     1:1 Validation test of the Emulator's global bias prediction against actual EC-Earth outputs.
 
@@ -627,6 +627,9 @@ def plot_emulator_performance_global(var_name: str, ref_obs: Dict[str, float], d
 
     lims = [min(predicted_biases + realized_biases) - 0.5, max(predicted_biases + realized_biases) + 0.5]
     plt.plot(lims, lims, 'k--', alpha=0.5, label='1:1 Ideal Line')
+
+    if base_bias is not None:
+        plt.scatter(base_bias, base_bias, color='gold', s=350, marker='*', edgecolors='black', zorder=6, label='Initial (Base Model)')
     
     plt.xlabel(f'Predicted {var_name.upper()} Global Bias [W/m²]', fontsize=11)
     plt.ylabel(f'Realized {var_name.upper()} Global Bias (Model - CERES) [W/m²]', fontsize=11)
@@ -639,7 +642,7 @@ def plot_emulator_performance_global(var_name: str, ref_obs: Dict[str, float], d
     if output_path: plt.savefig(output_path, dpi=300)
     else: plt.show()
 
-def plot_emulator_vs_model_spatial(var_name: str, preds_dict: Dict[str, float], reals_dict: Dict[str, float], output_path: str = None, color_mapping: dict = None) -> None:
+def plot_emulator_vs_model_spatial(var_name: str, preds_dict: Dict[str, float], reals_dict: Dict[str, float], base_cost: float = None, output_path: str = None, color_mapping: dict = None) -> None:
     """
     Performance 1:1 test validating emulator spatial predictions against realized outputs.
 
@@ -666,6 +669,9 @@ def plot_emulator_vs_model_spatial(var_name: str, preds_dict: Dict[str, float], 
     margin = (max(all_vals) - min(all_vals)) * 0.2 if len(all_vals) > 1 else 1.0
     lims = [min(all_vals) - margin, max(all_vals) + margin]
     plt.plot(lims, lims, color='gray', linestyle='--', alpha=0.6, label='1:1 Perfect Line')
+
+    if base_cost is not None:
+        plt.scatter(base_cost, base_cost, color='gold', s=350, marker='*', edgecolors='black', zorder=6, label='Initial (Base Model)')
 
     plt.xlabel('Spatial Cost Predicted (Emulator) [W/m²]', fontsize=11)
     plt.ylabel('Spatial Cost Realized (Model) [W/m²]', fontsize=11)
@@ -704,3 +710,247 @@ def plot_zonal_validation(latitudes: xr.DataArray, zonal_init: xr.DataArray, zon
     ax.set_ylim(-90, 90)
     plt.tight_layout()
     _handle_show_or_save(output_path)
+
+def plot_bias_decomposition(diag_yaml_path: str, diag_nc_path: str, sens_nc_path: str, var_name: str, exp_tag: str = "", output_path: str = None) -> dict:
+    """
+    Decomposes the predicted global bias into individual parameter contributions.
+    
+    Args:
+        diag_yaml_path: Path to the diagnostics_*.yaml file.
+        diag_nc_path: Path to the diagnostics_2d_*.nc file.
+        sens_nc_path: Path to the 2D sensitivity NetCDF file.
+        var_name: The name of the variable (e.g., 'rsnt' or 'rlnt').
+        exp_tag: Experiment tag for the title (e.g., 'C200').
+        output_path: Optional path to save the generated plot.
+        
+    Returns:
+        A dictionary mapping parameters to their predicted global flux contribution.
+    """
+    import math
+
+    # 1. Load data
+    with open(diag_yaml_path, 'r') as f:
+        diag_data = yaml.safe_load(f)
+        
+    ds_diag = xr.open_dataset(diag_nc_path)
+    ds_sens = xr.open_dataset(sens_nc_path)
+    
+    bias_init_name = f'{var_name}_bias_init'
+    if bias_init_name not in ds_diag.data_vars:
+        print(f"Variable {bias_init_name} not found in {diag_nc_path}")
+        return {}
+
+    bias_init_map = ds_diag[bias_init_name]
+    
+    # 2. Extract optimal changes (Delta p)
+    optimal_changes = {p['name']: float(p['change_abs']) for p in diag_data['parameters']}
+        
+    # 3. Calculate spatial weights (cosine of latitude)
+    weights = np.cos(np.deg2rad(bias_init_map.lat))
+    global_bias_init = float(bias_init_map.weighted(weights).mean())
+    
+    contributions = {}
+    
+    # 4. Reconstruct individual global contributions
+    for p, delta_p in optimal_changes.items():
+        if p in ds_sens.parameter.values and var_name in ds_sens.variable.values:
+            slope_map = ds_sens.sel(variable=var_name, parameter=p).slope
+            delta_flux_map = slope_map * delta_p
+            global_contrib = float(delta_flux_map.weighted(weights).mean(skipna=True))
+            contributions[p] = global_contrib
+            
+    sorted_contribs = dict(sorted(contributions.items(), key=lambda item: abs(item[1])))
+    
+    params = list(sorted_contribs.keys())
+    vals = list(sorted_contribs.values())
+    
+    # 5. Plotting
+    plt.figure(figsize=(10, 8))
+    bars = plt.barh(params, vals, color=['#d73027' if v > 0 else '#4575b4' for v in vals])
+    plt.axvline(0, color='black', linewidth=1.2, linestyle='--')
+    
+    for bar in bars:
+        width = bar.get_width()
+        ha = 'left' if width > 0 else 'right'
+        offset = 0.05 if width > 0 else -0.05
+        if abs(width) > 0.01:
+            plt.text(width + offset, bar.get_y() + bar.get_height()/2, 
+                     f'{width:.2f}', va='center', ha=ha, fontsize=9)
+    
+    predicted_total = global_bias_init + sum(vals)
+    
+    plt.title(f"[{exp_tag}] Bias Decomposition: {var_name.upper()}", fontsize=14, fontweight='bold')
+    plt.xlabel("Predicted Contribution to Global Flux [W/m²]", fontsize=12)
+    
+    info_text = (f"Initial Bias: {global_bias_init:+.2f} W/m²\n"
+                 f"Sum of Contributions: {sum(vals):+.2f} W/m²\n"
+                 f"Predicted Final Bias: {predicted_total:+.2f} W/m²")
+    
+    plt.text(0.95, 0.05, info_text, transform=plt.gca().transAxes, fontsize=11,
+             verticalalignment='bottom', horizontalalignment='right',
+             bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    
+    plt.grid(axis='x', linestyle=':', alpha=0.6)
+    plt.tight_layout()
+    _handle_show_or_save(output_path)
+    
+    return sorted_contribs
+
+
+def plot_sensitivity_maps(sens_nc_path: str, var_name: str, ref_values: dict, inc: float = 0.3, vmin: float = -3.0, vmax: float = 3.0, output_path: str = None) -> None:
+    """
+    Creates a composite map of all spatial sensitivities for a specific variable.
+    
+    Args:
+        sens_nc_path: Path to the 2D sensitivity NetCDF file.
+        var_name: The target atmospheric variable (e.g., 'rsnt').
+        vmin: Minimum value for the color scale.
+        vmax: Maximum value for the color scale.
+        output_path: Optional path to save the generated plot.
+    """
+    import math
+
+    ds_sens = xr.open_dataset(sens_nc_path)
+    
+    if var_name not in ds_sens.variable.values:
+        print(f"Variable {var_name} not found in {sens_nc_path}")
+        return
+        
+    ds_var = ds_sens.sel(variable=var_name)
+    parameters = ds_var.parameter.values
+    
+    n = len(parameters)
+    ncols = math.ceil(math.sqrt(n))
+    nrows = math.ceil(n / ncols)
+    
+    fig, axs = plt.subplots(
+        nrows, ncols,
+        figsize=(4 * ncols, 2.5 * nrows),
+        subplot_kw={'projection': ccrs.PlateCarree()}
+    )
+    
+    if nrows * ncols > 1:
+        axs = axs.flatten()
+    else:
+        axs = [axs]
+        
+    for i, param in enumerate(parameters):
+        ax = axs[i]
+        field = ds_var.sel(parameter=param).slope
+        
+        # Handle extra dimensions if present
+        extra_dims = [d for d in field.dims if d not in ['lat', 'lon']]
+        if extra_dims:
+            field = field.mean(extra_dims)
+            
+        p_ref = ref_values.get(param, 1.0)
+        delta_p = abs(p_ref) * inc if p_ref != 0 else inc 
+        data = field.values * delta_p
+        lon2d, lat2d = np.meshgrid(field['lon'], field['lat'])
+        
+        im = ax.pcolormesh(
+            lon2d, lat2d, data,
+            vmin=vmin, vmax=vmax, cmap='RdBu_r',
+            transform=ccrs.PlateCarree(),
+            shading="auto"
+        )
+        
+        ax.coastlines(linewidth=0.5)
+        ax.set_title(param, fontsize=12)
+        
+    for ax in axs[len(parameters):]:
+        ax.remove()
+        
+    cbar_ax = fig.add_axes([0.25, 0.08, 0.5, 0.03])
+    cbar = fig.colorbar(im, cax=cbar_ax, orientation='horizontal')
+    cbar.set_label(f'Impact on {var_name.upper()} for {inc*100}% param change (W/m²)')
+    
+    _handle_show_or_save(output_path)
+
+import math
+def plot_sensitivity_maps_with_snr(sens_nc_path: str, path_ctrl: str, var_name: str, ref_values: dict, inc: float = 0.3, snr_threshold: float = 1.0, vmin: float = -3.0, vmax: float = 3.0, output_path: str = None) -> None:
+    """
+    Creates a composite map of all spatial sensitivities for a specific variable, applying a filter based on the Signal-to-Noise Ratio (SNR).
+    """
+    # 1. compute the noise map from the control run
+    print("Calcolo la mappa del rumore dal run di controllo...")
+    ds_ctrl = xr.open_mfdataset(path_ctrl, chunks={'time_counter': 12})
+    
+    if var_name == 'net_toa' and 'net_toa' not in ds_ctrl:
+        ds_ctrl['net_toa'] = ds_ctrl['rsdt'] - ds_ctrl['rsut'] - ds_ctrl['rlut']
+        
+    noise_map_raw = ds_ctrl[var_name].groupby('time_counter.year').mean().std(dim='year').compute()
+    noise_map_raw.name = var_name 
+    
+    sample_raw_file = glob.glob(path_ctrl)[0]
+    noise_map = regrid_to_regular_smm_safe(
+        ds_averaged=noise_map_raw,
+        target_grid='r180x90',
+        method='ycon',
+        raw_file_path=sample_raw_file,
+        varname=var_name
+    )
+
+    ds_sens = xr.open_dataset(sens_nc_path)
+    if var_name not in ds_sens.variable.values:
+        print(f"Variabile {var_name} non trovata in {sens_nc_path}")
+        return
+        
+    ds_var = ds_sens.sel(variable=var_name)
+    parameters = ds_var.parameter.values
+    
+    n = len(parameters)
+    ncols = math.ceil(math.sqrt(n))
+    nrows = math.ceil(n / ncols)
+    
+    fig, axs = plt.subplots(
+        nrows, ncols,
+        figsize=(4 * ncols, 2.5 * nrows),
+        subplot_kw={'projection': ccrs.PlateCarree()}
+    )
+    if nrows * ncols > 1:
+        axs = axs.flatten()
+    else:
+        axs = [axs]
+        
+    for i, param in enumerate(parameters):
+        ax = axs[i]
+        field = ds_var.sel(parameter=param).slope
+        
+        extra_dims = [d for d in field.dims if d not in ['lat', 'lon']]
+        if extra_dims:
+            field = field.mean(extra_dims)
+            
+        p_ref = ref_values.get(param, 1.0)
+        delta_p = abs(p_ref) * inc if p_ref != 0 else inc 
+        
+        signal = np.abs(field * delta_p)
+        snr = signal / noise_map
+        
+        data_filtered = xr.where(snr > snr_threshold, field * delta_p, 0.0)
+        data = data_filtered.values
+        
+        lon2d, lat2d = np.meshgrid(field['lon'], field['lat'])
+        
+        im = ax.pcolormesh(
+            lon2d, lat2d, data,
+            vmin=vmin, vmax=vmax, cmap='RdBu_r',
+            transform=ccrs.PlateCarree(),
+            shading="auto"
+        )
+        ax.coastlines(linewidth=0.5)
+        ax.set_title(param, fontsize=12)
+        
+    for ax in axs[len(parameters):]:
+        ax.remove()
+        
+    cbar_ax = fig.add_axes([0.25, 0.08, 0.5, 0.03])
+    cbar = fig.colorbar(im, cax=cbar_ax, orientation='horizontal')
+    cbar.set_label(f'Robust Impact on {var_name.upper()} (SNR > {snr_threshold}) (W/m²)')
+    
+    if output_path:
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        print(f"Plot salvato in: {output_path}")
+    else:
+        plt.show()
+    plt.close()

@@ -4,23 +4,23 @@
 
 files:
   # --- 1D Specific Paths ---
-  reference: "/ec/res4/.../gm_reference_EC26-PDAY.yml" 
-  sensitivity: "/ec/res4/.../sensitivity_TL63_415_1991-2000.yaml" 
-  slope_file: "utils/slopes.yaml" 
-  ecmean: "/ec/res4/.../gm_lres/" 
+  reference: "/../../data/ecmean/reference/gm_reference_EC26-PDAY.yml" 
+  sensitivity: "/../../data/sensitivities/sensitivity_TL63_415_1991-2000.yaml" 
+  slope_file: "/../../data/utils/slopes.yaml" 
+  ecmean: "/../../path/to/exp/global/mean" 
   ecmean_config: "/path/to/config_ecmean.yml"
   base: "GM_EC26-PDAY_{exp}_EC-Earth4_r1i1p1f1_{year1}_{year2}.yml" 
 
   # --- 2D Specific Paths ---
-  ref_2d_dir: "../../ecmean/reference/climatology/EC26-PDAY/r180x90/"
-  sensitivity_nc: "../../sensitivities/2D/sensitivity_TL63_415_1991-2000_2D.nc"
-  raw_dir: "/ec/res4/scratch/ecme3038/ece4/" 
-  base_2d_dir: "/ec/res4/.../ecmean/maps_lres/"
+  ref_2d_dir: "../../data/ecmean/reference/climatology/EC26-PDAY/r180x90/"
+  sensitivity_nc: "../../data/sensitivities/2D/sensitivity_TL63_415_1991-2000_2D.nc"
+  raw_dir: "/../../path/to/raw_data/" 
+  base_2d_dir: "/../../path/to/exp/global/mean/map/"
   
   # --- Common Paths ---
   params: "tuning_{exp}.yml"  # Note: 'params' must be just the filename pattern, not a full path.
-  exps: "/ec/res4/.../perturb_exps/exps_lres/" 
-  output_dir: "/ec/res4/.../results/tuned/"
+  exps: "../../path/to/perturb_exps/exps_lres/" 
+  output_dir: "../../../path/to/output_dir/"
 
 # ==========================================
 # Tuning Arguments
@@ -28,6 +28,8 @@ files:
 args:
   year1: 2000
   year2: 2017
+  sens_year1: 1991
+  sens_year2: 2000
   penalty: 0 
   inc: 0.2
   method: 'dual_annealing'
