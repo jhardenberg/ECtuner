@@ -86,27 +86,29 @@ class BaseDataLoader(ABC):
         def recursive_search(data: Any) -> None:
             if isinstance(data, dict):
                 for k, v in data.items():
-                    if k in target_param_names:
-                        try:
-                            extracted_params[k] = float(v)
-                        except (ValueError, TypeError):
-                            raise ValueError(f"Could not cast parameter '{k}' with value '{v}' to float.")
-                    else:
+                    if isinstance(v, (dict, list)):
                         recursive_search(v)
+                    else:
+                        if not target_param_names or k in target_param_names:
+                            try:
+                                extracted_params[k] = float(v)
+                            except (ValueError, TypeError):
+                                pass
             elif isinstance(data, list):
                 for item in data:
                     recursive_search(item)
 
         recursive_search(raw_data)
 
-        missing_params = target_param_names - set(extracted_params.keys())
-        if missing_params and hasattr(self, 'logger'):
-            self.logger.warning(
-                f"[DataLoader] The following reference parameters were NOT found in {param_file} "
-                f"and will fallback to reference defaults: {', '.join(missing_params)}"
-            )
-            for p in missing_params:
-                extracted_params[p] = ref_params[p] 
+        if target_param_names:
+            missing_params = target_param_names - set(extracted_params.keys())
+            if missing_params and hasattr(self, 'logger'):
+                self.logger.warning(
+                    f"[DataLoader] The following reference parameters were NOT found in {param_file} "
+                    f"and will fallback to reference defaults: {', '.join(missing_params)}"
+                )
+                for p in missing_params:
+                    extracted_params[p] = ref_params[p]
 
         return list(extracted_params.keys()), extracted_params
 
