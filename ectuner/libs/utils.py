@@ -19,6 +19,10 @@ FluxDict = Dict[str, Dict[str, Dict[str, float]]]
 if TYPE_CHECKING:
     import xarray as xr
 
+if TYPE_CHECKING:
+    import xarray as xr
+    from ectuner.libs.config import Config
+
 REGION_BOUNDS = {
     'Global': (-90.0, 90.0),
     'Tropical': (-30.0, 30.0),
@@ -371,7 +375,7 @@ def get_region_mask(ds_sens: 'xr.Dataset', weights_region: Dict[str, float]) -> 
         return mask_2d
 
 
-def autodetect_experiment_years(config: Config, exp: str) -> tuple[int, int]:
+def autodetect_experiment_years(config: 'Config', exp: str) -> tuple[int, int]:
     """
     Scans the raw scratch directory to find the last 20 simulated years.
     """
