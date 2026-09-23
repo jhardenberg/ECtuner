@@ -1,0 +1,56 @@
+- base.context:
+    model_config:
+      oifs:
+        tuning:
+          namcumf:
+            RPRCON: 1.8863E-03  # coefficients for determining conversion from cloud water to rain
+            ENTRORG: 8.3033E-04  # entrainment rate (positive buoyant convection)
+            DETRPEN: 1.2E-04  # detrainment rate for penetrative convection
+            ENTRDD: 1.5313E-04  # entrainment rate for cumulus downdrafts
+            RMFDEPS: 4.4703E-01  # fractional massflux for downdrafts at lfs
+          namcldp:
+            RVICE: 2.08E-01  # fixed ice fallspeed
+            RLCRITSNOW: 8E-06  # critical autoconversion threshold
+            RSNOWLIN2: 1.2E-02  # Constant governing of the temperature dependence of the autoconversion
+            RCLDIFF: 3.6894E-06  # diffusion-coefficient for evaporation by turbulent mixing
+            RCLDIFF_CONVI: 9.3002  # enhancement factor of rcldiff for convection
+            RDEPLIQREFRATE: 3.9298E-01  # (deposition efficiency in top layer)
+            RDEPLIQREFDEPTH: 234.93  # m (recovery depth scale)
+            RCL_OVERLAPLIQICE: 2.6023E-01  # overlap assumption for liquid and ice for deposition 
+            RCL_INHOMOGAUT: 6.0002E-01  # Fixed inhomogeneity factor for autoconversion
+            RCL_INHOMOGACC: 1.2001E+00  # Fixed inhomogeneity factor for accretion
+      nemo:
+        tuning:
+          namzdf:
+            rn_avm0: 0.00001 # coefficient for the vertical eddy viscosity
+      rnfm:
+        tuning:
+          # scaling factors for the freshwater flux to the ocean
+          # to control mass balance of the ocean (sea level height)
+          # leave empty for no scaling (or set 1.0)
+          runoff_scaling: #0.95
+          calving_scaling:
+# --- ECtuner meta-parameters ---
+# penalty: 5
+# inc (fractional max change): 0.6
+# weights (flux):
+#   net_toa: 3.0
+#   rsnt: 1.0
+#   rlnt: 1.0
+#   swcf: 0.0
+#   lwcf: 0.0
+#   rsns: 0.0
+#   rlns: 0.0
+#   hfss: 0.0
+#   hfls: 0.0
+#   net_sfc: 0.0
+#   toamsfc: 0.0
+# weights (region):
+#   Global: 1.0
+#   North Midlat: 0.9
+#   South Midlat: 0.9
+#   Tropical: 0.3
+# weights (season):
+#   ALL: 1.0
+#   DJF: 0.0
+#   JJA: 0.0

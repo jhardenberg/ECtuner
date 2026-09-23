@@ -15,22 +15,35 @@
 # > conda activate ece4
 # > conda env update --file environment.yml --prune
 # 
+name: ectuner
 channels:
   - conda-forge
   - nodefaults
 
 dependencies:
-  - python
+  - python>=3.10
   - pip
+  - cdo
+  - ipykernel
   - "esmf=*=nompi_*"
   - xesmf  # for ECmean4 regridding
   - eccodes  # binary eccodes package
   - python-eccodes  # Python API for eccodes
   - scriptengine>=1.2.0
   #- scriptengine-tasks-ecearth>=0.8.0  # Needed for ECE4 monitoring only!
+  - numpy
+  - scipy
+  - pandas
+  - xarray
+  - matplotlib
+  - cartopy
+  - tabulate
+  - ruamel.yaml
   - pip:
     - scriptengine-tasks-ecearth==v0.8.0  
     - rdy2cpl @ git+https://github.com/uwefladrich/rdy2cpl.git@main
     - scriptengine-tasks-hpc==v1.0.0rc2 # temporary for bug in SE
-    - ECmean4 # for ECmean4 diagnostics
+    - ecmean @ git+https://github.com/oloapinivad/ecmean.git@main # for ECmean4 diagnostics
     - ecbundle @ git+https://github.com/ecmwf/ecbundle.git
+    - smmregrid
+    - pytest

@@ -1,0 +1,31 @@
+|   Variable   |             Longname              |  Units  |     EC-Earth4 |      Obs.      |    Dataset     |   Years   |
+|--------------+-----------------------------------+---------+---------------+----------------+----------------+-----------|
+|   tas_land   |    2m Temperature (land-only)     | celsius |   13.3146     |  13.459±0.292  |      CRU       | 1981-2010 |
+|     tas      |          2m Temperature           | celsius |   13.9922     |  14.686±0.184  | BERKELEY-EARTH | 1981-2010 |
+|     psl      |      Mean Sea Level Pressure      |   hPa   | 1011.15       | 1011.386±0.068 |      ERA5      | 1981-2010 |
+|      pr      |           Precipitation           | mm/day  |    2.67695    |  2.832±0.034   |     MSWEP      | 1981-2010 |
+|   evspsbl    |            Evaporation            | mm/day  |   -2.68328    |  -2.856±0.072  |      ERA5      | 1981-2010 |
+|     pme      |        Precip. minus Evap.        | mm/day  |   -0.00632786 |  0.045±0.041   |      ERA5      | 1981-2010 |
+|     clt      |         Total Cloud Cover         |  frac   |    0.649995   |  0.676±0.002   |  EBAF_v4.2.1   | 2000-2010 |
+|     cll      |          Low Cloud Cover          |  frac   |    0.329677   |  0.383±0.003   |      ERA5      | 1981-2010 |
+|     clm      |        Medium Cloud Cover         |  frac   |    0.31227    |  0.246±0.003   |      ERA5      | 1981-2010 |
+|     clh      |         High Cloud Cover          |  frac   |    0.425973   |   0.34±0.003   |      ERA5      | 1981-2010 |
+|    pr_oce    |       Precipitation (ocean)       |   Sv    |   11.7196     |  13.284±0.216  |     MSWEP      | 1981-2010 |
+|   pme_oce    |    Precip. minus Evap. (ocean)    |   Sv    |   -1.88724    |  -1.184±0.204  |      ERA5      | 1981-2010 |
+|   pr_land    |       Precipitation (land)        |   Sv    |    4.07945    |  3.449±0.074   |     MSWEP      | 1981-2010 |
+|   pme_land   |    Precip. minus Evap. (land)     |   Sv    |    1.8499     |  1.448±0.087   |      ERA5      | 1981-2010 |
+|   net_toa    |              TOA Net              |  W/m2   |    6.57401    |  0.607±0.585   |   CERES EBAF   | 2000-2010 |
+|     rsnt     |            TOA SW Net             |  W/m2   |  237.809      |  240.95±0.484  |   CERES EBAF   | 2000-2010 |
+|     rlnt     |            TOA LW Net             |  W/m2   | -231.235      | -240.344±0.243 |   CERES EBAF   | 2000-2010 |
+|    rsntcs    |      TOA SW Net (clear sky)       |  W/m2   |  285.54       | 286.792±0.593  |   CERES EBAF   | 2000-2010 |
+|    rlntcs    |      TOA LW Net (clear sky)       |  W/m2   | -258.591      | -268.426±0.253 |   CERES EBAF   | 2000-2010 |
+|     swcf     |         SW Cloud Forcing          |  W/m2   |  -47.7314     | -45.841±0.285  |   CERES EBAF   | 2000-2010 |
+|     lwcf     |         LW Cloud Forcing          |  W/m2   |   27.3558     |  28.083±0.174  |   CERES EBAF   | 2000-2010 |
+|     rsns     |          Surface Net SW           |  W/m2   |  159.827      |      160       |   Wild 2020    |     -     |
+|     rlns     |          Surface Net LW           |  W/m2   |  -58.1587     |      -56       |   Wild 2020    |     -     |
+|     hfss     |    Surface Sensible Heat Flux     |  W/m2   |  -17.0313     |      -21       |   Wild 2020    |     -     |
+|     hfls     |     Surface Latent Heat Flux      |  W/m2   |  -77.7094     |      -82       |   Wild 2020    |     -     |
+| net_sfc_nosn |     Net Surface (no snowfall)     |  W/m2   |    6.92767    |      0.6       |   Wild 2020    |     -     |
+|   net_sfc    |            Net Surface            |  W/m2   |    6.15892    |      0.6       |   Wild 2020    |     -     |
+| toamsfc_nosn | TOA - Sfc Net Radiation (no snow) |  W/m2   |   -0.353669   |       0        |      None      |     -     |
+|   toamsfc    |      TOA - Sfc Net Radiation      |  W/m2   |    0.41508    |       0        |      None      |     -     |

@@ -1,0 +1,11 @@
+#slope value
+T_slope:
+    net_toa: 
+        ALL:
+            Global: -0.744982
+    rsnt: 
+        ALL:
+            Global: 0.924695
+    rlnt: 
+        ALL:
+            Global: -1.670409

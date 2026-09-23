@@ -1,0 +1,448 @@
+tas:
+  ALL:
+    Global: 13.5213623046875
+    North Midlat: 2.73260498046875
+    Tropical: 23.634796142578125
+    South Midlat: 14.698486328125
+  DJF:
+    Global: 5.390350341796875
+    North Midlat: -12.4700927734375
+    Tropical: 21.192657470703125
+    South Midlat: 21.411468505859375
+  JJA:
+    Global: 20.930389404296875
+    North Midlat: 17.77191162109375
+    Tropical: 24.790924072265625
+    South Midlat: 7.807769775390625
+psl:
+  ALL:
+    Global: 1011.1423950195312
+    North Midlat: 1016.2056274414062
+    Tropical: 1012.0270385742188
+    South Midlat: 1004.212890625
+  DJF:
+    Global: 1011.4555053710938
+    North Midlat: 1017.9671020507812
+    Tropical: 1011.327392578125
+    South Midlat: 1005.1912841796875
+  JJA:
+    Global: 1010.8255004882812
+    North Midlat: 1013.6119384765625
+    Tropical: 1013.1007080078125
+    South Midlat: 1003.2713623046875
+pr:
+  ALL:
+    Global: 2.688059091567993
+    North Midlat: 1.9191185235977173
+    Tropical: 3.3505446910858154
+    South Midlat: 2.073979377746582
+  DJF:
+    Global: 2.672656297683716
+    North Midlat: 2.0226616859436035
+    Tropical: 3.4625468254089355
+    South Midlat: 1.673671841621399
+  JJA:
+    Global: 2.7633821964263916
+    North Midlat: 1.9091488122940063
+    Tropical: 3.330026626586914
+    South Midlat: 2.434670925140381
+evspsbl:
+  ALL:
+    Global: -2.6950149536132812
+    North Midlat: -1.4627124071121216
+    Tropical: -3.7581064701080322
+    South Midlat: -1.708019495010376
+  DJF:
+    Global: -2.683490037918091
+    North Midlat: -1.5029094219207764
+    Tropical: -3.8488309383392334
+    South Midlat: -1.4313300848007202
+  JJA:
+    Global: -2.7803897857666016
+    North Midlat: -1.4560363292694092
+    Tropical: -3.8237738609313965
+    South Midlat: -1.9265855550765991
+pme:
+  ALL:
+    Global: -0.006955924443900585
+    North Midlat: 0.4564059376716614
+    Tropical: -0.40755993127822876
+    South Midlat: 0.36595994234085083
+  DJF:
+    Global: -0.010834909044206142
+    North Midlat: 0.5197523832321167
+    Tropical: -0.38628336787223816
+    South Midlat: 0.24234242737293243
+  JJA:
+    Global: -0.017008256167173386
+    North Midlat: 0.4531130790710449
+    Tropical: -0.49374833703041077
+    South Midlat: 0.5080856680870056
+clt:
+  ALL:
+    Global: 0.6511709690093994
+    North Midlat: 0.7117791771888733
+    Tropical: 0.575670063495636
+    South Midlat: 0.7481623888015747
+  DJF:
+    Global: 0.6573010683059692
+    North Midlat: 0.7530384659767151
+    Tropical: 0.5827741026878357
+    South Midlat: 0.7171300053596497
+  JJA:
+    Global: 0.6497978568077087
+    North Midlat: 0.6724861264228821
+    Tropical: 0.5767583250999451
+    South Midlat: 0.779570996761322
+cll:
+  ALL:
+    Global: 0.33953413367271423
+    North Midlat: 0.43501487374305725
+    Tropical: 0.22203533351421356
+    South Midlat: 0.4893302023410797
+  DJF:
+    Global: 0.3507350981235504
+    North Midlat: 0.4673745632171631
+    Tropical: 0.2187603861093521
+    South Midlat: 0.5095922946929932
+  JJA:
+    Global: 0.3416367173194885
+    North Midlat: 0.43999579548835754
+    Tropical: 0.2296147644519806
+    South Midlat: 0.47712206840515137
+clm:
+  ALL:
+    Global: 0.31601399183273315
+    North Midlat: 0.41118133068084717
+    Tropical: 0.19062118232250214
+    South Midlat: 0.48260340094566345
+  DJF:
+    Global: 0.3279860317707062
+    North Midlat: 0.49748262763023376
+    Tropical: 0.1998240202665329
+    South Midlat: 0.4260271489620209
+  JJA:
+    Global: 0.305556982755661
+    North Midlat: 0.30775463581085205
+    Tropical: 0.20061372220516205
+    South Midlat: 0.5224276185035706
+clh:
+  ALL:
+    Global: 0.42089831829071045
+    North Midlat: 0.4345560669898987
+    Tropical: 0.40078720450401306
+    South Midlat: 0.44921550154685974
+  DJF:
+    Global: 0.4177970290184021
+    North Midlat: 0.4652474820613861
+    Tropical: 0.41272082924842834
+    South Midlat: 0.38093626499176025
+  JJA:
+    Global: 0.4162226915359497
+    North Midlat: 0.38084128499031067
+    Tropical: 0.3866226077079773
+    South Midlat: 0.5133870840072632
+pr_oce:
+  ALL:
+    Global: 11.707784652709961
+    North Midlat: 1.6839758157730103
+    Tropical: 7.175913333892822
+    South Midlat: 2.8478894233703613
+  DJF:
+    Global: 11.744568824768066
+    North Midlat: 2.1739861965179443
+    Tropical: 7.303691387176514
+    South Midlat: 2.2668874263763428
+  JJA:
+    Global: 11.978358268737793
+    North Midlat: 1.2082198858261108
+    Tropical: 7.391810894012451
+    South Midlat: 3.3783276081085205
+pme_oce:
+  ALL:
+    Global: -1.905804991722107
+    North Midlat: 0.2502259910106659
+    Tropical: -2.6110501289367676
+    South Midlat: 0.45502033829689026
+  DJF:
+    Global: -2.2632055282592773
+    North Midlat: 0.14848671853542328
+    Tropical: -2.7168526649475098
+    South Midlat: 0.30516043305397034
+  JJA:
+    Global: -1.580634593963623
+    North Midlat: 0.4863917827606201
+    Tropical: -2.70306134223938
+    South Midlat: 0.6360357999801636
+pr_land:
+  ALL:
+    Global: 4.1568284034729
+    North Midlat: 1.0869982242584229
+    Tropical: 2.9231479167938232
+    South Midlat: 0.14668111503124237
+  DJF:
+    Global: 4.029141426086426
+    North Midlat: 0.7464917302131653
+    Tropical: 3.1329612731933594
+    South Midlat: 0.14968949556350708
+  JJA:
+    Global: 4.330801010131836
+    North Midlat: 1.5483596324920654
+    Tropical: 2.6454052925109863
+    South Midlat: 0.13703715801239014
+pme_land:
+  ALL:
+    Global: 1.8647514581680298
+    North Midlat: 0.4087691009044647
+    Tropical: 1.3826017379760742
+    South Midlat: 0.07338066399097443
+  DJF:
+    Global: 2.1992595195770264
+    North Midlat: 0.6019729971885681
+    Tropical: 1.5525343418121338
+    South Midlat: 0.044752221554517746
+  JJA:
+    Global: 1.4802528619766235
+    North Midlat: 0.1678484082221985
+    Tropical: 1.214827060699463
+    South Midlat: 0.09757722914218903
+net_toa:
+  ALL:
+    Global: 6.698060512542725
+    North Midlat: -37.58480453491211
+    Tropical: 46.62763214111328
+    South Midlat: -32.37382125854492
+  DJF:
+    Global: 13.862022399902344
+    North Midlat: -119.02782440185547
+    Tropical: 51.34174346923828
+    South Midlat: 68.51126098632812
+  JJA:
+    Global: -2.868260622024536
+    North Midlat: 49.16455841064453
+    Tropical: 28.848339080810547
+    South Midlat: -121.11083221435547
+rsnt:
+  ALL:
+    Global: 238.4969940185547
+    North Midlat: 174.66741943359375
+    Tropical: 301.5290222167969
+    South Midlat: 170.74000549316406
+  DJF:
+    Global: 243.13925170898438
+    North Midlat: 72.02222442626953
+    Tropical: 304.04345703125
+    South Midlat: 287.1119079589844
+  JJA:
+    Global: 232.23623657226562
+    North Midlat: 285.708251953125
+    Tropical: 284.9361877441406
+    South Midlat: 68.74649810791016
+rlnt:
+  ALL:
+    Global: -231.7990264892578
+    North Midlat: -212.25216674804688
+    Tropical: -254.90151977539062
+    South Midlat: -203.1138458251953
+  DJF:
+    Global: -229.2771759033203
+    North Midlat: -191.05003356933594
+    Tropical: -252.7016143798828
+    South Midlat: -218.60061645507812
+  JJA:
+    Global: -235.10455322265625
+    North Midlat: -236.5436248779297
+    Tropical: -256.08795166015625
+    South Midlat: -189.8573760986328
+rsntcs:
+  ALL:
+    Global: 285.3564453125
+    North Midlat: 218.4373321533203
+    Tropical: 346.6104736328125
+    South Midlat: 224.4001007080078
+  DJF:
+    Global: 293.5503234863281
+    North Midlat: 90.74947357177734
+    Tropical: 351.83905029296875
+    South Midlat: 374.6656494140625
+  JJA:
+    Global: 278.8600158691406
+    North Midlat: 360.2612609863281
+    Tropical: 329.2786560058594
+    South Midlat: 92.20216369628906
+rlntcs:
+  ALL:
+    Global: -258.9512634277344
+    North Midlat: -238.32308959960938
+    Tropical: -281.7442321777344
+    South Midlat: -231.99346923828125
+  DJF:
+    Global: -255.7793426513672
+    North Midlat: -216.27618408203125
+    Tropical: -280.59991455078125
+    South Midlat: -243.46327209472656
+  JJA:
+    Global: -262.7215270996094
+    North Midlat: -262.2061767578125
+    Tropical: -282.2438659667969
+    South Midlat: -222.47842407226562
+swcf:
+  ALL:
+    Global: -46.85945129394531
+    North Midlat: -43.76995086669922
+    Tropical: -45.08131790161133
+    South Midlat: -53.660037994384766
+  DJF:
+    Global: -50.411041259765625
+    North Midlat: -18.72725486755371
+    Tropical: -47.79560852050781
+    South Midlat: -87.55377197265625
+  JJA:
+    Global: -46.623653411865234
+    North Midlat: -74.55302429199219
+    Tropical: -44.34236526489258
+    South Midlat: -23.4556941986084
+lwcf:
+  ALL:
+    Global: 27.15235710144043
+    North Midlat: 26.070894241333008
+    Tropical: 26.842761993408203
+    South Midlat: 28.879581451416016
+  DJF:
+    Global: 26.501976013183594
+    North Midlat: 25.226144790649414
+    Tropical: 27.89822769165039
+    South Midlat: 24.862598419189453
+  JJA:
+    Global: 27.617050170898438
+    North Midlat: 25.662508010864258
+    Tropical: 26.1560001373291
+    South Midlat: 32.62108612060547
+rsns:
+  ALL:
+    Global: 160.33090209960938
+    North Midlat: 109.91110229492188
+    Tropical: 207.7749481201172
+    South Midlat: 111.70641326904297
+  DJF:
+    Global: 164.9053192138672
+    North Midlat: 44.61778259277344
+    Tropical: 210.46749877929688
+    South Midlat: 190.0769805908203
+  JJA:
+    Global: 153.43548583984375
+    North Midlat: 179.30909729003906
+    Tropical: 193.72035217285156
+    South Midlat: 43.46284484863281
+rlns:
+  ALL:
+    Global: -57.96042251586914
+    North Midlat: -54.3646354675293
+    Tropical: -63.321590423583984
+    South Midlat: -50.36347961425781
+  DJF:
+    Global: -57.125091552734375
+    North Midlat: -51.9666748046875
+    Tropical: -63.323081970214844
+    South Midlat: -49.343910217285156
+  JJA:
+    Global: -57.56216812133789
+    North Midlat: -53.19100570678711
+    Tropical: -62.61175537109375
+    South Midlat: -51.39097595214844
+hfss:
+  ALL:
+    Global: -17.289199829101562
+    North Midlat: -19.40074920654297
+    Tropical: -20.05959129333496
+    South Midlat: -9.394017219543457
+  DJF:
+    Global: -16.229530334472656
+    North Midlat: -18.454931259155273
+    Tropical: -19.678112030029297
+    South Midlat: -6.804780960083008
+  JJA:
+    Global: -18.885339736938477
+    North Midlat: -22.26930046081543
+    Tropical: -20.490503311157227
+    South Midlat: -12.1502103805542
+hfls:
+  ALL:
+    Global: -78.0495376586914
+    North Midlat: -42.470462799072266
+    Tropical: -108.77767944335938
+    South Midlat: -49.480751037597656
+  DJF:
+    Global: -77.72757720947266
+    North Midlat: -43.61618423461914
+    Tropical: -111.40538024902344
+    South Midlat: -41.533817291259766
+  JJA:
+    Global: -80.49148559570312
+    North Midlat: -42.21538162231445
+    Tropical: -110.67704010009766
+    South Midlat: -55.75264358520508
+net_sfc_nosn:
+  ALL:
+    Global: 7.0317864418029785
+    North Midlat: -6.324755668640137
+    Tropical: 15.616053581237793
+    South Midlat: 2.468186378479004
+  DJF:
+    Global: 13.823104858398438
+    North Midlat: -69.42001342773438
+    Tropical: 16.060930252075195
+    South Midlat: 92.3945083618164
+  JJA:
+    Global: -3.50346040725708
+    North Midlat: 61.6334114074707
+    Tropical: -0.05892229825258255
+    South Midlat: -75.83100891113281
+net_sfc:
+  ALL:
+    Global: 6.277231216430664
+    North Midlat: -7.708258152008057
+    Tropical: 15.601762771606445
+    South Midlat: 0.7972533702850342
+  DJF:
+    Global: 12.968954086303711
+    North Midlat: -71.9853744506836
+    Tropical: 16.037139892578125
+    South Midlat: 91.51814270019531
+  JJA:
+    Global: -4.118180751800537
+    North Midlat: 61.40358352661133
+    Tropical: -0.0604683980345726
+    South Midlat: -78.11058807373047
+toamsfc_nosn:
+  ALL:
+    Global: -0.3337096571922302
+    North Midlat: -31.260038375854492
+    Tropical: 31.011577606201172
+    South Midlat: -34.84200668334961
+  DJF:
+    Global: 0.038935184478759766
+    North Midlat: -49.60780715942383
+    Tropical: 35.280826568603516
+    South Midlat: -23.883251190185547
+  JJA:
+    Global: 0.6352063417434692
+    North Midlat: -12.468853950500488
+    Tropical: 28.907270431518555
+    South Midlat: -45.27985382080078
+toamsfc:
+  ALL:
+    Global: 0.4208422303199768
+    North Midlat: -29.876543045043945
+    Tropical: 31.02586555480957
+    South Midlat: -33.17106628417969
+  DJF:
+    Global: 0.8930855393409729
+    North Midlat: -47.042449951171875
+    Tropical: 35.30461883544922
+    South Midlat: -23.006898880004883
+  JJA:
+    Global: 1.249925136566162
+    North Midlat: -12.239019393920898
+    Tropical: 28.908817291259766
+    South Midlat: -43.0002326965332
