@@ -65,8 +65,6 @@ def check_sensitivities(config: Config, logger, mode: str) -> bool:
     Verifies the existence of the required sensitivity file (1D or 2D).
     If it doesn't exist, notifies the user that the ensemble must be run first.
     """
-    sens_y1 = config.get('args.sens_year1', config.get('args.year1'))
-    sens_y2 = config.get('args.sens_year2', config.get('args.year2'))
     
     if mode == '2d':
         sens_path = config.get('files.sensitivity_nc')
@@ -74,7 +72,7 @@ def check_sensitivities(config: Config, logger, mode: str) -> bool:
         sens_path = config.get('files.sensitivity')
         
     if sens_path:
-        sens_file = sens_path.format(year1=sens_y1, year2=sens_y2) if '{year1}' in sens_path else sens_path
+        sens_file = sens_path
         if os.path.exists(sens_file):
             logger.info(f"[CHECK] Sensitivity file found: {sens_file}")
             return True
@@ -129,7 +127,7 @@ def run_pipeline(
     model_kind: str = 'CPLD',    # AMIP, CPLD, OMIP
     model_sub: str = 'FAST',     # FAST, PALEO
     quest_base_config: str = 'config.yml', # Template di base per quests
-    submit: bool = True
+    submit: bool = False
 ) -> None:
     """
     Tuning execution pipeline.
@@ -272,7 +270,7 @@ if __name__ == "__main__":
     parser.add_argument("-k", "--kind", type=str, default='CPLD', help="Model type (CPLD, AMIP, OMIP)")
     parser.add_argument("--submodel", type=str, default='FAST', help="Sub-configuration (FAST, PALEO)")
     parser.add_argument("--quest_config", type=str, default='config_TL63.yml', help="Base configuration for quests")
-    parser.add_argument("--no_submit", action='store_true', help="Prepare the job folder but do NOT run launch.sh")
+    parser.add_argument("--submit", action='store_true', help="Run launch.sh after preparing the job folder")
 
     args = parser.parse_args()
 
@@ -287,7 +285,7 @@ if __name__ == "__main__":
         model_kind=args.kind,
         model_sub=args.submodel,
         quest_base_config=args.quest_config, 
-        submit=not args.no_submit
+        submit=args.submit
     )
 
 # how to use: 

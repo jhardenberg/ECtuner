@@ -28,8 +28,6 @@ files:
 args:
   year1: 2000
   year2: 2017
-  sens_year1: 1991
-  sens_year2: 2000
   penalty: 0 
   inc: 0.2
   method: 'dual_annealing'

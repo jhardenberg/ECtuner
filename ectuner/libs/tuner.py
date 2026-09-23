@@ -570,6 +570,9 @@ class Tuner2D(BaseTuner):
         """
         free_changes = self.run_optimizer(method)
         
+        initial_guess_free = np.zeros(len(self.opt_params))
+        score_init = self._objective_function(initial_guess_free)
+
         optimal_changes_dict = {p: 0.0 for p in self.params_names}
         for i, p in enumerate(self.opt_params):
             optimal_changes_dict[p] = free_changes[i]
@@ -590,6 +593,7 @@ class Tuner2D(BaseTuner):
         result.metrics['metric_name'] = self.metric
         result.metrics['penalty'] = self.penalty
         result.metrics['inc'] = self.inc
+        result.metrics['score_init'] = score_init
         
         tot_spat = 0.0
         tot_glob = 0.0

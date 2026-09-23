@@ -168,17 +168,9 @@ class DataLoader1D(BaseDataLoader):
             KeyError: If the 'files.sensitivity' template is missing in the config.
             FileNotFoundError: If the generated sensitivity file path does not exist.
         """
-        sens_template = self.config.get('files.sensitivity')
-        if not sens_template:
+        sens_file = self.config.get('files.sensitivity')
+        if not sens_file:
             raise KeyError("Missing 'files.sensitivity' in configuration.")
-            
-        sens_y1 = self.config.get('args.sens_year1', self.year1)
-        sens_y2 = self.config.get('args.sens_year2', self.year2)
-        
-        sens_file = sens_template.format(year1=sens_y1, year2=sens_y2)
-        
-        if not os.path.exists(sens_file):
-            raise FileNotFoundError(f"Sensitivity file not found: {sens_file}")
 
         with open(sens_file, 'r') as file:
             return YAML().load(file)
@@ -312,16 +304,9 @@ class DataLoader2D(BaseDataLoader):
         Raises:
             FileNotFoundError: If the sensitivity file does not exist.
         """
-        sens_template = self.config.get('files.sensitivity_nc')
-        if not sens_template:
+        sens_file = self.config.get('files.sensitivity_nc')
+        if not sens_file:
             raise KeyError("Missing 'files.sensitivity_nc' in configuration.")
-
-        sens_y1 = self.config.get('args.sens_year1', self.year1)
-        sens_y2 = self.config.get('args.sens_year2', self.year2)
-
-        sens_file = sens_template.format(year1=sens_y1, year2=sens_y2)
-        if not sens_file or not os.path.exists(sens_file):
-                    raise FileNotFoundError(f"2D Sensitivity file not found: {sens_file}")
 
         self.logger.info(f"Loading 2D sensitivity from: {sens_file}")
         return xr.open_dataset(sens_file)
