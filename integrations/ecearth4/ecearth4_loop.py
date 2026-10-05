@@ -15,6 +15,7 @@ from ectuner.libs.config import Config
 from ectuner.ectuner import run_1d_tuning, run_2d_tuning
 from ectuner.libs import exporter
 from ectuner.libs.logger import setup_logger
+from ectuner.libs.utils import autodetect_experiment_years
 from ruamel.yaml import YAML
 
 
@@ -137,6 +138,12 @@ def run_pipeline(
     
     # 1. Load the configuration
     config = Config(config_path, exp=exp_prev)
+
+    if config.get('args.year1') is None or config.get('args.year2') is None:
+        logger.info("Years not explicitly set in config. Triggering auto-detect...")
+        y1, y2 = autodetect_experiment_years(config, exp_prev)
+        config.set('args.year1', y1)
+        config.set('args.year2', y2)
     
     # 2. Check sensitivities before proceeding with the mathematics
     if not check_sensitivities(config, logger, mode):

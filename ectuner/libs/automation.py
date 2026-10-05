@@ -53,7 +53,7 @@ class ExperimentSLURM:
         temp_config_path = os.path.join(out_dir, f"temp_{run_tag}.yaml")
         self.base_config.save(temp_config_path)
        
-        out_yml = os.path.join(out_dir, f"tuned_{run_tag}.yml")
+        out_yml = os.path.join(out_dir, f"tuning_{run_tag}.yml")
         log_file = os.path.join(out_dir, f"log_{run_tag}.log")
         slurm_out = os.path.join(out_dir, f"slurm_{run_tag}.out")
         

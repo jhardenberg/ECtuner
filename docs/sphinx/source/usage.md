@@ -36,7 +36,7 @@ ectuner-sens-2d -c config_sens_2d.yaml
 ectuner 1d -c config.yaml -o output/tuned_{exp}.yml {exp} 1990 2000
 ```
 **Advanced 1D Physics Options**
-- `-dT, --deltaT`: applies a reference correction based on temperature using slopes defined in `data/utils/slopes.yaml`. Important for tuning coupled model simulations o remove temperature drifts.
+- `-dT, --deltaT`: applies a reference correction based on temperature using slopes defined in `data/utils/slopes.yaml`. Important for tuning coupled model simulations to remove temperature drifts by dynamically adjusting the target observational fluxes.
 - `-imb, --model_imbalance`: corrects the `net_toa` target to cope with intrinsic model energy imbalances (mainly for low-resolution configurations).
 
 **Run 2D Spatial Tuning:**

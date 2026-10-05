@@ -85,10 +85,12 @@ def run_1d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
         logger.info(f"Frozen parameters (keeping manual tuning): {', '.join(frozen_config.keys())}")
         
     inc_val = config.get('args.inc', 0.2)
+    custom_inc_val = config.get('args.custom_inc') or {}
     penalty_val = config.get('args.penalty', 0.0)
     method = config.get('args.method', 'dual_annealing')
     
     tuner = Tuner1D(inc=inc_val, penalty=penalty_val, logger=logger)
+    tuner.custom_inc = custom_inc_val
     tuner.setup_parameters(current_values, ref_params, frozen_config)
     tuner.prepare_data(sensitivity, difference, reference, weights_flux, weights_season, weights_region)
     
@@ -135,11 +137,13 @@ def run_2d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
         
     # 3. Setup Tuner
     inc_val = config.get('args.inc', 0.2)
+    custom_inc_val = config.get('args.custom_inc') or {}
     penalty_val = config.get('args.penalty', 0.0)
     alpha_val = config.get('spatial_tuning.alpha', 0.0)
     metric_val = config.get('spatial_tuning.metric', 'l2').lower()
     method = config.get('args.method', 'dual_annealing')
     tuner = Tuner2D(inc=inc_val, penalty=penalty_val, alpha=alpha_val, metric=metric_val, logger=logger)
+    tuner.custom_inc = custom_inc_val
     param_names, current_values = loader.load_params()
     ref_params = config.get('reference_parameters') or {}
     frozen_config = config.get('frozen_parameters') or {}
@@ -222,7 +226,7 @@ def main():
     if args.year1 is not None: config.set('args.year1', args.year1)
     if args.year2 is not None: config.set('args.year2', args.year2)
 
-    y1, y2 = autodetect_experiment_years(config)
+    y1, y2 = autodetect_experiment_years(config, args.exp)
     config.set('args.year1', y1)
     config.set('args.year2', y2)
                                           

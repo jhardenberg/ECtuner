@@ -14,12 +14,12 @@ files:
   # --- 2D Specific Paths ---
   ref_2d_dir: "../../data/ecmean/reference/climatology/EC26-PDAY/r180x90/"
   sensitivity_nc: "../../data/sensitivities/2D/sensitivity_TL63_415_1991-2000_2D.nc"
-  raw_dir: "/../../path/to/raw_data/" 
   base_2d_dir: "/../../path/to/exp/global/mean/map/"
   
   # --- Common Paths ---
   params: "tuning_{exp}.yml"  # Note: 'params' must be just the filename pattern, not a full path.
   exps: "../../path/to/perturb_exps/exps_lres/" 
+  raw_dir: "/../../path/to/raw_data/" 
   output_dir: "../../../path/to/output_dir/"
 
 # ==========================================
@@ -30,6 +30,9 @@ args:
   year2: 2017
   penalty: 0 
   inc: 0.2
+  custom_inc:           
+    RPRCON: 0.15        
+    ENTRORG: 0.15       
   method: 'dual_annealing'
   
   # 1D Specific Args

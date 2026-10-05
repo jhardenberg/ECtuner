@@ -51,6 +51,7 @@ class BaseTuner(ABC):
         self.logger = logger
         self.inc = float(inc)
         self.penalty = float(penalty)
+        self.custom_inc: Dict[str, float] = {}
 
         # Parameter structures
         self.params_names: List[str] = []
@@ -102,6 +103,7 @@ class BaseTuner(ABC):
         for p in self.opt_params:
             v_ref = self.ref_params[p]
             v_curr = self.current_values[p]
+            param_inc = float(self.custom_inc.get(p, self.inc))
             min_change = v_ref * (1.0 - self.inc) - v_curr
             max_change = v_ref * (1.0 + self.inc) - v_curr
             self.bounds.append((min_change, max_change))

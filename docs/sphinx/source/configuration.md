@@ -12,13 +12,19 @@ Defines where ECtuner should look for inputs and save outputs. It handles both 1
 * `sensitivity`: path to the 1D sensitivity regression coefficients YAML.
 * `sensitivity_nc`: path to the 2D NetCDF sensitivity map (for spatial mode).
 * `raw_dir` & `exps`: directories containing raw OIFS model outputs and parameter perturbation files.
+* `slope_file`: path to the YAML file containing the climate feedback parameters (λ), derived from the slopes of a Gregory plot. Required for temperature drift corrections in coupled simulations.
 
 ### Tuning Arguments (`args`)
 Controls the runtime parameters:
 * `year1` & `year2`: the time window used for averaging model climatology.
 * `inc`: the maximum fractional change allowed relative to reference values (e.g., `0.2` limits changes to $\pm 20\%$).
+* `custom_inc`: allows overriding the global inc limit for specific parameters (e.g., setting a narrower bound for highly sensitive variables).
 * `penalty`: weight for the distance penalty from OIFS default parameters. Prevents the optimizer from finding mathematically correct but physically unrealistic solutions.
 * `method`: the optimization algorithm. `dual_annealing` is the robust default.
+
+#### 1D Specific Physics Arguments:
+* `deltaT`: the temperature adjustment step (K) applied to compute flux corrections. It represents the difference between the target and the simulated surface temperature (ΔT). ECtuner uses this along with the `slope_file` to adjust the reference fluxes prior to tuning (ΔF=ΔT⋅λ).
+* `model_imbalance`: the intrinsic model energy imbalance to be subtracted from the net_toa target. Useful to equilibrate tuning targets for low-resolution configurations that inherently create or destroy energy.
 
 ### Spatial Tuning Options (`spatial_tuning`)
 Ignored in 1D mode, these parameters dictate how the 2D spatial engine behaves:

@@ -513,7 +513,6 @@ def extract_1d_validation_data(experiment_tags, ecmean_dir, diagnostics_dir, ref
             with open(ecmean_files[0], 'r') as f:
                 ecm_raw = yaml.safe_load(f)
                 for var, data in ecm_raw.items():
-                    # Applica la stessa logica protettiva qui!
                     if isinstance(data, dict) and isinstance(data.get('ALL'), dict):
                         if 'Global' in data['ALL']:
                             data_ecmean[tag][var] = data['ALL']['Global']
@@ -525,11 +524,22 @@ def extract_1d_validation_data(experiment_tags, ecmean_dir, diagnostics_dir, ref
         if os.path.exists(diag_file):
             with open(diag_file, 'r') as f:
                 diag_raw = yaml.safe_load(f)
+                
+                # Metodo 1: Prova a leggere il formato 2D (var_metrics)
                 var_metrics = diag_raw.get('var_metrics', {})
                 for var, stats in var_metrics.items():
-                    # Note: Make sure your diagnostics save 'predicted_global_bias'
                     if 'predicted_global_bias' in stats:
                         data_predicted[tag][var] = stats['predicted_global_bias']
+                
+                # Metodo 2: Se var_metrics è vuoto, è un file 1D. Cerca in biases
+                if not var_metrics:
+                    biases = diag_raw.get('biases', {})
+                    for category in ['targets', 'diagnostics']:
+                        for row in biases.get(category, []):
+                            # Filtriamo per la media globale annuale per il plot 1:1
+                            if row.get('region') == 'Global' and row.get('season') == 'ALL':
+                                var = row['variable']
+                                data_predicted[tag][var] = row['bias_final']
         else:
             print(f"Warning: Missing Diagnostics file for tag {tag}")
 
