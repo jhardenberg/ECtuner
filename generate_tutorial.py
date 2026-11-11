@@ -62,7 +62,7 @@ def create_tutorial():
     # ==========================================
     # Create a tiny 10x10 grid
     lat = np.linspace(-90, 90, 10)
-    lon = np.linspace(0, 360, 10)
+    lon = np.linspace(0, 360, 10, endpoint=False)
     
     # Fake Reference Map
     ref_data = np.random.rand(10, 10) * 240.0
@@ -84,7 +84,7 @@ def create_tutorial():
         },
         coords={
             'variable': ['net_toa'],
-            'parameter': ['ENTRORG', 'RVICE'],   # <--- Aggiunto RVICE
+            'parameter': ['ENTRORG', 'RVICE'],   
             'lat': lat,
             'lon': lon
         }
@@ -98,7 +98,7 @@ def create_tutorial():
         'files': {
             'reference': f"{data_dir}/reference_dummy.yml",
             'sensitivity': f"{data_dir}/sensitivity_dummy.yaml",
-            'ecmean': data_dir,            # <--- AGGIUNTO PER L'1D
+            'ecmean': data_dir,            
             'base': "base_{exp}.yml",
             'params': "tuning_{exp}.yml",
             'exps': data_dir,
@@ -108,12 +108,13 @@ def create_tutorial():
             'ref_2d_dir': nc_dir,
             'sensitivity_nc': f"{nc_dir}/sensitivity_2d_dummy.nc",
             'base_2d_dir': nc_dir,
-            'raw_dir': nc_dir              # <--- AGGIUNTO PER IL 2D
+            'raw_dir': nc_dir              
         },
         'args': {
             'penalty': 0.1,
             'inc': 0.2,
-            'method': 'dual_annealing'
+            'method': 'dual_annealing',
+            'bounds_around': 'current'
         },
         'spatial_tuning': {
             'target_grid': 'r10x10',

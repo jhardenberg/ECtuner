@@ -19,9 +19,9 @@ def test_objective_function_2d_math(dummy_logger, mock_2d_data):
 
     # each pixel has a bias of 5.0, and the weights are all 1.0, 
     # so the spatial cost is:
-    # Costo Spaziale L2 (MSE) = (5.0^2 + 5.0^2 + 5.0^2 + 5.0^2) / 4 pesi = 25.0
-    # Costo Globale L2 (Bias medio)^2 = (5.0)^2 = 25.0
-    # Costo Totale (alpha 0.5) = (0.5 * 25.0) + (0.5 * 25.0) = 25.0
+    # Spatial cost L2 (MSE) = (5.0^2 + 5.0^2 + 5.0^2 + 5.0^2) / 4 pesi = 25.0
+    # Global cost L2 (Bias medio)^2 = (5.0)^2 = 25.0
+    # Total cost (alpha 0.5) = (0.5 * 25.0) + (0.5 * 25.0) = 25.0
     changes_zero = np.array([0.0, 0.0])
     cost_zero = tuner._objective_function(changes_zero)
 
@@ -82,11 +82,11 @@ def test_frozen_parameter_warning_and_shift(caplog, mock_2d_data):
             mock_2d_data['weights_flux'], mock_2d_data['weights_region']
         )
     
-    assert "CRITICAL: Frozen parameter 'paramA' is shifted" in caplog.text, "Il warning non è stato emesso"
+    assert "CRITICAL: Frozen parameter 'paramA' is shifted" in caplog.text, "Warning not printed"
     
-    # Check that the bias map has been shifted by +1.0 (the difference between frozen value 1.5 and reference 1.0)
+    # Check that the bias map has been shifted by +1.0 (Δp × slope = 0.5 × 2.0)
     shifted_bias = tuner.bias_maps_2d['net_toa'].values
-    assert np.allclose(shifted_bias, 6.0), f"Atteso bias 6.0, ma trovato: {shifted_bias}"
+    assert np.allclose(shifted_bias, 6.0), f"Expected bias 6.0, but found: {shifted_bias}"
 
 def test_nan_pixel_masking_2d(dummy_logger, mock_2d_data):
     """

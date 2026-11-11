@@ -78,7 +78,7 @@ def test_optimization_convergence(dummy_logger, mock_1d_data):
     while paramB should remain unchanged at 0.0.
     The final cost should be 0.0, indicating that the bias has been fully corrected.
     """
-    # ARRANGE: increase the increment to 3.0 to speed up convergence for this test
+    # ARRANGE: increase the increment to 3.0
     tuner = Tuner1D(inc=3.0, penalty=0.0, logger=dummy_logger)
     frozen_config = {'paramB': "default"}
     tuner.setup_parameters(mock_1d_data['current_values'], mock_1d_data['ref_params'], frozen_config)
