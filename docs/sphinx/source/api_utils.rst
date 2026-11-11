@@ -1,11 +1,18 @@
 Utilities & Diagnostics
 =======================
 
-Support modules handling mathematical operations, spatial regridding, visualization, and file exports.
+Support modules handling mathematical operations, spatial regridding, bias metrics, visualization, and file exports.
 
 Mathematical & Spatial Utilities
 --------------------------------
 .. automodule:: ectuner.libs.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Metrics & Emulator Validation
+-----------------------------
+.. automodule:: ectuner.libs.metrics
    :members:
    :undoc-members:
    :show-inheritance:

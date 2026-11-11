@@ -1,10 +1,10 @@
 # Installation
-## Prerequistites
+## Prerequisites
 Ensure you have Conda installed (Miniconda/Mamba recommended): [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
 ## 1. Clone the Repository
 Download the source code from the repository:
 ```bash
-git clone [https://github.com/jhardenberg/ECtuner](https://github.com/jhardenberg/ECtuner)
+git clone https://github.com/jhardenberg/ECtuner.git
 cd ECtuner
 ```
 ## 2. Set up the Conda Environment

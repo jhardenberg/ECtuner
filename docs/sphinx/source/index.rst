@@ -1,6 +1,6 @@
-===================================
+========================================
 ECtuner: Climate Model Optimization Tool
-===================================
+========================================
 
 ECtuner is an advanced, automated optimization tool designed to objectively tune climate model parameters. 
 Originally developed for EC-Earth4 OpenIFS, it allows for robust parameter estimation 

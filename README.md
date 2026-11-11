@@ -30,6 +30,7 @@ python generate_tutorial.py
 
 # 2. Run the optimizer (1D or 2D)
 ectuner 1d -c tutorial/config_tutorial.yaml -o tutorial/output/tuned_1d.yml dummy_exp 2000 2010
+ectuner 2d -c tutorial/config_tutorial.yaml -o tutorial/output/tuned_2d.yml dummy_exp 2000 2010
 ```
 
 ## Real Usage
@@ -40,7 +41,7 @@ ectuner 1d -c config.yaml -o output/tuned_exp.yml exp 1990 2000
 
 *A complete guide on how to configure your YAML files, compute sensitivities, and use the tuner is available in the [Official Documentation](https://ectuner.readthedocs.io/).*
 
-## Example Ouput
+## Ouput
 Below is an example of a tuning run involving 16 parameters:
 
 |     Parameter     |     New value |   Old value |       Change |   Relative change |   Min change |   Max change |   Rel. dist. from ref. |
@@ -53,7 +54,7 @@ Below is an example of a tuning run involving 16 parameters:
 |       RVICE       |   0.12499     |     0.13    | -0.00501046  |      -0.038542    |     -0.078   |      0.078   |           -0.038542    |
 |    RLCRITSNOW     |   2.02131e-05 |     2e-05   |  2.13131e-07 |       0.0106565   |     -1.2e-05 |      1.2e-05 |            0.0106565   |
 |     RSNOWLIN2     |   0.0312179   |     0.03    |  0.00121795  |       0.0405983   |     -0.018   |      0.018   |            0.0405983   |
-|      RCLDIFF      |   3.03635e-06 |     3e-06   |  3.63473e-08 |       0.0121158   |     -1.8e-06 |      1.8e-06 |            0.0121158   |
+|      RCLDIFF      |   3.03635e-06 |     0.6e-05   |  3.63473e-08 |       0.0121158   |     -1.8e-06 |      1.8e-06 |            0.0121158   |
 |   RCLDIFF_CONVI   |  10.1805      |    10       |  0.180548    |       0.0180548   |     -6       |      6       |            0.0180548   |
 |  RDEPLIQREFRATE   |   0.500985    |     0.5     |  0.000984559 |       0.00196912  |     -0.3     |      0.3     |            0.00196912  |
 |  RDEPLIQREFDEPTH  | 499.541       |   500       | -0.458564    |      -0.000917128 |   -300       |    300       |           -0.000917128 |
