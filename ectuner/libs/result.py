@@ -50,8 +50,6 @@ class TuningResult:
         self.metrics: Dict[str, Any] = {
             'metric_name': 'unknown',
             'score_init': 0.0,
-            'total_global_cost': 0.0,
-            'total_spatial_cost': 0.0,
             'alpha': None,
             'penalty': None,
             'inc': None
@@ -63,7 +61,7 @@ class TuningResult:
         # Detailed bias metrics (populated by Tuner1D)
         self.bias_evaluation: Dict[str, List[Dict[str, Any]]] = {}
 
-    def set_var_metrics(self, var_name: str, predicted_global_bias: float, spatial_cost: float, global_cost: float) -> None:
+    def set_var_metrics(self, var_name: str, predicted_global_bias: float, spatial_cost: float, global_cost: float, initial_global_bias=None, initial_spatial_cost=None) -> None:
         """
         Stores the predicted metrics for a specific variable.
         
@@ -74,9 +72,11 @@ class TuningResult:
             global_cost: The global cost component.
         """
         self.var_metrics[var_name] = {
-            'predicted_global_bias': predicted_global_bias,
-            'spatial_cost': spatial_cost,
-            'global_cost': global_cost
+            'predicted_global_bias': float(predicted_global_bias),
+            'spatial_cost': float(spatial_cost),
+            'global_cost': float(global_cost),
+            'initial_global_bias': None if initial_global_bias is None else float(initial_global_bias),
+            'initial_spatial_cost': None if initial_spatial_cost is None else float(initial_spatial_cost)
         }
 
     def get_predicted_global_bias(self, var_name: str) -> Optional[float]:

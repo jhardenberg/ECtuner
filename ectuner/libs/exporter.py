@@ -14,6 +14,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .result import TuningResult
 
+def _fmt(x, spec=".4f"):
+    return "n/a" if x is None else format(x, spec)
+
 def get_yaml_parser() -> YAML:
     """Configures the YAML parser to natively support NumPy types."""
     yaml_ru = YAML(typ="rt")
@@ -144,9 +147,18 @@ def save_model_yaml(result: 'TuningResult', filepath: str, parameter_group_confi
         f.write("\n# --- ECtuner Meta-Diagnostics ---\n")
         f.write(f"# metric_used: {result.metrics.get('metric_name')}\n")
         f.write(f"# score_init: {result.metrics.get('score_init'):.8f}\n")
-        f.write(f"# total_spatial_cost: {result.metrics.get('total_spatial_cost'):.8f}\n")
-        f.write(f"# total_global_cost: {result.metrics.get('total_global_cost'):.8f}\n")
-        f.write(f"# alpha: {result.metrics.get('alpha')} | penalty: {result.metrics.get('penalty')} | inc: {result.metrics.get('inc')}\n")
+        if result.metrics.get('metric_name') != '1D_scalars':
+            f.write(f"# total_global_cost_init: {result.metrics.get('total_global_cost_init'):.8f}\n")
+            f.write(f"# total_spatial_cost_init: {result.metrics.get('total_spatial_cost_init'):.8f}\n")
+            f.write(f"# total_spatial_cost: {result.metrics.get('total_spatial_cost'):.8f}\n")
+            f.write(f"# total_global_cost: {result.metrics.get('total_global_cost'):.8f}\n")
+            
+        f.write(f"# alpha: {result.metrics.get('alpha')} | penalty: {result.metrics.get('penalty')} | inc: {result.metrics.get('inc')} | bounds_around: {result.metrics.get('bounds_around')}\n")
+
+        f.write(f"# seed: {result.metrics.get('seed')} | drift_cap: {result.metrics.get('drift_cap')} | "
+           f"drift_rms: {_fmt(result.metrics.get('drift_rms'), '.1%')} | "
+           f"drift_max: {_fmt(result.metrics.get('drift_max'), '.1%')} | "
+           f"n_at_bound: {result.metrics.get('n_at_bound')}\n")
         
         f.write("# weights (flux):\n")
         for k, v in weights_flux.items():
@@ -160,6 +172,21 @@ def save_model_yaml(result: 'TuningResult', filepath: str, parameter_group_confi
         for var_name, stats in result.var_metrics.items():
             f.write(f"# {var_name}_predicted_global_bias: {stats.get('predicted_global_bias'):.6f}\n")
             f.write(f"# {var_name}_spatial_cost: {stats.get('spatial_cost'):.6f}\n")
+            f.write(f"# {var_name}_initial_global_bias: {stats.get('initial_global_bias'):.6f}\n")
+            f.write(f"# {var_name}_initial_spatial_cost: {stats.get('initial_spatial_cost'):.6f}\n")
+
+        targets = result.bias_evaluation.get('targets', [])
+        side_effects = [r for r in result.bias_evaluation.get('diagnostics', [])
+                        if r['region'] == 'Global' and r['season'] == 'ALL']
+        for label, rows in (("targets", targets),
+                            ("side effects, Global only, not in cost", side_effects)):
+            if rows:
+                f.write(f"# biases seen by the tuner, {label} (model - target), init -> final:\n")
+                for r in rows:
+                    ref = r.get('ref_val')
+                    ref_s = f"{ref:.4f}" if ref is not None else "n/a"
+                    f.write(f"#   {r['variable']} | {r['season']} | {r['region']}: target {ref_s} | "
+                            f"bias {r['bias_init']:+.4f} -> {r['bias_final']:+.4f}\n")
 
     print(f"Structured tuning YAML written to: {filepath}")
 

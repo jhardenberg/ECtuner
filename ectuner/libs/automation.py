@@ -40,7 +40,7 @@ class ExperimentSLURM:
         """
         self.base_config.set(key_path, value)
         
-    def submit(self, job_template: str, run_tag: str) -> None:
+    def submit(self, job_template: str, run_tag: str, mode: str = '2d') -> str:
         """
         Saves the current configuration to disk and submits the job to SLURM.
         
@@ -63,6 +63,8 @@ class ExperimentSLURM:
         exp_name = self.base_config.get('args.exp')
         year1 = self.base_config.get('args.year1')
         year2 = self.base_config.get('args.year2')
+        if year1 is None or year2 is None:
+            raise ValueError("Set args.year1 and args.year2 before submitting.")
         
         cmd = [
             "sbatch", f"--job-name={run_tag}", f"--output={slurm_out}", 

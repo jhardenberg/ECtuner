@@ -10,6 +10,7 @@ import os
 import argparse
 import copy
 import logging
+from ruamel.yaml import YAML
 
 from .libs.config import Config
 from .libs.logger import setup_logger
@@ -25,7 +26,6 @@ from .libs.tuner import Tuner1D
 from .libs.loader import DataLoader2D
 from .libs.tuner import Tuner2D
 from .libs.utils import save_diagnostic_maps, get_region_mask, autodetect_experiment_years
-
 
 def run_1d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
     """
@@ -60,10 +60,10 @@ def run_1d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
     delta_t = config.get('args.deltaT')
     slope_file = config.get('files.slope_file')
     if delta_t is not None and slope_file is not None:
-        temp_config_kwargs = {'files.sensitivity': slope_file, 'args.exp': 'temp', 'args.year1': 0, 'args.year2': 0}
-        slopes_yaml = DataLoader1D(Config(config_path=None, **temp_config_kwargs)).load_sensitivity()
-        reference, temp_warnings = apply_temperature_correction(reference, slopes_yaml.get('T_slope', {}), delta_t, weights_flux, weights_season, weights_region)
-        logger.info(f"[PRE-PROC] Applied Temperature Correction: {delta_t} K")
+        with open(slope_file) as f:
+            slopes_yaml = YAML().load(f)
+        reference, temp_warnings = apply_temperature_correction(reference, slopes_yaml.get('T_slope', {}), delta_t,
+                                                                weights_flux, weights_season, weights_region)
         
         for w in temp_warnings:
             logger.warning(f"[Drift Correction] {w}")
@@ -91,6 +91,10 @@ def run_1d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
     
     tuner = Tuner1D(inc=inc_val, penalty=penalty_val, logger=logger)
     tuner.custom_inc = custom_inc_val
+    tuner.bounds_around = config.get('args.bounds_around', 'current')
+    tuner.drift_cap = config.get('args.drift_cap', None)
+    tuner.seed = config.get('args.seed')
+
     tuner.setup_parameters(current_values, ref_params, frozen_config)
     tuner.prepare_data(sensitivity, difference, reference, weights_flux, weights_season, weights_region)
     
@@ -144,13 +148,17 @@ def run_2d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
     method = config.get('args.method', 'dual_annealing')
     tuner = Tuner2D(inc=inc_val, penalty=penalty_val, alpha=alpha_val, metric=metric_val, logger=logger)
     tuner.custom_inc = custom_inc_val
+    tuner.bounds_around = config.get('args.bounds_around', 'current')
     param_names, current_values = loader.load_params()
     ref_params = config.get('reference_parameters') or {}
     frozen_config = config.get('frozen_parameters') or {}
     if frozen_config:
         logger.info(f"Frozen parameters (keeping manual tuning): {', '.join(frozen_config.keys())}")
+    tuner.drift_cap = config.get('args.drift_cap', None)
+    tuner.seed = config.get('args.seed')
         
     tuner.setup_parameters(current_values, ref_params, frozen_config)
+    #tuner.prepare_data(bias_maps, ref_maps, ds_sens, mask_2d, weights_flux, weights_region, noise_maps)
     tuner.prepare_data(bias_maps, ref_maps, ds_sens, mask_2d, weights_flux, weights_region)
     
     # 4. Optimize
@@ -177,8 +185,7 @@ def run_2d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
         bias_maps=bias_maps,
         ds_sens=ds_sens,
         params=result.param_names,
-        optimal_changes=result.optimal_changes,
-        r2_threshold=config.get('spatial_tuning.r2_threshold', 0.0)
+        optimal_changes=result.optimal_changes
     )
     
     return result
@@ -194,9 +201,10 @@ def parse_arguments():
         sp.add_argument('-c', '--config', type=str, required=True, help='YAML config file')
         sp.add_argument('-o', '--output', type=str, help='Output YAML for Script Engine')
         sp.add_argument('-l', '--loglevel', type=str, default='INFO')
-        sp.add_argument('-m', '--method', type=str, default='dual_annealing')
+        sp.add_argument('-m', '--method', type=str, default='None')
         sp.add_argument('-p', '--penalty', type=float, help='Penalty weight')
         sp.add_argument('-i', '--inc', type=float, help='Fractional max parameter change')
+        sp.add_argument('--seed', type=int, help='Random seed for reproducibility')
         sp.add_argument('-t', '--output_tag', type=str, default='')
         sp.add_argument('--logfile', type=str, help='Explicit path for the structured log file (overrides auto-generated name)')
         
@@ -225,6 +233,7 @@ def main():
     if args.output_tag is not None: config.set('args.output_tag', args.output_tag)
     if args.year1 is not None: config.set('args.year1', args.year1)
     if args.year2 is not None: config.set('args.year2', args.year2)
+    if args.seed is not None: config.set('args.seed', args.seed)
 
     y1, y2 = autodetect_experiment_years(config, args.exp)
     config.set('args.year1', y1)
@@ -265,7 +274,9 @@ def main():
     exporter.print_summary(result,logger)
     exporter.save_model_yaml(result, out, config.get('parameter_group', {}), config.get('weights', {}), config.get('weights_region', {}))
         
-    diag_yaml = out.replace('tuning_', 'diagnostics_').replace('.yml', '.yaml')
+    out_dir_, out_base = os.path.split(out)        
+    diag_base = out_base.replace('tuning_', 'diagnostics_', 1) if out_base.startswith('tuning_') else f"diagnostics_{out_base}"
+    diag_yaml = os.path.join(out_dir_, os.path.splitext(diag_base)[0] + '.yaml')  
     exporter.save_diagnostics_yaml(result, diag_yaml)
 
 if __name__ == '__main__':

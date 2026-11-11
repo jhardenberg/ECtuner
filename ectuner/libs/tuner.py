@@ -9,10 +9,10 @@ import math
 import numpy as np
 from scipy import optimize
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple, Any, Union, TYPE_CHECKING
+from typing import Dict, List, Tuple, Any, Union, Optional, TYPE_CHECKING
 
 from .result import TuningResult
-from .utils import REGION_BOUNDS
+from .utils import REGION_BOUNDS, normalize_metric
 
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class BaseTuner(ABC):
     Attributes:
         config: The ECtuner configuration object.
         logger: The initialized logging object.
-        inc: Fractional maximum parameter change relative to the reference.
+        inc: Fractional maximum parameter change relative to the current value.
         penalty: Penalty weight for distance from reference parameters.
         params_names: Names of all loaded parameters.
         current_values: Current values of the parameters.
@@ -44,7 +44,7 @@ class BaseTuner(ABC):
         Initializes the base tuner with configuration and logger.
 
         Args:
-            inc: Fractional maximum parameter change relative to the reference.
+            inc: Fractional maximum parameter change relative to the current value.
             penalty: Penalty weight for distance from reference parameters.
             logger: The configured logger instance.
         """
@@ -60,6 +60,9 @@ class BaseTuner(ABC):
         self.frozen_params: Dict[str, float] = {}
         self.opt_params: List[str] = []
         self.bounds: List[Tuple[float, float]] = []
+        self.bounds_around: str = 'current'  # Options: 'ref' or 'current'
+        self.drift_cap: Optional[float] = None   
+        self.seed: Optional[int] = None
 
     def setup_parameters(self, param_dict: Dict[str, float], ref_dict: Dict[str, float], frozen_config: Union[List[str], Dict[str, Any]]) -> None:
         """
@@ -93,20 +96,50 @@ class BaseTuner(ABC):
         self._setup_bounds()
 
     def _setup_bounds(self) -> None:
-        """
-        Calculates min/max bounds for the free parameters.
-        
-        The absolute limits are derived from the fractional increment (`inc`) 
-        applied to the reference parameters.
-        """
+        if self.bounds_around not in ('ref', 'current'):
+            raise ValueError(f"bounds_around must be 'ref' or 'current', got '{self.bounds_around}'")
         self.bounds = []
         for p in self.opt_params:
             v_ref = self.ref_params[p]
             v_curr = self.current_values[p]
             param_inc = float(self.custom_inc.get(p, self.inc))
-            min_change = v_ref * (1.0 - self.inc) - v_curr
-            max_change = v_ref * (1.0 + self.inc) - v_curr
-            self.bounds.append((min_change, max_change))
+            center = v_ref if self.bounds_around == 'ref' else v_curr
+            lo, hi = sorted((center * (1.0 - param_inc), center * (1.0 + param_inc)))
+    
+            if self.drift_cap is not None and v_ref != 0:
+                cap_lo, cap_hi = sorted((v_ref * (1.0 - self.drift_cap), v_ref * (1.0 + self.drift_cap)))
+                tol = 1e-3 * abs(v_ref)  
+                if v_curr < cap_lo - tol or v_curr > cap_hi + tol:
+                    self.logger.warning(f"Parameter '{p}' ({v_curr:.4e}) is outside the drift cap "
+                                        f"[{cap_lo:.4e}, {cap_hi:.4e}]: it can only move back towards it.")
+                lo = max(lo, min(cap_lo, v_curr))
+                hi = min(hi, max(cap_hi, v_curr))
+
+            lo_change, hi_change = lo - v_curr, hi - v_curr
+            if lo_change > 0 or hi_change < 0:
+                self.logger.warning(
+                    f"Parameter '{p}': current value {v_curr:.4e} is outside its bounds "
+                    f"[{lo:.4e}, {hi:.4e}]; zero change is not feasible."
+                )
+            self.bounds.append((lo_change, hi_change))
+
+    def _record_run_info(self, result, free_changes) -> None:
+        new_params = result.get_new_parameters()
+        rel = [(new_params[p] - self.ref_params[p]) / self.ref_params[p]
+            for p in self.params_names if self.ref_params[p] != 0]
+        n_bound = 0
+        for (lo, hi), c in zip(self.bounds, free_changes):
+            tol = 0.01 * (hi - lo)
+            if (c - lo) <= tol or (hi - c) <= tol:
+                n_bound += 1
+        result.metrics['seed'] = self.seed
+        result.metrics['drift_cap'] = self.drift_cap
+        result.metrics['drift_rms'] = float(np.sqrt(np.mean(np.square(rel))))
+        result.metrics['drift_max'] = float(np.max(np.abs(rel)))
+        result.metrics['n_at_bound'] = n_bound
+        self.logger.info(f"Drift from reference: rms {result.metrics['drift_rms']:.1%}, "
+                        f"max {result.metrics['drift_max']:.1%}; parameters at bound: "
+                        f"{n_bound}/{len(self.opt_params)}")
 
     @abstractmethod        
     def _objective_function(self, changes: np.ndarray) -> float:
@@ -159,12 +192,12 @@ class BaseTuner(ABC):
                 self._objective_function, 
                 bounds=self.bounds,
                 minimizer_kwargs=m_kwargs,
-                maxiter=1000
+                maxiter=1000, seed=self.seed
             )
         elif method == 'differential_evolution':
             result = optimize.differential_evolution(
                 self._objective_function, 
-                bounds=self.bounds
+                bounds=self.bounds, seed=self.seed
             )
         elif method == 'shgo':
             result = optimize.shgo(self._objective_function, self.bounds)
@@ -202,12 +235,14 @@ class Tuner1D(BaseTuner):
                 
             delta_p = custom_val - curr_val
 
-            if ref_val != 0:
-                rel_shift = abs(custom_val - ref_val) / abs(ref_val)
-                if rel_shift > self.inc:
+            center = ref_val if self.bounds_around == 'ref' else curr_val
+            if center != 0:
+                limit = float(self.custom_inc.get(p, self.inc))
+                rel_shift = abs(custom_val - center) / abs(center)
+                if rel_shift > limit:
                     self.logger.warning(
                         f"CRITICAL: Frozen parameter '{p}' is shifted by {rel_shift:.1%} "
-                        f"from reference (max linear bound is {self.inc:.1%}). "
+                        f"from {self.bounds_around} (max linear bound is {limit:.1%}). "
                     )
 
             self.logger.info(f"[Pre-Shift 1D] Absorbing frozen parameter '{p}' (delta_p: {delta_p:e})")
@@ -331,18 +366,17 @@ class Tuner1D(BaseTuner):
             bounds=bounds_dict,
             frozen_params=self.frozen_params
         )
-    
+
+        self._record_run_info(result, free_changes)
         result.metrics['metric_name'] = '1D_scalars'
         result.metrics['penalty'] = self.penalty
         result.metrics['inc'] = self.inc
+        result.metrics['bounds_around'] = self.bounds_around
         result.metrics['score_init'] = score_init
         result.metrics['score_final'] = score_final
         result.bias_evaluation = bias_evaluation
         
-        final_score = self._objective_function(free_changes)
-        result.metrics['total_global_cost'] = final_score
-        
-        self.logger.info(f"Optimization finished. Final Global Score: {final_score:.4f}")
+        self.logger.info(f"Optimization finished. Final Global Score: {score_final:.4f}")
         return result
     
     def evaluate_biases(self, optimal_changes_dict: dict) -> dict:
@@ -390,8 +424,8 @@ class Tuner1D(BaseTuner):
                         'region': region,
                         'weight': combined_weight,
                         'ref_val': ref_val,
-                        'model_init': ref_val + bias_init,
-                        'model_final': ref_val + bias_final,
+                        'model_init': ref_val + bias_init if ref_val is not None else None,
+                        'model_final': ref_val + bias_final if ref_val is not None else None,
                         'bias_init': bias_init,
                         'bias_final': bias_final,
                         'status': 'IMPROVED' if abs(bias_final) < abs(bias_init) else 'WORSENED'
@@ -418,15 +452,15 @@ class Tuner2D(BaseTuner):
         Initializes the 2D Tuner.
 
         Args:
-            inc: Fractional maximum parameter change relative to the reference.
+            inc: Fractional maximum parameter change relative to the current value.
             penalty: Penalty weight for distance from reference parameters.
             alpha: Blending weight between spatial error (0.0) and global error (1.0).
-            metric: Error metric to compute ('l2' for MSE, 'l1' for MAE).
+            metric: Error metric to compute ('l2'/'rmse' for RMSE, 'l1'/'mae' for MAE).
             logger: The configured logger instance.
         """
         super().__init__(inc, penalty, logger)
         self.alpha = float(alpha)
-        self.metric = metric.lower()
+        self.metric = normalize_metric(metric)
 
         self.bias_flat = {}
         self.sens_matrices_spatial = {}
@@ -447,12 +481,14 @@ class Tuner2D(BaseTuner):
                 
             delta_p = custom_val - curr_val
 
-            if ref_val != 0:
-                rel_shift = abs(custom_val - ref_val) / abs(ref_val)
-                if rel_shift > self.inc:
+            center = ref_val if self.bounds_around == 'ref' else curr_val
+            if center != 0:
+                limit = float(self.custom_inc.get(p, self.inc))
+                rel_shift = abs(custom_val - center) / abs(center)
+                if rel_shift > limit:
                     self.logger.warning(
                         f"CRITICAL: Frozen parameter '{p}' is shifted by {rel_shift:.1%} "
-                        f"from reference (max linear bound is {self.inc:.1%}). "
+                        f"from {self.bounds_around} (max linear bound is {limit:.1%}). "
                     )
 
             self.logger.info(f"[Pre-Shift 2D] Absorbing frozen parameter '{p}' (delta_p: {delta_p:e})")
@@ -460,7 +496,7 @@ class Tuner2D(BaseTuner):
             for var in self.target_vars:
                 if p in self.ds_sens.parameter.values and var in self.ds_sens.variable.values:
                     slope_map = self.ds_sens.sel(variable=var, parameter=p).slope
-                    self.bias_maps_2d[var] += (slope_map * delta_p)
+                    self.bias_maps_2d[var] += (slope_map.fillna(0) * delta_p)
         
     def prepare_data(
         self, 
@@ -470,7 +506,7 @@ class Tuner2D(BaseTuner):
         mask_2d: 'xr.DataArray',
         weights_flux: Dict[str, float], 
         weights_region: Dict[str, float]
-    ) -> None:
+    ) -> None: 
         """
         Flattens the 2D geospatial maps into 1D arrays for fast matrix operations.
 
@@ -504,22 +540,14 @@ class Tuner2D(BaseTuner):
             
             self.weights_vector_var[var] = mask_ordered.values.flatten()[valid_pix]
             self.bias_flat[var] = b_ordered.values.flatten()[valid_pix]
-            
-            slopes_raw = []
-            slopes_filtered = []
-            
+
+            slopes = []
             for p in self.opt_params:
                 s_ds = ds_sens.sel(variable=var, parameter=p).sortby(['lat', 'lon'])
-                s_val = np.nan_to_num(s_ds.slope.values.flatten()[valid_pix], nan=0.0)
-                #s_val = s_ds.slope.values.flatten()[valid_pix]
-                r2_val = s_ds.r2.values.flatten()[valid_pix]
-                
-                slopes_raw.append(s_val.copy())
-                s_filt = s_val.copy()
-                slopes_filtered.append(s_filt)
-                
-            self.sens_matrices_global[var] = np.column_stack(slopes_raw)
-            self.sens_matrices_spatial[var] = np.column_stack(slopes_filtered)
+                slopes.append(np.nan_to_num(s_ds.slope.values.flatten()[valid_pix], nan=0.0))
+
+            self.sens_matrices_spatial[var] = np.column_stack(slopes)
+            self.sens_matrices_global[var] = self.sens_matrices_spatial[var]  # stesso array, mai modificato in place
 
     def _objective_function(self, changes: np.ndarray) -> float:
         """
@@ -539,6 +567,7 @@ class Tuner2D(BaseTuner):
             sens_global_mean = np.average(self.sens_matrices_global[var], axis=0, weights=w_v)
             bias_global_init = np.average(self.bias_flat[var], weights=w_v)
             bias_global_final = bias_global_init + np.dot(sens_global_mean, changes)
+
             
             if self.metric == 'l2': #MSE (Mean Squared Error) 
                 cost_spatial = np.average(residual_spatial**2, weights=w_v) #MSE
@@ -590,19 +619,26 @@ class Tuner2D(BaseTuner):
             bounds=bounds_dict,
             frozen_params=self.frozen_params
         )
-        
+
+        self._record_run_info(result, free_changes)
         result.metrics['alpha'] = self.alpha
         result.metrics['metric_name'] = self.metric
         result.metrics['penalty'] = self.penalty
         result.metrics['inc'] = self.inc
+        result.metrics['bounds_around'] = self.bounds_around
         result.metrics['score_init'] = score_init
         
         tot_spat = 0.0
         tot_glob = 0.0
+        tot_spat_init = 0.0
+        tot_glob_init = 0.0
         
         for var in self.target_vars:
             w_flux = self.weights_flux.get(var, 0.0)
             w_v = self.weights_vector_var[var]
+
+            res_spat_init = self.bias_flat[var]
+            res_glob_init = np.average(self.bias_flat[var], weights=w_v)
             
             d_spat = np.dot(self.sens_matrices_spatial[var], free_changes)
             res_spat = self.bias_flat[var] + d_spat
@@ -611,19 +647,26 @@ class Tuner2D(BaseTuner):
             res_glob = np.average(self.bias_flat[var], weights=w_v) + np.dot(sens_glob_v, free_changes)
             
             if self.metric == 'l2':
-                v_spat = np.sqrt(np.average(res_spat**2, weights=w_v)) #RMSE
-                v_glob = np.abs(res_glob) #bias assoluto globale 
+                v_spat_init = np.sqrt(np.average(res_spat_init**2, weights=w_v))
+                v_spat = np.sqrt(np.average(res_spat**2, weights=w_v))
             else:
-                v_spat = np.average(np.abs(res_spat), weights=w_v) #MAE
-                v_glob = np.abs(res_glob)
-                
-            tot_spat += w_flux * v_spat
-            tot_glob += w_flux * v_glob
-            
-            result.set_var_metrics(var, res_glob, v_spat, v_glob)
-            
+                v_spat_init = np.average(np.abs(res_spat_init), weights=w_v)
+                v_spat = np.average(np.abs(res_spat), weights=w_v)
+            v_glob_init, v_glob = np.abs(res_glob_init), np.abs(res_glob)
+
+            tot_spat += w_flux * v_spat;  tot_glob += w_flux * v_glob
+            tot_spat_init += w_flux * v_spat_init;  tot_glob_init += w_flux * v_glob_init
+
+            result.set_var_metrics(var, res_glob, v_spat, v_glob,
+                                initial_global_bias=res_glob_init,
+                                initial_spatial_cost=v_spat_init)
+            self.logger.info(f"[{var}] INIT: global bias {res_glob_init:+.3f}, spatial {v_spat_init:.3f} "
+                            f"-> FINAL: global bias {res_glob:+.3f}, spatial {v_spat:.3f}")
+
         result.metrics['total_spatial_cost'] = tot_spat
         result.metrics['total_global_cost'] = tot_glob
+        result.metrics['total_spatial_cost_init'] = tot_spat_init
+        result.metrics['total_global_cost_init'] = tot_glob_init
 
         result.bias_evaluation = self.evaluate_biases(optimal_changes_dict)
         
@@ -653,7 +696,7 @@ class Tuner2D(BaseTuner):
             # Reconstruct the full predicted 2D map
             for p in self.opt_params:
                 slope = self.ds_sens.sel(variable=var, parameter=p).slope
-                delta_pred += slope * optimal_changes_dict[p]
+                delta_pred += slope.fillna(0) * optimal_changes_dict[p]
 
             b_final_map = b_init_map + delta_pred
             var_w = self.weights_flux.get(var, 0.0)

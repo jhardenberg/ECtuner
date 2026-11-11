@@ -1,4 +1,4 @@
-# EC-Earth4 conda environment file
+# ECtunerconda environment file
 #
 #
 # Sample usage:
@@ -7,12 +7,12 @@
 # > conda env create --prefix .conda --file environment.yml
 # > conda activate ./.conda
 #
-# (2) Install environment with name "ece4"
-# > conda env create --name ece4 --file environment.yml
-# > conda activate ece4
+# (2) Install environment with name "ectuner"
+# > conda env create --name ectuner --file environment.yml
+# > conda activate ectuner
 #
 # (3) Update environment
-# > conda activate ece4
+# > conda activate ectuner
 # > conda env update --file environment.yml --prune
 # 
 name: ectuner
@@ -30,7 +30,6 @@ dependencies:
   - eccodes  # binary eccodes package
   - python-eccodes  # Python API for eccodes
   - scriptengine>=1.2.0
-  #- scriptengine-tasks-ecearth>=0.8.0  # Needed for ECE4 monitoring only!
   - numpy
   - scipy
   - pandas
@@ -39,11 +38,11 @@ dependencies:
   - cartopy
   - tabulate
   - ruamel.yaml
+  - pyyaml
   - pip:
-    - scriptengine-tasks-ecearth==v0.8.0  
-    - rdy2cpl @ git+https://github.com/uwefladrich/rdy2cpl.git@main
+    - scriptengine-tasks-ecearth==v0.8.0 # needed only by integrations/ecearth4 (job creation and submission)
+    - rdy2cpl @ git+https://github.com/uwefladrich/rdy2cpl.git@main # needed only by integrations/ecearth4 (job creation and submission)
     - scriptengine-tasks-hpc==v1.0.0rc2 # temporary for bug in SE
     - ecmean @ git+https://github.com/oloapinivad/ecmean.git@main # for ECmean4 diagnostics
-    - ecbundle @ git+https://github.com/ecmwf/ecbundle.git
+    - ecbundle @ git+https://github.com/ecmwf/ecbundle.git # needed only by integrations/ecearth4 (job creation and submission)
     - smmregrid
-    - pytest

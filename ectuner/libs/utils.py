@@ -12,12 +12,9 @@ import os
 import glob
 import re
 import logging
-from typing import Dict, Any, List, Tuple, TYPE_CHECKING
+from typing import Dict, Any, List, Tuple, Optional, TYPE_CHECKING
 
 FluxDict = Dict[str, Dict[str, Dict[str, float]]]
-
-if TYPE_CHECKING:
-    import xarray as xr
 
 if TYPE_CHECKING:
     import xarray as xr
@@ -292,7 +289,6 @@ def save_diagnostic_maps(
     ds_sens: 'xr.Dataset', 
     params: list, 
     optimal_changes: dict, 
-    r2_threshold: float
 ) -> None:
     """
     Generates and saves a NetCDF file containing initial and predicted 2D biases.
@@ -304,7 +300,6 @@ def save_diagnostic_maps(
         ds_sens: The full sensitivity dataset containing slope and R2 values.
         params: List of active tuning parameters.
         optimal_changes: Dictionary containing the calculated optimal shifts per parameter.
-        r2_threshold: Threshold to ignore unreliable sensitivities (R2 filter).
     """
     import xarray as xr
     import logging
@@ -316,10 +311,7 @@ def save_diagnostic_maps(
         
         for p in params:
             slope = ds_sens.sel(variable=var, parameter=p).slope.drop_vars(['variable', 'parameter'], errors='ignore')
-            r2 = ds_sens.sel(variable=var, parameter=p).r2.drop_vars(['variable', 'parameter'], errors='ignore')
-            
-            clean_slope = slope.where(r2 > r2_threshold, 0)
-            delta_pred += clean_slope * optimal_changes[p]
+            delta_pred += slope.fillna(0) * optimal_changes[p]
             
         bias_final = bias_init + delta_pred
         
@@ -377,7 +369,7 @@ def get_region_mask(ds_sens: 'xr.Dataset', weights_region: Dict[str, float]) -> 
 
 def autodetect_experiment_years(config: 'Config', exp: str) -> tuple[int, int]:
     """
-    Scans the raw scratch directory to find the last 20 simulated years.
+    Scans the raw scratch directory to find the last 20 simulated years. It is valid only if years are not specified.
     """
     y1 = config.get('args.year1')
     y2 = config.get('args.year2')
@@ -387,7 +379,9 @@ def autodetect_experiment_years(config: 'Config', exp: str) -> tuple[int, int]:
         
     print(f"[Auto-Detect] Years not fully specified. Scanning raw files for experiment '{exp}'...")
     
-    raw_dir = config.get('files.raw_dir', '/ec/res4/scratch/ecme3038/ece4')
+    raw_dir = config.get('files.raw_dir')
+    if not raw_dir or not os.path.isdir(raw_dir):
+            raise FileNotFoundError(f"You have to specify the raw_dir")
     pattern = os.path.join(raw_dir, exp, "output/oifs", f"{exp}_atm_cmip6_1m_*.nc")
     
     files = glob.glob(pattern)
@@ -411,3 +405,33 @@ def autodetect_experiment_years(config: 'Config', exp: str) -> tuple[int, int]:
     
     print(f"[Auto-Detect] Found data from {min_year} to {max_year}. Using window: {y1_auto}-{y2_auto}.")
     return y1_auto, y2_auto
+
+
+def normalize_metric(metric: str) -> str:
+    m = str(metric).strip().lower()
+    if m in ('l1', 'mae'): return 'l1'
+    if m in ('l2', 'rmse'): return 'l2'
+    raise ValueError(f"Unknown metric '{metric}' (use l1/mae or l2/rmse)")
+
+
+def find_reference_files(ref_dir: str, var: str, target_grid: str, period: Optional[str] = None) -> List[str]:
+    """
+    Lists the reference climatology files of a variable, preferring a given period.
+
+    Files are named ``climate_average_<var>_<dataset>_<grid>_<period>.nc``. If ``period``
+    is given (e.g. ``"2000-2024"``), only the files containing it are returned; if none
+    matches, all the files for that variable and grid are returned so that the caller can
+    decide whether to warn.
+
+    Args:
+        ref_dir: Directory containing the reference climatologies.
+        var: Variable name (e.g. ``"rsnt"``).
+        target_grid: Grid tag contained in the file name (e.g. ``"r180x90"``).
+        period: Optional period string to look for in the file name.
+
+    Returns:
+        Sorted list of matching file paths (possibly empty).
+    """
+    base = os.path.join(ref_dir, f"climate_average_{var}_*{target_grid}*")
+    files = sorted(glob.glob(f"{base}{period}*.nc")) if period else []
+    return files or sorted(glob.glob(f"{base}.nc"))

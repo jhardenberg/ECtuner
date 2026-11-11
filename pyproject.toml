@@ -21,7 +21,8 @@ dependencies = [
     "pandas",
     "matplotlib",
     "cartopy",
-    "tabulate"
+    "tabulate",
+    "pyyaml"
 ]
 
 [project.optional-dependencies]
@@ -35,3 +36,6 @@ ectuner-sens-2d = "ectuner.scripts.sensitivity_2D:main"
 
 [tool.setuptools.packages.find]
 include = ["ectuner*"]
+
+[tool.setuptools.package-data]
+ectuner = ["templates/*.yaml"]

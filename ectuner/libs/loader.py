@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Tuple
 import xarray as xr 
 
-from .utils import compute_derived_flux, regrid_to_regular_smm_safe, standardize_reference_signs
+from .utils import compute_derived_flux, regrid_to_regular_smm_safe, standardize_reference_signs, find_reference_files
 
 FluxDict = Dict[str, Dict[str, Dict[str, float]]]
 
@@ -333,22 +333,20 @@ class DataLoader2D(BaseDataLoader):
         if not ref_dir:
             raise KeyError("Missing 'files.ref_2d_dir' in configuration.")
 
+        period = self.config.get('files.ref_2d_period')   
         for var in variables:
-            pattern = os.path.join(ref_dir, f"climate_average_{var}_*{self.target_grid}*.nc")
-            matching_files = sorted(glob.glob(pattern))
-            
-            if not matching_files:
-                self.logger.warning(
-                    f"Missing observation map for '{var}'. Skipping it from 2D targets/diagnostics."
-                )
+            files = find_reference_files(ref_dir, var, self.target_grid, period)
+            if not files:
+                self.logger.warning(f"Missing observation map for '{var}'. Skipping it from 2D targets/diagnostics.")
                 continue
-            
-            f_obs = matching_files[0]
+            if period and period not in os.path.basename(files[0]):
+                self.logger.warning(f"No reference map for '{var}' with period {period}: using any available period.")
+            if len(files) > 1:
+                self.logger.warning(f"{len(files)} reference maps match '{var}'; using {os.path.basename(files[0])}")
+            f_obs = files[0]
             self.logger.info(f"Loading reference for {var} from: {os.path.basename(f_obs)}")
-            
             ds = xr.open_dataset(f_obs)
             data = ds[var].mean('time') if 'time' in ds.dims else ds[var]
-
             ref_maps[var] = data
             
         ref_maps_standardized = standardize_reference_signs(ref_maps)
@@ -393,7 +391,7 @@ class DataLoader2D(BaseDataLoader):
                     self.logger.info(f"Loading all cached base maps for {self.exp} from {cache_file}")
                     return {var: ds_cached[var] for var in variables}
 
-                self.logger.info(f"Cache not found. Extracting 2D maps for {self.exp} (this may take a while...)")
+                self.logger.info(f"Cache missing variables. Extracting 2D maps for {self.exp} (this may take a while...)")
             except Exception as e:
                 self.logger.warning(f"Failed to read cache file {cache_file}: {e}. Recomputing base maps.")
                 ds_cached = None
@@ -444,4 +442,3 @@ class DataLoader2D(BaseDataLoader):
         self.logger.info(f"Cache updated and saved successfully: {cache_file}")
         
         return {var: ds_base[var] for var in variables}
-    

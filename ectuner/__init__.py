@@ -3,7 +3,7 @@ ECtuner module.
 (1D and 2D).
 """
 
-__version__ = '1.0.0'
+__version__ = '0.2.0'
 
 # 1. Core Data Structures
 from .libs.config import Config

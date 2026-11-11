@@ -1,5 +1,6 @@
 # --- Cartelle personali e cache ---
 __pycache__/
+**.log
 ectuner/__pycache__/
 data/ecmean/**/figs/
 data/sensitivities/NO_sensitivity_TL255_415_1991-2000_v2.yaml
@@ -10,5 +11,9 @@ mari/
 .pytest_cache/
 tutorial/
 jobs/run_tuner_sweep_mari.sh
+jobs/run_loop_mari_old.sh
+jobs/chain_loop_mari.sh
+jobs/logs/
 integrations/ecearth4/ecearth4_loop_mari.py
+integrations/ecearth4/tuning_loop_peper.py
 notebooks/test_tuner_mari.ipynb
