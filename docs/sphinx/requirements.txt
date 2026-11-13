@@ -1,0 +1,10 @@
+sphinx
+sphinx-rtd-theme
+myst-parser
+sphinx-autodoc-typehints
+
+# Dependencies for type hints
+xarray
+numpy
+pandas
+matplotlib
