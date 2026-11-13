@@ -164,10 +164,19 @@ def save_model_yaml(result: 'TuningResult', filepath: str, parameter_group_confi
         for k, v in weights_flux.items():
             f.write(f"#   {k}: {v}\n")
             
-        if weights_region:
-            f.write("# weights (region):\n")
-            for k, v in weights_region.items():
+        targets = getattr(result, 'targets', None)           # 1D: one weight per target
+        if targets:
+            f.write("# targets (variable | season | region: weight):\n")
+            for (v, s, r), w in targets.items():
+                f.write(f"#   {v} | {s} | {r}: {w:g}\n")
+        else:
+            f.write("# weights (flux):\n")
+            for k, v in weights_flux.items():
                 f.write(f"#   {k}: {v}\n")
+            if weights_region:
+                f.write("# weights (region):\n")
+                for k, v in weights_region.items():
+                    f.write(f"#   {k}: {v}\n")
                 
         for var_name, stats in result.var_metrics.items():
             f.write(f"# {var_name}_predicted_global_bias: {stats.get('predicted_global_bias'):.6f}\n")

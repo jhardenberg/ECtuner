@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple, Any, Union, Optional, TYPE_CHECKING
 
 from .result import TuningResult
-from .utils import REGION_BOUNDS, normalize_metric
+from .utils import REGION_BOUNDS, normalize_metric, build_targets_1d
 
 
 if TYPE_CHECKING:
@@ -262,10 +262,11 @@ class Tuner1D(BaseTuner):
         reference: Dict[str, Any],
         weights_flux: Dict[str, float], 
         weights_season: Dict[str, float], 
-        weights_region: Dict[str, float]
+        weights_region: Dict[str, float],
+        targets: Optional[Dict[Tuple[str, str, str], float]] = None
     ) -> None:
         """
-        Injects data and normalizes weights for the objective function.
+        Injects data and builds the target arrays used by the objective function.
 
         Args:
             sensitivity: Pre-calculated sensitivity coefficients.
@@ -274,6 +275,8 @@ class Tuner1D(BaseTuner):
             weights_flux: Weights for the tuning target variables.
             weights_season: Weights for the seasonal intervals.
             weights_region: Weights for the spatial regions.
+            targets: {(variable, season, region): weight}, from ``utils.build_targets_1d``.
+                If None, built from the product of the three weight dictionaries.
         """
         self.sensitivity = sensitivity
         self.difference = difference
@@ -281,54 +284,54 @@ class Tuner1D(BaseTuner):
         self.weights_flux = {k: float(v) for k, v in weights_flux.items()}
         self.weights_season = {k: float(v) for k, v in weights_season.items()}
         self.weights_region = {k: float(v) for k, v in weights_region.items()}
+        if targets is None:
+            targets, notes = build_targets_1d(sensitivity, None, weights_flux, weights_season, weights_region)
+            for n in notes:
+                self.logger.warning(n)
+        self.targets = dict(targets)
         self._apply_frozen_shift()
+        self._build_target_arrays()
+
+    def _build_target_arrays(self) -> None:
+        """
+        One row per target: bias (after the frozen shift), weight and slopes of all parameters,
+        so that the cost is a few vector operations.
+        """
+        keys, diffs, weights, rows = [], [], [], []
+        for (v, s, r), w in self.targets.items():
+            diff = self.difference.get(v, {}).get(s, {}).get(r, np.nan)
+            if diff is None or math.isnan(diff):
+                self.logger.warning(f"Target ({v}, {s}, {r}): no model-reference difference, skipped.")
+                continue
+            keys.append((v, s, r))
+            diffs.append(diff)
+            weights.append(w)
+            rows.append([self.sensitivity[p][v][s][r][0] for p in self.params_names])
+        if not keys:
+            raise ValueError("No valid 1D target: check weights / targets in the config.")
+        self._t_keys = keys
+        self._t_diff = np.asarray(diffs, dtype=float)
+        self._t_w = np.asarray(weights, dtype=float)
+        self._t_sens = np.asarray(rows, dtype=float).reshape(len(keys), len(self.params_names))
+        self._opt_idx = np.array([self.params_names.index(p) for p in self.opt_params], dtype=int)
 
     def _objective_function(self, changes: np.ndarray) -> float:
         """
-        Calculates the scalar cost function (Squared Bias + Penalty).
+        Calculates the scalar cost function: sum over the targets of
+        weight * (bias + predicted change)**2, plus the parameter penalty.
         """
-        change_dict = {p: changes[i] for i, p in enumerate(self.opt_params)}
-        for p in self.frozen_params:
-            change_dict[p] = 0.0
+        c = np.zeros(len(self.params_names))          # frozen parameters: no change
+        c[self._opt_idx] = changes
+        residual = self._t_diff + self._t_sens @ c
+        total_difference = float(np.sum(self._t_w * residual ** 2))
+        # Note: a perfect paraboloid. A gradient solver like L-BFGS-B finds the same
+        # global minimum as dual_annealing in a fraction of the time.
 
-        total_difference = 0.0
         param_penalty = 0.0
-        ref_param_name = self.params_names[0]
-
-        for fluxname in self.sensitivity.get(ref_param_name, {}).keys():
-            w_flux = self.weights_flux.get(fluxname, 0.0)
-            if w_flux <= 0: continue
-            
-            for season in self.sensitivity[ref_param_name][fluxname].keys():
-                w_season = self.weights_season.get(season, 0.0)
-                if w_season <= 0: continue
-                
-                for region in self.sensitivity[ref_param_name][fluxname][season].keys():
-                    w_region = self.weights_region.get(region, 0.0)
-                    combined_weight = w_flux * w_season * w_region
-                    
-                    if combined_weight <= 0: continue
-                    
-                    diff_val = self.difference.get(fluxname, {}).get(season, {}).get(region, np.nan)
-                    if not math.isnan(diff_val):
-                        flux_change = sum(
-                            self.sensitivity[param][fluxname][season][region][0] * change_dict[param]
-                            for param in self.params_names
-                        )
-                        
-                        total_difference += combined_weight * ((diff_val + flux_change) ** 2)
-                        # Note: This is a perfect paraboloid. Stochastic algorithms like 
-                        # dual_annealing or differential_evolution are mathematically oversized here. 
-                        # A gradient solver like L-BFGS-B will find the same exact global 
-                        # minimum in a fraction of the time.
-
-                        # normalise `total_difference` relative to the reference values (making it dimensionless) 
-                        # because the scale of the penalty in 1D depends on the physical quantities involved.
-
-        for param in self.params_names:
+        for i, param in enumerate(self.params_names):
             ref_val = self.ref_params[param]
             if ref_val != 0:
-                new_val = self.current_values[param] + change_dict[param]
+                new_val = self.current_values[param] + c[i]
                 param_penalty += ((ref_val - new_val) / ref_val) ** 2
 
         return total_difference + (param_penalty * self.penalty)
@@ -358,7 +361,7 @@ class Tuner1D(BaseTuner):
         bias_evaluation = self.evaluate_biases(optimal_changes_dict)
 
         result = TuningResult(
-            target_vars=list(self.weights_flux.keys()),
+            target_vars=sorted({v for v, _, _ in self.targets}),
             param_names=self.params_names,
             optimal_changes=optimal_changes_dict,
             initial_values=self.current_values,
@@ -368,6 +371,7 @@ class Tuner1D(BaseTuner):
         )
 
         self._record_run_info(result, free_changes)
+        result.targets = dict(self.targets)
         result.metrics['metric_name'] = '1D_scalars'
         result.metrics['penalty'] = self.penalty
         result.metrics['inc'] = self.inc
@@ -411,10 +415,7 @@ class Tuner1D(BaseTuner):
                     )
                     bias_final = bias_init + flux_change
                     
-                    w_flux = self.weights_flux.get(fluxname, 0.0)
-                    w_season = self.weights_season.get(season, 0.0)
-                    w_region = self.weights_region.get(region, 0.0)
-                    combined_weight = w_flux * w_season * w_region
+                    combined_weight = self.targets.get((fluxname, season, region), 0.0)
 
                     ref_val = self.reference.get(fluxname, {}).get(season, {}).get(region, None)
                     

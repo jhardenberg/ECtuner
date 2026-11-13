@@ -20,6 +20,7 @@ from .libs import exporter
 # 1D modules
 from .libs.loader import DataLoader1D
 from .libs.utils import compute_difference, apply_imbalance_correction, apply_temperature_correction
+from .libs.utils import build_targets_1d, log_targets_1d
 from .libs.tuner import Tuner1D
 
 # 2D Modules
@@ -49,8 +50,12 @@ def run_1d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
     weights_season = config.get('weights_season', {})
     weights_region = config.get('weights_region', {})
 
-    if len(weights_region) > 1:
-        logger.info("Note: Region weights are additive. Overlapping regions (e.g., Global and NH) will stack their weights.")
+    # Targets: explicit list (config 'targets') or product of the three weight dictionaries
+    targets, notes = build_targets_1d(sensitivity, config.get('targets'),
+                                      weights_flux, weights_season, weights_region)
+    for n in notes:
+        logger.warning(n)
+    log_targets_1d(targets, logger)
 
     model_imbalance = config.get('args.model_imbalance')
     if model_imbalance is not None:
@@ -63,7 +68,8 @@ def run_1d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
         with open(slope_file) as f:
             slopes_yaml = YAML().load(f)
         reference, temp_warnings = apply_temperature_correction(reference, slopes_yaml.get('T_slope', {}), delta_t,
-                                                                weights_flux, weights_season, weights_region)
+                                                                weights_flux, weights_season, weights_region,
+                                                                target_weights=targets)
         
         for w in temp_warnings:
             logger.warning(f"[Drift Correction] {w}")
@@ -96,7 +102,8 @@ def run_1d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
     tuner.seed = config.get('args.seed')
 
     tuner.setup_parameters(current_values, ref_params, frozen_config)
-    tuner.prepare_data(sensitivity, difference, reference, weights_flux, weights_season, weights_region)
+    tuner.prepare_data(sensitivity, difference, reference, weights_flux, weights_season, weights_region,
+                       targets=targets)
     
     result = tuner.optimize(method=method)
 
@@ -119,6 +126,9 @@ def run_2d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
     weights_flux = config.get('weights', {})
     weights_region = config.get('weights_region', {})
     target_vars = list(weights_flux.keys())
+    if config.get('targets'):
+        raise NotImplementedError("The 'targets' list is only supported in 1D tuning: "
+                                  "use weights and weights_region in 2D.")
 
     if len(weights_region) > 1:
         logger.info("Note: Region weights are additive. Overlapping regions (e.g., Global and NH) will stack their weights.")

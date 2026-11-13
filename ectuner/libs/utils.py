@@ -110,7 +110,8 @@ def apply_temperature_correction(
     delta_t: float, 
     weights_flux: Dict[str, float], 
     weights_season: Dict[str, float], 
-    weights_region: Dict[str, float]
+    weights_region: Dict[str, float], 
+    target_weights: Optional[Dict[Tuple[str, str, str], float]] = None
 ) -> Tuple[FluxDict, List[str]]:
     """
     Modifies reference fluxes by subtracting the temperature drift.
@@ -146,9 +147,12 @@ def apply_temperature_correction(
             season_weight = weights_season.get(season, 0.0)
 
             for region in corrected[var][season]:
-                region_weight = weights_region.get(region, 0.0)
-                combined_weight = var_weight * season_weight * region_weight
-
+                if target_weights is not None:
+                    combined_weight = target_weights.get((var, season, region), 0.0)
+                else:
+                    region_weight = weights_region.get(region, 0.0)
+                    combined_weight = var_weight * season_weight * region_weight
+        
                 # Safe extraction of the slope value
                 slope = slopes.get(var, {}).get(season, {}).get(region)
 
@@ -435,3 +439,108 @@ def find_reference_files(ref_dir: str, var: str, target_grid: str, period: Optio
     base = os.path.join(ref_dir, f"climate_average_{var}_*{target_grid}*")
     files = sorted(glob.glob(f"{base}{period}*.nc")) if period else []
     return files or sorted(glob.glob(f"{base}.nc"))
+
+
+# ==============================================================================
+# 1D TARGETS
+# ==============================================================================
+Target = Tuple[str, str, str]          # (variable, season, region)
+
+def build_targets_1d(
+    sensitivity: Dict[str, Any],
+    targets: Optional[List[Dict[str, Any]]] = None,
+    weights_flux: Optional[Dict[str, float]] = None,
+    weights_season: Optional[Dict[str, float]] = None,
+    weights_region: Optional[Dict[str, float]] = None,
+) -> Tuple[Dict[Target, float], List[str]]:
+    """
+    Builds the list of 1D targets {(variable, season, region): weight}.
+
+    Each target is a separate term of the 1D cost, weight * (bias + predicted change)**2.
+
+    With ``targets`` (list of dicts with keys 'variable', 'region', optional 'season'
+    (default 'ALL') and 'weight' (default 1)) every target has its own weight. Otherwise the
+    targets are built from the product weights_flux * weights_season * weights_region over the
+    variables, seasons and regions of the sensitivity file (previous behaviour).
+
+    Args:
+        sensitivity: 1D sensitivities, sensitivity[param][variable][season][region] = [slope, ...].
+        targets: Explicit list of targets (config key ``targets``).
+        weights_flux, weights_season, weights_region: Weights of the product form.
+
+    Returns:
+        The targets with weight > 0, and a list of warning messages.
+
+    Raises:
+        ValueError: If an explicit target is malformed, duplicated or not in the sensitivity file.
+    """
+    available = sensitivity[next(iter(sensitivity))]       # variable -> season -> region -> slope
+    out: Dict[Target, float] = {}
+    notes: List[str] = []
+
+    if targets:
+        if targets:
+            ignored = [k for d in (weights_flux or {}, weights_season or {}, weights_region or {})
+                       for k, w in d.items() if float(w) > 0]
+        if ignored:
+            notes.append(f"'targets' is set: weights / weights_season / weights_region are ignored "
+                         f"(non-zero entries: {ignored})")
+        for i, t in enumerate(targets):
+            if 'variable' not in t or 'region' not in t:
+                raise ValueError(f"targets[{i}] needs 'variable' and 'region': {dict(t)}")
+            key = (str(t['variable']), str(t.get('season', 'ALL')), str(t['region']))
+            w = float(t.get('weight', 1.0))
+            if w <= 0:
+                continue
+            v, s, r = key
+            if r not in available.get(v, {}).get(s, {}):
+                regions = sorted(available.get(v, {}).get(s, {}))
+                raise ValueError(f"targets[{i}] ({v}, {s}, {r}) is not in the sensitivity file. "
+                                 f"Regions available for ({v}, {s}): {regions}")
+            if key in out:
+                raise ValueError(f"targets[{i}]: duplicated target {key}")
+            out[key] = w
+        return out, notes
+
+    weights_flux = weights_flux or {}
+    weights_season = weights_season or {}
+    weights_region = weights_region or {}
+    for v, seasons in available.items():
+        wf = float(weights_flux.get(v, 0.0))
+        if wf <= 0:
+            continue
+        for s, regions in seasons.items():
+            ws = float(weights_season.get(s, 0.0))
+            if ws <= 0:
+                continue
+            for r in regions:
+                w = wf * ws * float(weights_region.get(r, 0.0))
+                if w > 0:
+                    out[(v, s, r)] = w
+    # Weighted names that match nothing in the sensitivity file would be silently ignored
+    seasons_all = {s for seas in available.values() for s in seas}
+    regions_all = {r for seas in available.values() for regs in seas.values() for r in regs}
+    for kind, weights, names in (('variables', weights_flux, set(available)),
+                                 ('seasons', weights_season, seasons_all),
+                                 ('regions', weights_region, regions_all)):
+        missing = [k for k, w in weights.items() if float(w) > 0 and k not in names]
+        if missing:
+            notes.append(f"Weighted {kind} not in the sensitivity file (ignored): {missing}. "
+                         f"Available: {sorted(names)}")
+    return out, notes
+
+
+def log_targets_1d(targets: Dict[Target, float], logger) -> None:
+    """Logs the 1D targets and flags overlapping regions of the same variable and season."""
+    logger.info(f"1D targets ({len(targets)}): variable | season | region | weight")
+    for (v, s, r), w in targets.items():
+        logger.info(f"   {v:<10} | {s:<6} | {r:<15} | {w:g}")
+    groups: Dict[Tuple[str, str], List[str]] = {}
+    for v, s, r in targets:
+        groups.setdefault((v, s), []).append(r)
+    for (v, s), regs in groups.items():
+        overlaps = [f"{a}/{b}" for i, a in enumerate(regs) for b in regs[i + 1:]
+                    if a in REGION_BOUNDS and b in REGION_BOUNDS
+                    and min(REGION_BOUNDS[a][1], REGION_BOUNDS[b][1]) > max(REGION_BOUNDS[a][0], REGION_BOUNDS[b][0])]
+        if overlaps:
+            logger.info(f"   [{v}, {s}] overlapping regions count their shared area more than once: {overlaps}")

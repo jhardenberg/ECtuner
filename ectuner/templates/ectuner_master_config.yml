@@ -105,6 +105,12 @@ parameter_group: # Parameter grouping for SE output
 # ==========================================
 # Weights & Targets
 # ==========================================
+# 1D only: explicit list of targets, each with its own weight. If present, it replaces
+# the product weights x weights_season x weights_region.
+# targets:
+#   - {variable: rsnt, region: Tropical, season: ALL, weight: 0.5}
+#   - {variable: rlnt, region: Global,   season: DJF, weight: 1.0}
+
 weights:             # > 0: target; 0: diagnostic only
   net_toa: 1.0
   rsnt: 0.0 
