@@ -93,7 +93,7 @@ def run_1d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
     inc_val = config.get('args.inc', 0.2)
     custom_inc_val = config.get('args.custom_inc') or {}
     penalty_val = config.get('args.penalty', 0.0)
-    method = config.get('args.method', 'dual_annealing')
+    method = config.get('args.method') or 'dual_annealing'
     
     tuner = Tuner1D(inc=inc_val, penalty=penalty_val, logger=logger)
     tuner.custom_inc = custom_inc_val
@@ -155,7 +155,7 @@ def run_2d_tuning(config: Config, logger: logging.Logger) -> TuningResult:
     penalty_val = config.get('args.penalty', 0.0)
     alpha_val = config.get('spatial_tuning.alpha', 0.0)
     metric_val = config.get('spatial_tuning.metric', 'l2').lower()
-    method = config.get('args.method', 'dual_annealing')
+    method = config.get('args.method') or 'dual_annealing'
     tuner = Tuner2D(inc=inc_val, penalty=penalty_val, alpha=alpha_val, metric=metric_val, logger=logger)
     tuner.custom_inc = custom_inc_val
     tuner.bounds_around = config.get('args.bounds_around', 'current')
@@ -211,7 +211,7 @@ def parse_arguments():
         sp.add_argument('-c', '--config', type=str, required=True, help='YAML config file')
         sp.add_argument('-o', '--output', type=str, help='Output YAML for Script Engine')
         sp.add_argument('-l', '--loglevel', type=str, default='INFO')
-        sp.add_argument('-m', '--method', type=str, default='None')
+        sp.add_argument('-m', '--method', type=str, default=None, choices=['dual_annealing', 'L-BFGS-B', 'differential_evolution', 'shgo'])
         sp.add_argument('-p', '--penalty', type=float, help='Penalty weight')
         sp.add_argument('-i', '--inc', type=float, help='Fractional max parameter change')
         sp.add_argument('--seed', type=int, help='Random seed for reproducibility')
