@@ -194,7 +194,8 @@ def pattern_correlation(pred_delta: xr.DataArray, real_delta: xr.DataArray) -> D
     w = area_weights(real_delta)
     wm = lambda x: float(x.weighted(w).mean(skipna=True))
     a, b = pred - wm(pred), real_delta - wm(real_delta)
-    return wm(a * b) / np.sqrt(wm(a * a) * wm(b * b))
+    den = np.sqrt(wm(a * a) * wm(b * b))
+    return wm(a * b) / den if den > 0 else float('nan')
 
 
 def drift_from_reference(diag_yaml_path: str) -> Tuple[float, float]:

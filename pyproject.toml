@@ -38,4 +38,4 @@ ectuner-sens-2d = "ectuner.scripts.sensitivity_2D:main"
 include = ["ectuner*"]
 
 [tool.setuptools.package-data]
-ectuner = ["templates/*.yaml"]
+ectuner = ["templates/*.yml", "templates/*.yaml"]

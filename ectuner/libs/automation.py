@@ -5,6 +5,7 @@ Provides wrappers to interact with SLURM for batch submission
 of EC-Earth tuning experiments.
 """
 import os
+from statistics import mode
 import subprocess
 import re
 from copy import deepcopy
@@ -57,8 +58,10 @@ class ExperimentSLURM:
         log_file = os.path.join(out_dir, f"log_{run_tag}.log")
         slurm_out = os.path.join(out_dir, f"slurm_{run_tag}.out")
         
-        # Scelta del comando (1D o 2D a seconda del file config)
-        mode = '2d' if self.base_config.get('spatial_tuning') else '1d'
+        if mode is None:                                  
+            mode = '2d' if self.base_config.get('spatial_tuning') else '1d'
+        if mode not in ('1d', '2d'):
+            raise ValueError(f"mode must be '1d' or '2d', got {mode!r}")
 
         exp_name = self.base_config.get('args.exp')
         year1 = self.base_config.get('args.year1')

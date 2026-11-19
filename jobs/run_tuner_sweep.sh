@@ -17,9 +17,8 @@ YEAR1=$6    # Receives the first year of the experiment
 YEAR2=$7    # Receives the last year of the experiment
 RUNTAG=$8   # Receives the run tag (e.g., NoRegion_a0)
 
-# central dir (optional) where to copy the generated YAML files
-CENTRAL_DIR="path/to/directory/to/copy/yaml"  # Adjust this path as necessary
-mkdir -p "$CENTRAL_DIR"
+
+CENTRAL_DIR=""      # optional: folder where the tuning YAML is copied; leave empty for no copy
 
 if [ -f "$HOME/miniforge3/etc/profile.d/conda.sh" ]; then
     source "$HOME/miniforge3/etc/profile.d/conda.sh"
@@ -36,8 +35,10 @@ echo "Launch ECtuner in mode: $MODE on $EXP ($YEAR1-$YEAR2)" > "$LOG"
 ectuner $MODE -c "$CONFIG" -o "$OUTPUT" --logfile "$LOG" -t "$RUNTAG" $EXP $YEAR1 $YEAR2 
 # 2. Automatic copy of the generated YAML to central dir (if exists)
 if [ -f "$OUTPUT" ]; then
-    cp "$OUTPUT" "$CENTRAL_DIR/"
-    echo "Automatic copy of the generated YAML file to $CENTRAL_DIR" >> "$LOG"
+    if [ -n "$CENTRAL_DIR" ]; then
+        mkdir -p "$CENTRAL_DIR" && cp "$OUTPUT" "$CENTRAL_DIR/"
+        echo "Copied the tuning YAML to $CENTRAL_DIR" >> "$LOG"
+    fi
 else
     echo "ERROR: YAML file not generated. Check the logs above." >> "$LOG"
 fi
